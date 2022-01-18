@@ -90,5 +90,3 @@ Balance
     ✔ un-staking same nft twice should revert (550ms)
     ✔ staking nft should reflect correct block (489ms)
     ✔ un-staking nft should reflect block 0 (356ms)
-
-    ```
