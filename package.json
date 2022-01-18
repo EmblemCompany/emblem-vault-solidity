@@ -45,6 +45,7 @@
     "keccak256": "^1.0.6",
     "merklescript": "^0.0.2",
     "merkletreejs": "^0.2.27",
+    "mocha": "^9.1.4",
     "web3": "^1.6.1"
   }
 }

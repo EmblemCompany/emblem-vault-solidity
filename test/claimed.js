@@ -15,7 +15,7 @@ beforeEach(async ()=>{
 describe('Claimed', () => {    
   it('should deploy storage', async ()=>{    
     let storage = await util.factory.storageImplementation()
-    console.log(storage)
+    // console.log(storage)
     expect(storage).to.exist
   })
   it('storage should be owned by deployer', async ()=>{    
@@ -111,7 +111,7 @@ describe('Claimed', () => {
     await claimedContract.initialize()
     let emblemAddress = await util.factory.emblemImplementation()
     let isClaimed = await claimedContract.claimedBy(emblemAddress, 1)
-    console.log(isClaimed)
+    // console.log(isClaimed)
     expect(isClaimed._owner).to.equal("0x0000000000000000000000000000000000000000")
   })
   it('should be claimed by type of "unknown" when not minted', async()=>{
@@ -120,7 +120,7 @@ describe('Claimed', () => {
     await claimedContract.initialize()
     let emblemAddress = await util.factory.emblemImplementation()
     let isClaimed = await claimedContract.claimedBy(emblemAddress, 1)
-    console.log(isClaimed)
+    // console.log(isClaimed)
     expect(isClaimed._type).to.equal("unknown")
   })
   it('should be claimed when legacy', async ()=>{

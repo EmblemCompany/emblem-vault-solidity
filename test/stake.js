@@ -18,7 +18,7 @@ beforeEach(async ()=>{
 describe('NFT Stake', () => {    
   it('should deploy staking contract', async ()=>{    
     let stake = await util.factory.stakeImplementation()
-    console.log(stake)
+    // console.log(stake)
     expect(stake).to.exist
   })
   it('should not accept NFT if not initialized', async ()=>{

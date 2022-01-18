@@ -29,7 +29,7 @@ describe('Emblem Vault', () => {
     await util.cloneHandler(util.deployer.address)
     let emblemAddress = await util.factory.emblemImplementation()
     let emblemContract = await util.getEmblemVault(emblemAddress, util.deployer)
-    await util.handler.transferNftOwnership(util.deployer.address)
+    await util.handler.transferNftOwnership(emblemAddress, util.deployer.address)
     await emblemContract.mint(util.deployer.address, 1, "test", 0x0)
     let owner = await emblemContract.ownerOf(1)
     await expect(owner).to.equal(util.deployer.address)
@@ -51,7 +51,7 @@ describe('Emblem Vault', () => {
     let sig = await sign(web3, hash)
     let address = await util.handler.getAddressFromSignatureHash(hash, sig)
     expect(address).to.equal('0xB35a0b332657efE5d69792FCA9436537d263472F')
-    console.log(address)
+    // console.log(address)
   })
   it('should not be witnessed if signer not a witness', async () => {
     await util.cloneHandler(util.deployer.address)
