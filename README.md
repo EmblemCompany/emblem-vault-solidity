@@ -118,8 +118,8 @@
     - <span style="color:green">✔</span> users have correct balances of nfts before trades
     - <span style="color:green">✔</span> can swap erc721 for erc721 (422ms)
     - <span style="color:green">✔</span> can detect erc1155 vs erc721 vs erc20
-    1) can swap erc721 for erc1155
-    2) can swap erc1155 for erc1155
+    - <span style="color:green">✔</span> 1) can swap erc721 for erc1155
+    - <span style="color:green">✔</span> 2) can swap erc1155 for erc1155
     - <span style="color:green">✔</span> can swap erc20 for erc721 (360ms)
     - <span style="color:green">✔</span> can swap erc20 for erc1155 (361ms)
 
@@ -130,9 +130,7 @@
     - <span style="color:green">✔</span> can calculate 1000%
     - <span style="color:green">✔</span> can calculate 0%
     - <span style="color:green">✔</span> can calculate % of single
-    3) fails on attempt to calculate negative
-    percentage fee for erc20 offer
-      4) "before each" hook for "Percentage fees are paid when percentage fee for erc20 on"
+    - <span style="color:green">✔</span> fails on attempt to calculate negative
 
 -  ## NFT Stake
     - <span style="color:green">✔</span> should deploy staking contract
@@ -153,14 +151,5 @@
     - <span style="color:green">✔</span> un-staking nft should reflect block 0 (412ms)
 
 
-  - 122 passing (3m)
+  - 126 passing (3m)
   - 1 pending
-  - 4 failing
-
-  ```
-  1) NFTradeV2 Trade Types
-       can swap erc721 for erc1155:
-     Error: VM Exception while processing transaction: reverted with reason string '005007'
-    at EmblemVault.validNFToken (contracts/EmblemVault.sol:494)
-    at runMicrotasks (<anonymous>)
-    at proces
