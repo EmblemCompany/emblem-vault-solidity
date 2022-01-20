@@ -69,87 +69,127 @@
     - <span style="color:green">✔</span> should deploy handler (58ms)
     - <span style="color:green">✔</span> should transfer vault ownership to handler (66ms)
 
--  ## NFTradeV2 NFT
-    - <span style="color:green">✔</span> has correct name
-    - <span style="color:green">✔</span> can mint (186ms)
-    - <span style="color:green">✔</span> users have expected balances (644ms)
-
--  ## NFTradeV2 Trade
-    - <span style="color:green">✔</span> reflects correct version
-    - <span style="color:green">✔</span> cannot place offer without approval
-    - <span style="color:green">✔</span> cannot offer un-owned token
-    - <span style="color:green">✔</span> can place offer after approval (54ms)
-    - <span style="color:green">✔</span> cannot add erc20 token offer when canOfferERC20 off (44ms)
-    - <span style="color:green">✔</span> cannot add erc20 token offer before allowance
-    - can place offer against erc20
-    - <span style="color:green">✔</span> can add erc20 token offer after allowance (88ms)
-    - <span style="color:green">✔</span> can withdraw offer (128ms)
-    - <span style="color:green">✔</span> rejecting another users offer fails (48ms)
-    - <span style="color:green">✔</span> can reject offer (606ms)
-    - <span style="color:green">✔</span> cannot accept offer without approval (59ms)
-    - <span style="color:green">✔</span> cannot accept erc20 offer without approval (111ms)
-    - <span style="color:green">✔</span> can accept erc20 offer with approval (507ms)
-    - <span style="color:green">✔</span> can withdraw erc20 offer (114ms)
-    - <span style="color:green">✔</span> can reject erc20 offer (159ms)
-    - <span style="color:green">✔</span> can accept offer after approval (542ms)
-    - <span style="color:green">✔</span> cannot accept offer for un-owned nft (62ms)
-    - <span style="color:green">✔</span> accepting offer removes all other offers (557ms)
-    - <span style="color:green">✔</span> can get outstanding offers placed (111ms)
-    - <span style="color:green">✔</span> can get accepted offer for nft  (752ms)
-    - <span style="color:green">✔</span> accepting offer removes all outstanding offers for nft (1038ms)
-
--  ## NFTradeV2 Payment
-    - <span style="color:green">✔</span> reflects correct token balances before trades
-    - <span style="color:green">✔</span> toggles pay to make and accept offers
-    - <span style="color:green">✔</span> can charge separate prices to make and accept offers
-    -  ## Pay to make offer
-      - <span style="color:green">✔</span> fails to add offer if trade contract not approved to spend
-      - <span style="color:green">✔</span> fails to add offer if too broke (68ms)
-      - <span style="color:green">✔</span> can make offer (248ms)
-      - <span style="color:green">✔</span> bank receives fee
-    -  ## Pay to accept offer
-      - <span style="color:green">✔</span> fails to accept offer if trade contract not approved to spend
-      - <span style="color:green">✔</span> fails to accept offer if too broke (66ms)
-      - <span style="color:green">✔</span> can accept offer (529ms)
-      - <span style="color:green">✔</span> bank receives fee (871ms)
-
--  ## NFTradeV2 Trade Types
-    - <span style="color:green">✔</span> 2 separate nft contracts exist
-    - <span style="color:green">✔</span> users have correct balances of nfts before trades
-    - <span style="color:green">✔</span> can swap erc721 for erc721 (422ms)
-    - <span style="color:green">✔</span> can detect erc1155 vs erc721 vs erc20
-    - <span style="color:green">✔</span> 1) can swap erc721 for erc1155
-    - <span style="color:green">✔</span> 2) can swap erc1155 for erc1155
-    - <span style="color:green">✔</span> can swap erc20 for erc721 (360ms)
-    - <span style="color:green">✔</span> can swap erc20 for erc1155 (361ms)
-
--  ## NFTradeV2 Percentage
-    - <span style="color:green">✔</span> can calculate percentage of even
-    - <span style="color:green">✔</span> can calculate percentage of odd
-    - <span style="color:green">✔</span> can calculate 100%
-    - <span style="color:green">✔</span> can calculate 1000%
-    - <span style="color:green">✔</span> can calculate 0%
-    - <span style="color:green">✔</span> can calculate % of single
-    - <span style="color:green">✔</span> fails on attempt to calculate negative
-
--  ## NFT Stake
-    - <span style="color:green">✔</span> should deploy staking contract
-    - <span style="color:green">✔</span> should not accept NFT if not initialized (227ms)
-    - <span style="color:green">✔</span> should accept NFT if initialized (335ms)
-    - <span style="color:green">✔</span> staking one should record one staked NFT (356ms)
-    - <span style="color:green">✔</span> staking one should record expected value (350ms)
-    - <span style="color:green">✔</span> staking two should record two staked NFTs (569ms)
-    - <span style="color:green">✔</span> staking two should record expected value for each (998ms)
-    - <span style="color:green">✔</span> un-staking one should reflect correct number of staked NFTs (681ms)
-    - <span style="color:green">✔</span> un-staking one should reflect correct value for staked NFT (606ms)
-    - <span style="color:green">✔</span> un-staking one should return to owner (625ms)
-    - <span style="color:green">✔</span> un-staking two should reflect correct number of staked NFTs (694ms)
-    - <span style="color:green">✔</span> un-staking two should reflect correct NFT values (1768ms)
-    - <span style="color:green">✔</span> re-staking one should reflect correct number of staked NFTs (811ms)
-    - <span style="color:green">✔</span> un-staking same nft twice should revert (587ms)
-    - <span style="color:green">✔</span> staking nft should reflect correct block (338ms)
-    - <span style="color:green">✔</span> un-staking nft should reflect block 0 (412ms)
-
-
-  - 126 passing (3m)
-  - 1 pending
+-  ## NFTradeV2 (Single-Tenant)
+    -  ## NFTradeV2 NFT
+        - <span style="color:green">✔</span> has correct name
+        - <span style="color:green">✔</span> can mint (192ms)
+        - <span style="color:green">✔</span> users have expected balances (210ms)
+    -  ## NFTradeV2 Trade
+        - <span style="color:green">✔</span> reflects correct version
+        - <span style="color:green">✔</span> cannot place offer without approval
+        - <span style="color:green">✔</span> cannot offer un-owned token
+        - <span style="color:green">✔</span> can place offer after approval (214ms)
+        - <span style="color:green">✔</span> cannot add erc20 token offer when canOfferERC20 off (52ms)
+        - <span style="color:green">✔</span> cannot add erc20 token offer before allowance
+        - <span style="color:green">✔</span> can add erc20 token offer after allowance (179ms)
+        - <span style="color:green">✔</span> can withdraw offer (238ms)
+        - <span style="color:green">✔</span> rejecting another users offer fails (176ms)
+        - <span style="color:green">✔</span> can reject offer (272ms)
+        - <span style="color:green">✔</span> cannot accept offer without approval (173ms)
+        - <span style="color:green">✔</span> cannot accept erc20 offer without approval (174ms)
+        - <span style="color:green">✔</span> can accept erc20 offer with approval (622ms)
+        - <span style="color:green">✔</span> can withdraw erc20 offer (475ms)
+        - <span style="color:green">✔</span> can reject erc20 offer (254ms)
+        - <span style="color:green">✔</span> can accept offer after approval (666ms)
+        - <span style="color:green">✔</span> cannot accept offer for un-owned nft (187ms)
+        - <span style="color:green">✔</span> accepting offer removes all other offers (1263ms)
+        - <span style="color:green">✔</span> can get outstanding offers placed (353ms)
+        - <span style="color:green">✔</span> can get accepted offer for nft  (1004ms)
+        - <span style="color:green">✔</span> accepting offer removes all outstanding offers for nft (774ms)
+    -  ## NFTradeV2 Payment
+        - <span style="color:green">✔</span> reflects correct token balances before trades
+        - <span style="color:green">✔</span> toggles pay to make and accept offers
+        - <span style="color:green">✔</span> can charge separate prices to make and accept offers
+        -  ## Pay to make offer
+            - <span style="color:green">✔</span> fails to add offer if trade contract not approved to spend
+            - <span style="color:green">✔</span> fails to add offer if too broke (76ms)
+            - <span style="color:green">✔</span> can make offer (266ms)
+            - <span style="color:green">✔</span> bank receives fee (299ms)
+        -  ## Pay to accept offer
+            - <span style="color:green">✔</span> fails to accept offer if trade contract not approved to spend
+            - <span style="color:green">✔</span> fails to accept offer if too broke (106ms)
+            - <span style="color:green">✔</span> can accept offer (609ms)
+            - <span style="color:green">✔</span> bank receives fee (698ms)
+    -  ## NFTradeV2 Trade Types
+        - <span style="color:green">✔</span> 2 separate nft contracts exist
+        - <span style="color:green">✔</span> users have correct balances of nfts before trades
+        - <span style="color:green">✔</span> can swap erc721 for erc721 (431ms)
+        - <span style="color:green">✔</span> can detect erc1155 vs erc721 vs erc20
+        - <span style="color:green">✔</span> can swap erc721 for erc1155 (440ms)
+        - <span style="color:green">✔</span> can swap erc1155 for erc1155 (367ms)
+        - <span style="color:green">✔</span> fails to accept offer if too broke (97ms)
+        - <span style="color:green">✔</span> can accept offer (626ms)
+        - <span style="color:green">✔</span> bank receives fee (671ms)
+        - <span style="color:green">✔</span> can swap erc20 for erc721 (369ms)
+        - <span style="color:green">✔</span> can swap erc20 for erc1155
+    -  ## NFTradeV2 Percentage
+        - <span style="color:green">✔</span> can calculate percentage of even
+        - <span style="color:green">✔</span> can calculate percentage of odd
+        - <span style="color:green">✔</span> can calculate 100%
+        - <span style="color:green">✔</span> can calculate 1000%
+        - <span style="color:green">✔</span> can calculate 0%
+        - <span style="color:green">✔</span> can calculate % of single
+        - <span style="color:green">✔</span> fails on attempt to calculate negative
+            -  ## percentage fee for erc20 offer
+                - <span style="color:green">✔</span> Percentage fees are paid when percentage fee for erc20 on (682ms)
+                - <span style="color:green">✔</span> Percentage fees are not paid when percentage fee for erc20 off (443ms)
+-  ## NFTradeV3 (Multi-Tenant)
+    -  ## NFTradeV3 NFT
+        - <span style="color:green">✔</span> has correct name
+        - <span style="color:green">✔</span> can mint (628ms)
+        - <span style="color:green">✔</span> users have expected balances (184ms)
+    -  ## NFTradeV3 Trade
+        - <span style="color:green">✔</span> reflects correct version
+        - <span style="color:green">✔</span> cannot place offer without approval
+        - <span style="color:green">✔</span> cannot offer un-owned token
+        - <span style="color:green">✔</span> can place offer after approval (184ms)
+        - <span style="color:green">✔</span> cannot add erc20 token offer when canOfferERC20 off (59ms)
+        - <span style="color:green">✔</span> cannot add erc20 token offer before allowance
+        - <span style="color:green">✔</span> can add erc20 token offer after allowance (163ms)
+        - <span style="color:green">✔</span> can withdraw offer (239ms)
+        - <span style="color:green">✔</span> rejecting another users offer fails (185ms)
+        - <span style="color:green">✔</span> can reject offer (314ms)
+        - <span style="color:green">✔</span> cannot accept offer without approval (172ms)
+        - <span style="color:green">✔</span> cannot accept erc20 offer without approval (186ms)
+        - <span style="color:green">✔</span> can accept erc20 offer with approval (538ms)
+        - <span style="color:green">✔</span> can withdraw erc20 offer (209ms)
+        - <span style="color:green">✔</span> can reject erc20 offer (279ms)
+        - <span style="color:green">✔</span> can accept offer after approval (986ms)
+        - <span style="color:green">✔</span> cannot accept offer for un-owned nft (216ms)
+        - <span style="color:green">✔</span> accepting offer removes all other offers (871ms)
+        - <span style="color:green">✔</span> can get outstanding offers placed (386ms)
+        - <span style="color:green">✔</span> can get accepted offer for nft  (780ms)
+        - <span style="color:green">✔</span> accepting offer removes all outstanding offers for nft (1023ms)
+    -  ## NFTradeV3 Payment
+        - <span style="color:green">✔</span> reflects correct token balances before trades
+        - <span style="color:green">✔</span> toggles pay to make and accept offers
+        - <span style="color:green">✔</span> can charge separate prices to make and accept offers
+        -  ## Pay to make offer
+            - <span style="color:green">✔</span> fails to add offer if trade contract not approved to spend
+            - <span style="color:green">✔</span> fails to add offer if too broke (61ms)
+            - <span style="color:green">✔</span> can make offer (278ms)
+            - <span style="color:green">✔</span> bank receives fee (260ms)
+        -  ## Pay to accept offer
+            - <span style="color:green">✔</span> fails to accept offer if trade contract not approved to spend
+            - <span style="color:green">✔</span> fails to accept offer if too broke (67ms)
+            - <span style="color:green">✔</span> can accept offer (1149ms)
+            - <span style="color:green">✔</span> bank receives fee (552ms)
+    -  ## NFTradeV3 Trade Types
+        - <span style="color:green">✔</span> 2 separate nft contracts exist
+        - <span style="color:green">✔</span> users have correct balances of nfts before trades
+        - <span style="color:green">✔</span> can swap erc721 for erc721 (538ms)
+        - <span style="color:green">✔</span> can detect erc1155 vs erc721 vs erc20
+        - <span style="color:green">✔</span> can swap erc721 for erc1155 (399ms)
+        - <span style="color:green">✔</span> can swap erc1155 for erc1155 (366ms)
+        - <span style="color:green">✔</span> can swap erc20 for erc721 (378ms)
+        - <span style="color:green">✔</span> can swap erc20 for erc1155 (338ms)
+    -  ## NFTradeV3 Percentage
+        - <span style="color:green">✔</span> can calculate percentage of even
+        - <span style="color:green">✔</span> can calculate percentage of odd
+        - <span style="color:green">✔</span> can calculate 100%
+        - <span style="color:green">✔</span> can calculate 0%
+        - <span style="color:green">✔</span> can calculate % of single
+        - <span style="color:green">✔</span> fails on attempt to calculate negative
+        -  ## percentage fee for erc20 offer
+            - <span style="color:green">✔</span> Percentage fees are paid when percentage fee for erc20 on (402ms)
+            - <span style="color:green">✔</span> Percentage fees are not paid when percentage fee for erc20 off (363ms)
