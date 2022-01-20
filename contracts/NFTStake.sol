@@ -3,9 +3,10 @@ import "./IERC721.sol";
 import "./Ownable.sol";
 import "./Context.sol";
 import "./SafeMath.sol";
+import "./ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
-contract NFTStake is Ownable, Context, IERC721Receiver {
+contract NFTStake is Ownable, Context, IERC721Receiver, ReentrancyGuard {
 
     using SafeMath for uint256;
 
@@ -32,7 +33,7 @@ contract NFTStake is Ownable, Context, IERC721Receiver {
         initialized = true;
     }
     
-    function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data) initializedOnly public override returns (bytes4) {
+    function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data) initializedOnly public override nonReentrant returns (bytes4) {
         (address nftContract, uint256 value) = abi.decode(data, (address, uint256));
         tokenBlockStaked[nftContract][tokenId] = block.number;
         stakedByUser[from][nftContract].push(tokenId);
@@ -41,7 +42,7 @@ contract NFTStake is Ownable, Context, IERC721Receiver {
         return this.onERC721Received.selector;
     }
 
-    function unStake(address nftContract, uint256 tokenId) public {
+    function unStake(address nftContract, uint256 tokenId) public nonReentrant {
         require(isStaked(nftContract, _msgSender(), tokenId), 'Not staked by sender');
         for (uint i = 0; i < stakedByUser[_msgSender()][nftContract].length; i++){
             if (stakedByUser[_msgSender()][nftContract][i] == tokenId) {

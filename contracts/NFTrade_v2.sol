@@ -5,6 +5,10 @@ pragma solidity ^0.8.4;
 import "./IERC721.sol";
 import "./IERC1155.sol";
 import "./SafeMath.sol";
+import "./BasicERC20.sol";
+import "./ReentrancyGuard.sol";
+import "./Context.sol";
+import "./Ownable.sol";
 
 interface IERC20Token {
     function transfer(address to, uint256 value) external returns (bool);
@@ -16,17 +20,10 @@ interface IERC20Token {
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
-interface BasicERC20 {
-    function burn(uint256 value) external;
-    function mint(address account, uint256 amount) external;
-    function decimals() external view returns (uint8);
-}
 
-contract NFTrade_v2 {
+contract NFTrade_v2 is Context, Ownable, ReentrancyGuard {
     
     address resolver;
-    
-    address payable private owner;
     bool public initialized;
     address public paymentAddress = address(this);
     address public recipientAddress;
@@ -59,16 +56,6 @@ contract NFTrade_v2 {
     mapping(address => mapping(address => mapping(uint => Offer[]))) offered;
     mapping(address => mapping(uint => Offer[])) accepted;
     
-    modifier isOwner() {
-        // If the first argument of 'require' evaluates to 'false', execution terminates and all
-        // changes to the state and to Ether balances are reverted.
-        // This used to consume all gas in old EVM versions, but not anymore.
-        // It is often a good idea to use 'require' to check if functions are called correctly.
-        // As a second argument, you can also provide an explanation about what went wrong.
-        require(msg.sender == owner, "Caller is not owner");
-        _;
-    }
-    
     modifier notLocked() {
         require(!locked, "Contract is locked");
         _;
@@ -92,15 +79,6 @@ contract NFTrade_v2 {
     }
     
     /**
-     * @dev Change owner
-     * @param newOwner address of new owner
-     */
-    function transferOwnership(address payable newOwner) public isOwner {
-        emit OwnerSet(owner, newOwner);
-        owner = newOwner;
-    }
-    
-    /**
      * @dev Return owner address 
      * @return address of owner
      */
@@ -108,7 +86,7 @@ contract NFTrade_v2 {
         return owner;
     }
     event OfferAccepted(address token, uint256 _tokenId, address _forNft, uint256 _for, uint256 _amount);
-    function acceptOffer(address token, uint _tokenId, uint index) public notLocked {
+    function acceptOffer(address token, uint _tokenId, uint index) public notLocked nonReentrant {
         Offer memory _offer = offers[token][_tokenId][index];
         IERC721 nftToken1 = IERC721(token);
         IERC721 nftToken2 = IERC721(_offer.token);
@@ -171,7 +149,7 @@ contract NFTrade_v2 {
     }
     
     event OfferAdded(address token, uint256 _tokenId, address _forNft, uint256 _for, uint256 amount);
-    function addOffer(address token, uint256 _tokenId, address _forNft, uint256 _for, uint256 amount) public notLocked {
+    function addOffer(address token, uint256 _tokenId, address _forNft, uint256 _for, uint256 amount) public notLocked nonReentrant {
         IERC721 nftToken1 = IERC721(token);
         IERC20Token paymentToken = IERC20Token(paymentAddress);
 
@@ -220,22 +198,22 @@ contract NFTrade_v2 {
         delete offered[_offer.token][_offer._from][_offer.tokenId];
     }
     
-    function togglePayToMakeOffer() public isOwner {
+    function togglePayToMakeOffer() public onlyOwner {
         payToMakeOffer = !payToMakeOffer;
     }
-    function togglePayToAcceptOffer() public isOwner {
+    function togglePayToAcceptOffer() public onlyOwner {
         payToAcceptOffer = !payToAcceptOffer;
     }
     
-    function toggleLocked() public isOwner {
+    function toggleLocked() public onlyOwner {
         locked = !locked;
     }
 
-    function toggleCanOfferERC20() public isOwner {
+    function toggleCanOfferERC20() public onlyOwner {
         canOfferERC20 = !canOfferERC20;
     }
 
-    function toggleTakePercentageOfERC20() public isOwner {
+    function toggleTakePercentageOfERC20() public onlyOwner {
         takePercentageOfERC20 = !takePercentageOfERC20;
     }
     
@@ -259,13 +237,13 @@ contract NFTrade_v2 {
         return rejected[token][_tokenId];
     }
     
-    function changeOfferPrices(uint256 _makeOfferPrice, uint256 _acceptOfferPrice, uint _percentageFee) public isOwner {
+    function changeOfferPrices(uint256 _makeOfferPrice, uint256 _acceptOfferPrice, uint _percentageFee) public onlyOwner {
         makeOfferPrice = _makeOfferPrice;
         acceptOfferPrice = _acceptOfferPrice;
         percentageFee = _percentageFee;
     }
     
-    function changeRecipientAddress(address _recipientAddress) public isOwner {
+    function changeRecipientAddress(address _recipientAddress) public onlyOwner {
        recipientAddress = _recipientAddress;
     }
 

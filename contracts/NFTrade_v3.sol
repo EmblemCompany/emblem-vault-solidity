@@ -3,6 +3,8 @@
 pragma experimental ABIEncoderV2;
 pragma solidity ^0.8.4;
 
+import "./BasicERC20.sol";
+
 interface IERC20Token {
     function transfer(address to, uint256 value) external returns (bool);
     function approve(address spender, uint256 value) external returns (bool);
@@ -27,12 +29,6 @@ interface IERC721 {
 
 interface IERC1155 {
     function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes calldata data) external;
-}
-
-interface BasicERC20 {
-    function burn(uint256 value) external;
-    function mint(address account, uint256 amount) external;
-    function decimals() external view returns (uint8);
 }
 
 interface IERC165 {

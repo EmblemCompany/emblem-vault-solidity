@@ -3,6 +3,7 @@ import "./IERC721.sol";
 import "./Ownable.sol";
 import "./Context.sol";
 import "./Storage.sol";
+import "./ReentrancyGuard.sol";
 
 interface IStorage {
     function getZero() external view returns(address);
@@ -17,7 +18,7 @@ interface IStorage {
     function addToBurnAddresses(address burnAddress) external;
 }
 
-contract Claimed is Ownable, Context {
+contract Claimed is Ownable, Context, ReentrancyGuard {
     
     address StorageAddress;
     bool initialized = false;
@@ -48,7 +49,7 @@ contract Claimed is Ownable, Context {
         return false;
     }
     
-    function claim(address nftAddress, uint tokenId) public {
+    function claim(address nftAddress, uint tokenId) public nonReentrant {
         IERC721 token = IERC721(nftAddress);
         token.transferFrom(msg.sender, IStorage(StorageAddress).getDead(), tokenId);
         IStorage(StorageAddress).addToClaims(nftAddress, tokenId, msg.sender);

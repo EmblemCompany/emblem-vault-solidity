@@ -3,6 +3,7 @@ import "./IERC721.sol";
 import "./Ownable.sol";
 import "./Context.sol";
 import "./Storage.sol";
+import "./ReentrancyGuard.sol";
 
 struct BalanceObject {
     uint balance;
@@ -33,7 +34,7 @@ interface IBalanceStorage {
     function getTokensFromMap(address nftAddress, bytes32 token) external view returns (uint256[] memory);
 }
 
-contract Balance is Ownable, Context {
+contract Balance is Ownable, Context, ReentrancyGuard {
 
     address StorageAddress;
     bool initialized = false;
@@ -67,7 +68,7 @@ contract Balance is Ownable, Context {
 
     /* USER WRITE */
 
-    function addBalanceToAsset(address nftAddress, uint256 tokenId, Balances calldata balance, uint256 nonce, bytes calldata signature) public {
+    function addBalanceToAsset(address nftAddress, uint256 tokenId, Balances calldata balance, uint256 nonce, bytes calldata signature) public nonReentrant {
         IBalanceStorage _storage = IBalanceStorage(StorageAddress);
         require(IERC721(nftAddress).ownerOf(tokenId) == _msgSender(), 'Only owner can add balance');
         require(!_storage.usedNonce(nonce), 'Nonce already used');

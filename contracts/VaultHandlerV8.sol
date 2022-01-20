@@ -21,12 +21,11 @@
 //  \___|_  /(____  /___|  /\____ | |____/\___  >__|      \_/    /_/
 //       \/      \/     \/      \/           \/                     
 
-  
-// File: browser/ReentrancyGuard.sol
-
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.4;
+
+import "./BasicERC20.sol";
 import "./EmblemVault.sol";
 import "./ConfigurableERC20.sol";
 import "./ERC1155.sol";
@@ -39,99 +38,12 @@ import "./BalanceStorage.sol";
 import "./Claimed.sol";
 import "./Balance.sol";
 import "./NFTrade_v2.sol";
+import "./ReentrancyGuard.sol";
+import "./Ownable.sol";
 
-/**
- * @dev Contract module that helps prevent reentrant calls to a function.
- *
- * Inheriting from `ReentrancyGuard` will make the {nonReentrant} modifier
- * available, which can be applied to functions to make sure there are no nested
- * (reentrant) calls to them.
- *
- * Note that because there is a single `nonReentrant` guard, functions marked as
- * `nonReentrant` may not call one another. This can be worked around by making
- * those functions `private`, and then adding `external` `nonReentrant` entry
- * points to them.
- *
- * TIP: If you would like to learn more about reentrancy and alternative ways
- * to protect against it, check out our blog post
- * https://blog.openzeppelin.com/reentrancy-after-istanbul/[Reentrancy After Istanbul].
- */
-contract ReentrancyGuard {
-    // Booleans are more expensive than uint256 or any type that takes up a full
-    // word because each write operation emits an extra SLOAD to first read the
-    // slot's contents, replace the bits taken up by the boolean, and then write
-    // back. This is the compiler's defense against contract upgrades and
-    // pointer aliasing, and it cannot be disabled.
-
-    // The values being non-zero value makes deployment a bit more expensive,
-    // but in exchange the refund on every call to nonReentrant will be lower in
-    // amount. Since refunds are capped to a percentage of the total
-    // transaction's gas, it is best to keep them low in cases like this one, to
-    // increase the likelihood of the full refund coming into effect.
-    uint256 private constant _NOT_ENTERED = 1;
-    uint256 private constant _ENTERED = 2;
-
-    uint256 private _status;
-
-    constructor ()  {
-        _status = _NOT_ENTERED;
-    }
-
-    /**
-     * @dev Prevents a contract from calling itself, directly or indirectly.
-     * Calling a `nonReentrant` function from another `nonReentrant`
-     * function is not supported. It is possible to prevent this from happening
-     * by making the `nonReentrant` function external, and make it call a
-     * `private` function that does the actual work.
-     */
-    modifier nonReentrant() {
-        // On the first call to nonReentrant, _notEntered will be true
-        require(_status != _ENTERED, "ReentrancyGuard: reentrant call");
-
-        // Any calls to nonReentrant after this point will fail
-        _status = _ENTERED;
-
-        _;
-
-        // By storing the original value once again, a refund is triggered (see
-        // https://eips.ethereum.org/EIPS/eip-2200)
-        _status = _NOT_ENTERED;
-    }
-}
-// // File: browser/IERC20Token.sol
-
-// // pragma solidity ^0.8.4;
-// interface IERC20Token {
-//     function transfer(address to, uint256 value) external returns (bool);
-//     function approve(address spender, uint256 value) external returns (bool);
-//     function transferFrom(address from, address to, uint256 value) external returns (bool);
-//     function totalSupply() external view returns (uint256);
-//     function balanceOf(address who) external view returns (uint256);
-//     function allowance(address owner, address spender) external view returns (uint256);
-//     event Transfer(address indexed from, address indexed to, uint256 value);
-//     event Approval(address indexed owner, address indexed spender, uint256 value);
-// }
-
-// // File: browser/VaultHandler_v4.sol
-
-// pragma experimental ABIEncoderV2;
-// // pragma solidity ^0.8.4;
-
-// interface BasicERC20 {
-//     function burn(uint256 value) external;
-//     function mint(address account, uint256 amount) external;
-//     function decimals() external view returns (uint8);
-//     function transferFrom(address from, address to, uint256 value) external returns (bool);
-//     function totalSupply() external view returns (uint256);
-//     function balanceOf(address who) external view returns (uint256);
-//     function allowance(address owner, address spender) external view returns (uint256);
-// }
-
-
-contract VaultHandlerV8 is Context {
+contract VaultHandlerV8 is Ownable, Context, ReentrancyGuard {
     
     using SafeMath for uint256;
-    address payable private owner;
     string public metadataBaseUri;
     bool public initialized;
     address public nftAddress;
@@ -153,29 +65,6 @@ contract VaultHandlerV8 is Context {
     mapping(address => bool) public witnesses;
     mapping(uint256 => bool) usedNonces;
     
-    // event for EVM logging
-    event OwnerSet(address indexed oldOwner, address indexed newOwner);
-    
-    // modifier to check if caller is owner
-    modifier isOwner() {
-        // If the first argument of 'require' evaluates to 'false', execution terminates and all
-        // changes to the state and to Ether balances are reverted.
-        // This used to consume all gas in old EVM versions, but not anymore.
-        // It is often a good idea to use 'require' to check if functions are called correctly.
-        // As a second argument, you can also provide an explanation about what went wrong.
-        require(msg.sender == owner, "Caller is not owner");
-        _;
-    }
-    
-    /**
-     * @dev Change owner
-     * @param newOwner address of new owner
-     */
-    function transferOwnership(address payable newOwner) public isOwner {
-        emit OwnerSet(owner, newOwner);
-        owner = newOwner;
-    }
-    
     /**
      * @dev Return owner address 
      * @return address of owner
@@ -185,8 +74,6 @@ contract VaultHandlerV8 is Context {
     }
     
     constructor(address _nftAddress, address _paymentAddress, address _recipientAddress, uint256 _price) {
-        owner = _msgSender(); // 'msg.sender' is sender of current call, contract deployer for a constructor
-        emit OwnerSet(address(0), owner);
         addWitness(owner);
         metadataBaseUri = "https://api.emblemvault.io/s:evmetadata/meta/";
         nftAddress = _nftAddress;
@@ -197,7 +84,7 @@ contract VaultHandlerV8 is Context {
         price = _price.mul(10) ** decimals;
     }
     
-    function buyWithSignature(address _nftAddress, address _to, uint256 _tokenId, string calldata _payload, uint256 _nonce, bytes calldata _signature) public payable {
+    function buyWithSignature(address _nftAddress, address _to, uint256 _tokenId, string calldata _payload, uint256 _nonce, bytes calldata _signature) public payable nonReentrant {
         IERC20Token paymentToken = IERC20Token(paymentAddress);
         IERC721 nftToken = IERC721(_nftAddress);
         if (shouldBurn && price > 0) {
@@ -214,7 +101,7 @@ contract VaultHandlerV8 is Context {
         nftToken.mint(_to, _tokenId, _uri, _payload);
     }
 
-    function buyWithSignedPrice(address _nftAddress, address _payment, uint _price, address _to, uint256 _tokenId, string calldata _payload, uint256 _nonce, bytes calldata _signature) public payable {
+    function buyWithSignedPrice(address _nftAddress, address _payment, uint _price, address _to, uint256 _tokenId, string calldata _payload, uint256 _nonce, bytes calldata _signature) public payable nonReentrant {
         IERC20Token paymentToken = IERC20Token(_payment);
         IERC721 nftToken = IERC721(_nftAddress);
         if (shouldBurn) {
@@ -231,20 +118,20 @@ contract VaultHandlerV8 is Context {
         nftToken.mint(_to, _tokenId, _uri, _payload);
     }
     
-    function toggleShouldBurn() public isOwner {
+    function toggleShouldBurn() public onlyOwner {
         shouldBurn = !shouldBurn;
     }
     
     /* Transfer with code */
-    function addWitness(address _witness) public isOwner {
+    function addWitness(address _witness) public onlyOwner {
         witnesses[_witness] = true;
     }
 
-    function removeWitness(address _witness) public isOwner {
+    function removeWitness(address _witness) public onlyOwner {
         witnesses[_witness] = false;
     }
 
-    function transferToStaking(address _nftAddress, address _to, uint256 tokenId, uint256 value) external {
+    function transferToStaking(address _nftAddress, address _to, uint256 tokenId, uint256 value) external nonReentrant {
         IERC721 nftToken = IERC721(_nftAddress);
         nftToken.safeTransferFrom(_msgSender(), _to, tokenId, abi.encode(_nftAddress, value));
     }
@@ -277,7 +164,7 @@ contract VaultHandlerV8 is Context {
         return witnesses[addressFromSig];
     }
     
-    function transferWithCode(address _nftAddress, uint256 _tokenId, string calldata code, address _to, uint256 _nonce,  bytes calldata signature) public payable {
+    function transferWithCode(address _nftAddress, uint256 _tokenId, string calldata code, address _to, uint256 _nonce,  bytes calldata signature) public payable nonReentrant {
         require(witnesses[getAddressFromSignature(_to, _tokenId, _nonce, signature)], 'Not Witnessed');
         IERC721 nftToken = IERC721(_nftAddress);
         PreTransfer memory preTransfer = preTransfers[_nftAddress][_tokenId];
@@ -289,7 +176,7 @@ contract VaultHandlerV8 is Context {
         usedNonces[_nonce] = true;
     }
     
-    function addPreTransfer(address _nftAddress, uint256 _tokenId, bytes32 preImage) public {
+    function addPreTransfer(address _nftAddress, uint256 _tokenId, bytes32 preImage) public nonReentrant {
         require(!_duplicatePretransfer(_nftAddress, _tokenId), 'Duplicate PreTransfer');
         preTransferCounts[_nftAddress][_tokenId] = preTransferCounts[_nftAddress][_tokenId].add(1);
         preTransfers[_nftAddress][_tokenId] = PreTransfer("payload", preImage, msg.sender);
@@ -302,7 +189,7 @@ contract VaultHandlerV8 is Context {
         return keccak256(bytes(data)) != NULL;
     }
     
-    function deletePreTransfer(address _nftAddress, uint256 _tokenId) public {
+    function deletePreTransfer(address _nftAddress, uint256 _tokenId) public nonReentrant {
         require(preTransfers[_nftAddress][_tokenId]._from == msg.sender, 'PreTransfer does not belong to sender');
         delete preTransfersByIndex[_nftAddress][_tokenId][preTransferCounts[_nftAddress][_tokenId]];
         preTransferCounts[_nftAddress][_tokenId] = preTransferCounts[_nftAddress][_tokenId].sub(1);
@@ -327,31 +214,31 @@ contract VaultHandlerV8 is Context {
         return preTransfersByIndex[_nftAddress][_tokenId][index];
     }
     
-    function changeMetadataBaseUri(string calldata _uri) public isOwner {
+    function changeMetadataBaseUri(string calldata _uri) public onlyOwner {
         metadataBaseUri = _uri;
     }
     
-    function transferPaymentOwnership(address newOwner) external isOwner {
+    function transferPaymentOwnership(address newOwner) external onlyOwner {
         Ownable paymentToken = Ownable(paymentAddress);
         paymentToken.transferOwnership(newOwner);
     }
     
-    function transferNftOwnership(address _nftAddress, address newOwner) external isOwner {
+    function transferNftOwnership(address _nftAddress, address newOwner) external onlyOwner {
         Ownable nftToken = Ownable(_nftAddress);
         nftToken.transferOwnership(newOwner);
     }
     
-    function mint(address _nftAddress, address _to, uint256 _tokenId, string calldata _uri, string calldata _payload) external isOwner {
+    function mint(address _nftAddress, address _to, uint256 _tokenId, string calldata _uri, string calldata _payload) external onlyOwner {
         IERC721 nftToken = IERC721(_nftAddress);
         nftToken.mint(_to, _tokenId, _uri, _payload);
     }
     
-    function changeName(address _nftAddress, string calldata name, string calldata symbol) external isOwner {
+    function changeName(address _nftAddress, string calldata name, string calldata symbol) external onlyOwner {
         IERC721 nftToken = IERC721(_nftAddress);
         nftToken.changeName(name, symbol);
     }
     
-    function updateTokenUri(address _nftAddress, uint256 _tokenId,string memory _uri) external isOwner {
+    function updateTokenUri(address _nftAddress, uint256 _tokenId,string memory _uri) external onlyOwner {
         IERC721 nftToken = IERC721(_nftAddress);
         nftToken.updateTokenUri(_tokenId, _uri);
     }
@@ -361,19 +248,19 @@ contract VaultHandlerV8 is Context {
         return token.decimals();
     }
     
-    function changePayment(address payment) public isOwner {
+    function changePayment(address payment) public onlyOwner {
        paymentAddress = payment;
     }
 
-    function changeRecipient(address _recipient) public isOwner {
+    function changeRecipient(address _recipient) public onlyOwner {
        recipientAddress = _recipient;
     }
     
-    function changeNft(address token) public isOwner {
+    function changeNft(address token) public onlyOwner {
         nftAddress = token;
     }
     
-    function changePrice(uint256 _price) public isOwner {
+    function changePrice(uint256 _price) public onlyOwner {
         uint decimals = BasicERC20(paymentAddress).decimals();
         price = _price * 10 ** decimals;
     }
