@@ -426,12 +426,14 @@ async function getToken() {
       await NFT2.mint(util.alice.address, 456, 'a', 0x0)
       await NFT3.mint(util.bob.address, 789, 2)
       await NFT3.mint(util.alice.address, 1337, 2)
+      await NFT3.mint(util.bob.address, 1447, 2)
       // NFT = util.getEmblemVault(NFT.address, util.deployer)
       // await NFT.mint(util.deployer.address, 123, 'a', 0x0)
       // NFT2 = util.getEmblemVault(NFT.address, util.deployer)
       
 
       await Trade.toggleCanOfferERC20()
+
       await Token.mint(util.deployer.address, 10000000000000)
       await Token.approve(Trade.address, 100)
       
@@ -446,9 +448,11 @@ async function getToken() {
       await Trade.addOffer(NFT.address, 123, NFT2.address, 456, 1)
       await Trade.addOffer(Token.address, 0, NFT2.address, 456, 1)
       await Trade.addOffer(Token.address, 0, NFT3.address, 789, 1)
+      await Trade.addOffer(Token.address, 0, NFT3.address, 1337, 1)
       Trade = util.getTradeV2(Trade.address, util.alice)
       await Trade.addOffer(NFT2.address, 456, NFT3.address, 789, 2)      
-      await Trade.addOffer(NFT3.address, 1337, NFT3.address, 789, 2)
+      await Trade.addOffer(NFT3.address, 1337, NFT3.address, 1447, 2)
+      await Trade.addOffer(NFT2.address, 456, NFT3.address, 1447, 2)
       
     })
 
@@ -485,19 +489,20 @@ async function getToken() {
 
     it('can swap erc721 for erc1155', async ()=>{
       Trade = util.getTradeV2(Trade.address, util.bob)
-      await Trade.acceptOffer(NFT3.address, 789, 0)
-      let user2Nft = await NFT3.balanceOf(util.alice.address, 789)
-      let user3Nft = await NFT2.tokenOfOwnerByIndex(util.bob.address, 0)
+      await Trade.acceptOffer(NFT3.address, 1447, 1)
+      let user2Nft = await NFT3.balanceOf(util.alice.address, 1337)
+      let user3Nft = await NFT2.balanceOf(util.bob.address)
+      let erc20Owner = await NFT2.ownerOf(456)
       expect(user2Nft.toNumber()).to.equal(2)
-      expect(user3Nft.toNumber()).to.equal(456)
-      // console.log(user3Nft)
+      expect(user3Nft.toNumber()).to.equal(1)
+      expect(erc20Owner).to.equal(util.bob.address)
     })
 
     it('can swap erc1155 for erc1155', async ()=>{
       Trade = util.getTradeV2(Trade.address, util.bob)
-      await Trade.acceptOffer(NFT3.address, 789, 1)
+      await Trade.acceptOffer(NFT3.address, 1447, 0)
       let user3Nft = await NFT3.balanceOf(util.bob.address, 1337)
-      let user4Nft = await NFT3.balanceOf(util.alice.address, 789)
+      let user4Nft = await NFT3.balanceOf(util.alice.address, 1447)
       expect(user3Nft.toNumber()).to.equal(2)
       expect(user4Nft.toNumber()).to.equal(2)
     })
@@ -516,14 +521,14 @@ async function getToken() {
     })
 
     it('can swap erc20 for erc1155', async ()=>{
-      let balanceOfErc20 = await Token.balanceOf(util.bob.address)
-      let balanceOfERC1155 = await NFT3.balanceOf(util.bob.address, 789)
+      let balanceOfErc20 = await Token.balanceOf(util.alice.address)
+      let balanceOfERC1155 = await NFT3.balanceOf(util.alice.address, 1337)
       expect(balanceOfErc20.toNumber()).to.equal(0)
       expect(balanceOfERC1155).to.equal(2)
-      Trade = util.getTradeV2(Trade.address, util.bob)
-      await Trade.acceptOffer(NFT3.address, 789, 0)
-      balanceOfErc20 = await Token.balanceOf(util.bob.address)
-      balanceOfERC1155 = await NFT3.balanceOf(util.deployer.address, 789)
+      Trade = util.getTradeV2(Trade.address, util.alice)
+      await Trade.acceptOffer(NFT3.address, 1337, 0)
+      balanceOfErc20 = await Token.balanceOf(util.alice.address)
+      balanceOfERC1155 = await NFT3.balanceOf(util.deployer.address, 1337)
       expect(balanceOfErc20.toNumber()).to.equal(1)
       expect(balanceOfERC1155).to.equal(1)
     })
@@ -555,22 +560,24 @@ async function getToken() {
       expect(total.toNumber()).to.equal(0)
     })
     it('fails on attempt to calculate negative', async()=>{
-      let tx = await Trade.fromPercent(-105, 10)
-      // await expect(tx).to.throw
+      let tx = Trade.fromPercent(-105, 10)
+      await expect(tx).to.be.reverted
     })
     describe('percentage fee for erc20 offer', async()=>{
       beforeEach(async()=>{
-        await NFT.mint(util.alice.address, 456, 'a', 'b')
+        await util.handler.transferNftOwnership(NFT.address, util.deployer.address)
+        await NFT.mint(util.alice.address, 456, 'a', 0x0)
   
         await Trade.toggleCanOfferERC20()
         await Trade.toggleTakePercentageOfERC20()
         await Trade.changeOfferPrices(0, 0, 10)
 
-        await Token.mint(util.deployer.address, 10000000000000)
+        await Token.mint(util.bob.address, 10000000000000)
+        Token = util.getERC20(Token.address, util.bob)
         await Token.approve(Trade.address, 1000)
         NFT = util.getEmblemVault(NFT.address, util.alice)
         await NFT.setApprovalForAll(Trade.address, true)
-
+        Trade = util.getTradeV2(Trade.address, util.bob)
         await Trade.addOffer(Token.address, 0, NFT.address, 456, 10)
         
       })
@@ -578,7 +585,7 @@ async function getToken() {
       it('Percentage fees are paid when percentage fee for erc20 on', async ()=>{
         let balanceOfErc20 = await Token.balanceOf(util.alice.address)
         let ownerOfERC721 = await NFT.ownerOf(456)
-        expect((await Token.balanceOf(await Trade.recipientAddress())).toNumber()).to.equal( 0)
+        expect((await Token.balanceOf(await Trade.recipientAddress())).toNumber()).to.equal(0)
         expect(balanceOfErc20.toNumber()).to.equal(0)
         expect(ownerOfERC721).to.equal(util.alice.address)
         Trade = util.getTradeV2(Trade.address, util.alice)
@@ -586,22 +593,24 @@ async function getToken() {
         balanceOfErc20 = await Token.balanceOf(util.alice.address)
         ownerOfERC721 = await NFT.ownerOf(456)
         expect(balanceOfErc20.toNumber()).to.equal(9)
-        expect(ownerOfERC721).to.equal(util.deployer.address)
+        expect(ownerOfERC721).to.equal(util.bob.address)
         expect((await Token.balanceOf(await Trade.recipientAddress())).toNumber()).to.equal(1)
       })
 
       it('Percentage fees are not paid when percentage fee for erc20 off', async ()=>{
-        Trade.toggleTakePercentageOfERC20(fromOwner)
+        Trade = util.getTradeV2(Trade.address, util.deployer)
+        Trade.toggleTakePercentageOfERC20()
         let balanceOfErc20 = await Token.balanceOf(util.alice.address)
         let ownerOfERC721 = await NFT.ownerOf(456)
         expect((await Token.balanceOf(await Trade.recipientAddress())).toNumber()).to.equal(0)
         expect(balanceOfErc20.toNumber()).to.equal(0)
         expect(ownerOfERC721).to.equal(util.alice.address)
-        await Trade.acceptOffer(NFT.address, 456, 0, fromUser2)
+        Trade = util.getTradeV2(Trade.address, util.alice)
+        await Trade.acceptOffer(NFT.address, 456, 0)
         balanceOfErc20 = await Token.balanceOf(util.alice.address)
         ownerOfERC721 = await NFT.ownerOf(456)
         expect(balanceOfErc20.toNumber()).to.equal(10)
-        expect(ownerOfERC721).to.equal(util.deployer.address)
+        expect(ownerOfERC721).to.equal(util.bob.address)
         expect((await Token.balanceOf(await Trade.recipientAddress())).toNumber()).to.equal(0)
       })
     })
