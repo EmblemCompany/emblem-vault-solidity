@@ -35,8 +35,18 @@ class Util {
     let contract = new ethers.Contract(address, ABI, signer)
     return contract;
   }
+  getERC20 (address, signer) {
+    let ABI = require(path.resolve(__dirname, "../abi/contracts/ConfigurableERC20.sol/ConfigurableERC20.json"))
+    let contract = new ethers.Contract(address, ABI, signer)
+    return contract;
+  }
   getEmblemVault (address, signer) {
     let ABI = require(path.resolve(__dirname, "../abi/contracts/EmblemVault.sol/EmblemVault.json"))
+    let contract = new ethers.Contract(address, ABI, signer)
+    return contract;
+  }
+  getERC1155 (address, signer) {
+    let ABI = require(path.resolve(__dirname, "../abi/contracts/ERC1155.sol/ERC1155.json"))
     let contract = new ethers.Contract(address, ABI, signer)
     return contract;
   }
@@ -65,6 +75,11 @@ class Util {
     let contract = new ethers.Contract(address, ABI, signer)
     return contract;
   }
+  getTradeV2 (address, signer) {
+    let ABI = require(path.resolve(__dirname, "../abi/contracts/NFTrade_v2.sol/NFTrade_v2.json"))
+    let contract = new ethers.Contract(address, ABI, signer)
+    return contract;
+  }
   async collections (address) {
     let ABI = require(path.resolve(__dirname, "../abi/contracts/Factory.sol/Factory.json"))
     let _interface = new ethers.utils.Interface(ABI)
@@ -87,6 +102,32 @@ class Util {
     let events = await ethers.provider.getLogs(filter).then((events) => {
       return events.map((e) => {
         return _interface.parseLog(e).args.handler
+      })
+    })
+    return events;
+  }
+  async erc20s (address) {
+    let ABI = require(path.resolve(__dirname, "../abi/contracts/Factory.sol/Factory.json"))
+    let _interface = new ethers.utils.Interface(ABI)
+    let filter = this.factory.filters.ERC20Added(null, address)
+    filter.fromBlock = 0
+    filter.toBlock = 'latest'
+    let events = await ethers.provider.getLogs(filter).then((events) => {
+      return events.map((e) => {
+        return _interface.parseLog(e).args.erc20
+      })
+    })
+    return events;
+  }
+  async tradersV2 (address) {
+    let ABI = require(path.resolve(__dirname, "../abi/contracts/Factory.sol/Factory.json"))
+    let _interface = new ethers.utils.Interface(ABI)
+    let filter = this.factory.filters.TradeV2Added(null, address)
+    filter.fromBlock = 0
+    filter.toBlock = 'latest'
+    let events = await ethers.provider.getLogs(filter).then((events) => {
+      return events.map((e) => {
+        return _interface.parseLog(e).args.trader
       })
     })
     return events;
@@ -117,21 +158,21 @@ class Util {
     })
     return events;
   }
-  async clone2 (address, name, val) {
-    if (val) {
-      let tx = await this.factory.genesis2(address, name, val)
-      await tx.wait()
-    } else {
-      let tx = await this.factory.genesis2(address, name)
-      await tx.wait()
-    }
 
-    let addr = await this.collections(address);
-
-    let ABI = require(path.resolve(__dirname, "../abi/contracts/F2.sol/F2.json"))
-    this.signer = ethers.provider.getSigner()
-    this.token2 = new ethers.Contract(addr[0], ABI, this.signer)
+  async emblems (address) {
+    let ABI = require(path.resolve(__dirname, "../abi/contracts/Factory.sol/Factory.json"))
+    let _interface = new ethers.utils.Interface(ABI)
+    let filter = this.factory.filters.EmblemAdded(null, address)
+    filter.fromBlock = 0
+    filter.toBlock = 'latest'
+    let events = await ethers.provider.getLogs(filter).then((events) => {
+      return events.map((e) => {
+        return _interface.parseLog(e).args.emblem
+      })
+    })
+    return events;
   }
+  
   async cloneHandler (address, val) {
     if (val) {      
       let tx = await this.factory.genesisHandler(address, this.factory.emblemImplementation, this.factory.erc20Implementation, address, 300, val)
@@ -147,6 +188,36 @@ class Util {
     let ABI = require(path.resolve(__dirname, "../abi/contracts/VaultHandlerV8.sol/VaultHandlerV8.json"))
     this.signer = ethers.provider.getSigner()
     this.handler = new ethers.Contract(addr[0], ABI, this.signer)
+  }
+  async cloneTradeV2 (address, val) {
+    if (val) {      
+      let tx = await this.factory.genesisTradeV2(address, await this.factory.erc20Implementation(), address, val)
+      await tx.wait()
+    } else {
+      let tx = await this.factory.genesisTradeV2(address, await this.factory.erc20Implementation(), address)
+      await tx.wait()
+    }
+
+    let addr = await this.tradersV2(address);
+
+    let ABI = require(path.resolve(__dirname, "../abi/contracts/NFTrade_v2.sol/NFTrade_v2.json"))
+    this.signer = ethers.provider.getSigner()
+    this.traderV2 = new ethers.Contract(addr[0], ABI, this.signer)
+  }
+  async cloneERC20 (address, val) {
+    if (val) {      
+      let tx = await this.factory.genesisERC20(address, val)
+      await tx.wait()
+    } else {
+      let tx = await this.factory.genesisERC20(address)
+      await tx.wait()
+    }
+
+    let addr = await this.erc20s(address);
+
+    let ABI = require(path.resolve(__dirname, "../abi/contracts/ConfigurableERC20.sol/ConfigurableERC20.json"))
+    this.signer = ethers.provider.getSigner()
+    this.erc20 = new ethers.Contract(addr[0], ABI, this.signer)
   }
   async cloneClaimed (address, val) {
     if (val) {      
@@ -177,6 +248,21 @@ class Util {
     let ABI = require(path.resolve(__dirname, "../abi/contracts/Balance.sol/Balance.json"))
     this.signer = ethers.provider.getSigner()
     this.balancer = new ethers.Contract(addr[0], ABI, this.signer)
+  }  
+  async cloneEmblem(address, val) {
+    if (val) {      
+      let tx = await this.factory.genesisEmblem(address, val)
+      await tx.wait()
+    } else {
+      let tx = await this.factory.genesisEmblem(address)
+      await tx.wait()
+    }
+
+    let addr = await this.emblems(address);
+
+    let ABI = require(path.resolve(__dirname, "../abi/contracts/EmblemVault.sol/EmblemVault.json"))
+    this.signer = ethers.provider.getSigner()
+    this.emblem = new ethers.Contract(addr[0], ABI, this.signer)
   }  
   account () {
     let randomAccount;

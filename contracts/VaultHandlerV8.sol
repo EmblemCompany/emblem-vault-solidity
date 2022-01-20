@@ -29,6 +29,7 @@
 pragma solidity ^0.8.4;
 import "./EmblemVault.sol";
 import "./ConfigurableERC20.sol";
+import "./ERC1155.sol";
 import "./Context.sol";
 import "./SafeMath.sol";
 import "./Ownable.sol";
@@ -37,6 +38,7 @@ import "./Storage.sol";
 import "./BalanceStorage.sol";
 import "./Claimed.sol";
 import "./Balance.sol";
+import "./NFTrade_v2.sol";
 
 /**
  * @dev Contract module that helps prevent reentrant calls to a function.
@@ -96,34 +98,34 @@ contract ReentrancyGuard {
         _status = _NOT_ENTERED;
     }
 }
-// File: browser/IERC20Token.sol
+// // File: browser/IERC20Token.sol
 
-// pragma solidity ^0.8.4;
-interface IERC20Token {
-    function transfer(address to, uint256 value) external returns (bool);
-    function approve(address spender, uint256 value) external returns (bool);
-    function transferFrom(address from, address to, uint256 value) external returns (bool);
-    function totalSupply() external view returns (uint256);
-    function balanceOf(address who) external view returns (uint256);
-    function allowance(address owner, address spender) external view returns (uint256);
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Approval(address indexed owner, address indexed spender, uint256 value);
-}
+// // pragma solidity ^0.8.4;
+// interface IERC20Token {
+//     function transfer(address to, uint256 value) external returns (bool);
+//     function approve(address spender, uint256 value) external returns (bool);
+//     function transferFrom(address from, address to, uint256 value) external returns (bool);
+//     function totalSupply() external view returns (uint256);
+//     function balanceOf(address who) external view returns (uint256);
+//     function allowance(address owner, address spender) external view returns (uint256);
+//     event Transfer(address indexed from, address indexed to, uint256 value);
+//     event Approval(address indexed owner, address indexed spender, uint256 value);
+// }
 
-// File: browser/VaultHandler_v4.sol
+// // File: browser/VaultHandler_v4.sol
 
-pragma experimental ABIEncoderV2;
-// pragma solidity ^0.8.4;
+// pragma experimental ABIEncoderV2;
+// // pragma solidity ^0.8.4;
 
-interface BasicERC20 {
-    function burn(uint256 value) external;
-    function mint(address account, uint256 amount) external;
-    function decimals() external view returns (uint8);
-    function transferFrom(address from, address to, uint256 value) external returns (bool);
-    function totalSupply() external view returns (uint256);
-    function balanceOf(address who) external view returns (uint256);
-    function allowance(address owner, address spender) external view returns (uint256);
-}
+// interface BasicERC20 {
+//     function burn(uint256 value) external;
+//     function mint(address account, uint256 amount) external;
+//     function decimals() external view returns (uint8);
+//     function transferFrom(address from, address to, uint256 value) external returns (bool);
+//     function totalSupply() external view returns (uint256);
+//     function balanceOf(address who) external view returns (uint256);
+//     function allowance(address owner, address spender) external view returns (uint256);
+// }
 
 
 contract VaultHandlerV8 is Context {

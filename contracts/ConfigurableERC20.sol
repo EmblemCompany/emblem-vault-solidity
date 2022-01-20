@@ -33,6 +33,7 @@
 pragma solidity ^0.8.4;
 import "./SafeMath.sol";
 import "./Context.sol";
+import "./Address.sol";
 
 interface IERC20 {
     function totalSupply() external view returns (uint256);
@@ -470,20 +471,6 @@ contract ERC20 is IERC20, Configurable {
         if (visible()) {
             emit Approval(owner, spender, amount);
         }
-    }
-}
-
-library Address {
-    function isContract(address account) internal view returns (bool) {
-        bytes32 codehash;
-
-            bytes32 accountHash
-         = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            codehash := extcodehash(account)
-        }
-        return (codehash != 0x0 && codehash != accountHash);
     }
 }
 

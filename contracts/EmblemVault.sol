@@ -7,7 +7,7 @@
 pragma solidity ^0.8.4;
 import "./SafeMath.sol";
 import "./Ownable.sol";
-
+import "./ERC165.sol";
 
 // File: browser/github/0xcert/ethereum-erc721/src/contracts/tokens/erc721-enumerable.sol
 
@@ -138,77 +138,6 @@ library AddressUtils
     bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
     assembly { codehash := extcodehash(_addr) } // solhint-disable-line
     addressCheck = (codehash != 0x0 && codehash != accountHash);
-  }
-
-}
-
-// File: browser/github/0xcert/ethereum-erc721/src/contracts/utils/erc165.sol
-
-// pragma solidity ^0.8.4;
-
-/**
- * @dev A standard for detecting smart contract interfaces. 
- * See: https://eips.ethereum.org/EIPS/eip-165.
- */
-interface ERC165
-{
-
-  /**
-   * @dev Checks if the smart contract includes a specific interface.
-   * @notice This function uses less than 30,000 gas.
-   * @param _interfaceID The interface identifier, as specified in ERC-165.
-   * @return True if _interfaceID is supported, false otherwise.
-   */
-  function supportsInterface(
-    bytes4 _interfaceID
-  )
-    external
-    view
-    returns (bool);
-    
-}
-
-// File: browser/github/0xcert/ethereum-erc721/src/contracts/utils/supports-interface.sol
-
-// pragma solidity ^0.8.4;
-
-
-/**
- * @dev Implementation of standard for detect smart contract interfaces.
- */
-contract SupportsInterface is
-  ERC165
-{
-
-  /**
-   * @dev Mapping of supported intefraces.
-   * @notice You must not set element 0xffffffff to true.
-   */
-  mapping(bytes4 => bool) internal supportedInterfaces;
-
-  /**
-   * @dev Contract constructor.
-   */
-  constructor()
-    public
-  {
-    supportedInterfaces[0x01ffc9a7] = true; // ERC165
-  }
-
-  /**
-   * @dev Function to check which interfaces are suported by this contract.
-   * @param _interfaceID Id of the interface.
-   * @return True if _interfaceID is supported, false otherwise.
-   */
-  function supportsInterface(
-    bytes4 _interfaceID
-  )
-    external
-    override
-    view
-    returns (bool)
-  {
-    return supportedInterfaces[_interfaceID];
   }
 
 }
@@ -440,7 +369,7 @@ interface ERC721
  */
 contract NFToken is
   ERC721,
-  SupportsInterface
+  ERC165
 {
   using SafeMath for uint256;
   using AddressUtils for address;
@@ -576,7 +505,7 @@ contract NFToken is
   constructor()
     public
   {
-    supportedInterfaces[0x80ac58cd] = true; // ERC721
+    _registerInterface(0x80ac58cd);
   }
 
   /**
@@ -978,8 +907,10 @@ abstract contract NFTokenEnumerableMetadata is
    */
   constructor()
   {
-    supportedInterfaces[0x5b5e139f] = true; // ERC721Metadata
-    supportedInterfaces[0x780e9d63] = true; // ERC721Enumerable
+    // supportedInterfaces[0x5b5e139f] = true; // ERC721Metadata
+    // supportedInterfaces[0x780e9d63] = true; // ERC721Enumerable
+    _registerInterface(0x5b5e139f);
+    _registerInterface(0x780e9d63);
   }
 
   /**
