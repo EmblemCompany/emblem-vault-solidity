@@ -1,8 +1,6 @@
 # Emblem Vault Solidity Test Suite Results
 
-- <span style="color:green">- <span style="color:green">✔</span></span>
-
-  Balance
+-  ## Balance
     - <span style="color:green">✔</span> should deploy storage
     - <span style="color:green">✔</span> storage should be owned by deployer
     - <span style="color:green">✔</span> should deploy balance
@@ -28,7 +26,7 @@
     - <span style="color:green">✔</span> should get tokenIds from map (1069ms)
     - <span style="color:green">✔</span> should get tokenIds from map by index (1349ms)
 
-  Burn tokens
+-  ## Burn tokens
     - <span style="color:green">✔</span> should burn directly via vault contract (199ms)
     - <span style="color:green">✔</span> should not claim via handler without permission (176ms)
     - <span style="color:green">✔</span> should claim via handler with permission (318ms)
@@ -36,7 +34,7 @@
     - <span style="color:green">✔</span> unminted should not return claimed (106ms)
     - <span style="color:green">✔</span> burnt via emblem vault should not return claimed (266ms)
 
-  Claimed
+-  ## Claimed
     - <span style="color:green">✔</span> should deploy storage
     - <span style="color:green">✔</span> storage should be owned by deployer
     - <span style="color:green">✔</span> should deploy claimed
@@ -54,7 +52,7 @@
     - <span style="color:green">✔</span> should not verify invalid merkle proof (77ms)
     - <span style="color:green">✔</span> should verify valid complex merkle proof (81ms)
 
-  Emblem Vault
+-  ## Emblem Vault
     - <span style="color:green">✔</span> should deploy vault (57ms)
     - <span style="color:green">✔</span> should not allow minting if not owned (58ms)
     - <span style="color:green">✔</span> should allow minting if owned (161ms)
@@ -67,16 +65,16 @@
     - <span style="color:green">✔</span> should mint with signature if signer is a witness (445ms)
     - <span style="color:green">✔</span> should mint with signed price (499ms)
 
-  Vault Handler
+-  ## Vault Handler
     - <span style="color:green">✔</span> should deploy handler (58ms)
     - <span style="color:green">✔</span> should transfer vault ownership to handler (66ms)
 
-  NFTradeV2 NFT
+-  ## NFTradeV2 NFT
     - <span style="color:green">✔</span> has correct name
     - <span style="color:green">✔</span> can mint (186ms)
     - <span style="color:green">✔</span> users have expected balances (644ms)
 
-  NFTradeV2 Trade
+-  ## NFTradeV2 Trade
     - <span style="color:green">✔</span> reflects correct version
     - <span style="color:green">✔</span> cannot place offer without approval
     - <span style="color:green">✔</span> cannot offer un-owned token
@@ -100,22 +98,22 @@
     - <span style="color:green">✔</span> can get accepted offer for nft  (752ms)
     - <span style="color:green">✔</span> accepting offer removes all outstanding offers for nft (1038ms)
 
-  NFTradeV2 Payment
+-  ## NFTradeV2 Payment
     - <span style="color:green">✔</span> reflects correct token balances before trades
     - <span style="color:green">✔</span> toggles pay to make and accept offers
     - <span style="color:green">✔</span> can charge separate prices to make and accept offers
-    Pay to make offer
+    -  ## Pay to make offer
       - <span style="color:green">✔</span> fails to add offer if trade contract not approved to spend
       - <span style="color:green">✔</span> fails to add offer if too broke (68ms)
       - <span style="color:green">✔</span> can make offer (248ms)
       - <span style="color:green">✔</span> bank receives fee
-    Pay to accept offer
+    -  ## Pay to accept offer
       - <span style="color:green">✔</span> fails to accept offer if trade contract not approved to spend
       - <span style="color:green">✔</span> fails to accept offer if too broke (66ms)
       - <span style="color:green">✔</span> can accept offer (529ms)
       - <span style="color:green">✔</span> bank receives fee (871ms)
 
-  NFTradeV2 Trade Types
+-  ## NFTradeV2 Trade Types
     - <span style="color:green">✔</span> 2 separate nft contracts exist
     - <span style="color:green">✔</span> users have correct balances of nfts before trades
     - <span style="color:green">✔</span> can swap erc721 for erc721 (422ms)
@@ -125,7 +123,7 @@
     - <span style="color:green">✔</span> can swap erc20 for erc721 (360ms)
     - <span style="color:green">✔</span> can swap erc20 for erc1155 (361ms)
 
-  NFTradeV2 Percentage
+-  ## NFTradeV2 Percentage
     - <span style="color:green">✔</span> can calculate percentage of even
     - <span style="color:green">✔</span> can calculate percentage of odd
     - <span style="color:green">✔</span> can calculate 100%
@@ -136,7 +134,7 @@
     percentage fee for erc20 offer
       4) "before each" hook for "Percentage fees are paid when percentage fee for erc20 on"
 
-  NFT Stake
+-  ## NFT Stake
     - <span style="color:green">✔</span> should deploy staking contract
     - <span style="color:green">✔</span> should not accept NFT if not initialized (227ms)
     - <span style="color:green">✔</span> should accept NFT if initialized (335ms)
@@ -155,10 +153,11 @@
     - <span style="color:green">✔</span> un-staking nft should reflect block 0 (412ms)
 
 
-  122 passing (3m)
-  1 pending
-  4 failing
+  - 122 passing (3m)
+  - 1 pending
+  - 4 failing
 
+  ```
   1) NFTradeV2 Trade Types
        can swap erc721 for erc1155:
      Error: VM Exception while processing transaction: reverted with reason string '005007'
