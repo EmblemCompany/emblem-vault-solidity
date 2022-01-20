@@ -190,6 +190,6 @@
         - <span style="color:green">✔</span> can calculate 0%
         - <span style="color:green">✔</span> can calculate % of single
         - <span style="color:green">✔</span> fails on attempt to calculate negative
-        -  ## percentage fee for erc20 offer
-            - <span style="color:green">✔</span> Percentage fees are paid when percentage fee for erc20 on (402ms)
-            - <span style="color:green">✔</span> Percentage fees are not paid when percentage fee for erc20 off (363ms)
+            -  ## percentage fee for erc20 offer
+                - <span style="color:green">✔</span> Percentage fees are paid when percentage fee for erc20 on (402ms)
+                - <span style="color:green">✔</span> Percentage fees are not paid when percentage fee for erc20 off (363ms)
