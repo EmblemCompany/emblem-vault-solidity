@@ -135,7 +135,7 @@ contract NFTrade_v2 is Context, Ownable, ReentrancyGuard {
 
         if (checkInterface(token, _INTERFACE_ID_ERC20)) {
             IERC20Token(token).transferFrom(msg.sender,  _offer._from, _offer.amount);
-            revert('not allowed to make offers for erc20');
+            // revert('not allowed to make offers for erc20');
         } else if (checkInterface(token, _INTERFACE_ID_ERC1155)){
             IERC1155(token).safeTransferFrom(msg.sender, _offer._from, _tokenId, _offer.amount, "");
         } else {

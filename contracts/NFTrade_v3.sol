@@ -3,7 +3,13 @@
 pragma experimental ABIEncoderV2;
 pragma solidity ^0.8.4;
 
+import "./IERC721.sol";
+import "./IERC1155.sol";
+import "./SafeMath.sol";
 import "./BasicERC20.sol";
+import "./ReentrancyGuard.sol";
+import "./Context.sol";
+import "./Ownable.sol";
 
 interface IERC20Token {
     function transfer(address to, uint256 value) external returns (bool);
@@ -16,40 +22,10 @@ interface IERC20Token {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-interface IERC721 {
-    function burn(uint256 tokenId) external;
-    function transferFrom(address from, address to, uint256 tokenId) external;
-    function mint( address _to, uint256 _tokenId, string calldata _uri, string calldata _payload) external;
-    function ownerOf(uint256 _tokenId) external returns (address _owner);
-    function getApproved(uint256 _tokenId) external returns (address);
-    function safeTransferFrom(address _from, address _to, uint256 _tokenId) external;
-    function isApprovedForAll(address _owner, address _operator) external returns (bool);
-    function balanceOf(address account, uint256 id) external view returns (uint256);
-}
-
-interface IERC1155 {
-    function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes calldata data) external;
-}
-
-interface IERC165 {
-    function supportsInterface(bytes4 interfaceId) external view returns (bool);
-}
-
-contract NFTrade_v3 {
+contract NFTrade_v3 is Context, Ownable, ReentrancyGuard {
     
     address resolver;
-    
-    address payable private owner;
     bool public initialized;
-    // address public paymentAddress = address(this);
-    // address public recipientAddress;
-    // uint256 public makeOfferPrice = 0;
-    // uint256 public acceptOfferPrice = 0;
-    // uint public percentageFee = 0;
-    // bool public payToAcceptOffer = false;
-    // bool public payToMakeOffer = false;
-    // bool public canOfferERC20 = false;
-    // bool public takePercentageOfERC20 = false;
     bool public locked = false;
     
     bytes4 private constant _INTERFACE_ID_ERC1155 = 0xd9b67a26;
@@ -81,27 +57,11 @@ contract NFTrade_v3 {
     }
     
     // event for EVM logging
-    event OwnerSet(address indexed oldOwner, address indexed newOwner);
     mapping(uint256 => Config) configs;
     mapping(address => mapping(uint => Offer[])) offers;
     mapping(address => mapping(uint => Offer[])) rejected;
     mapping(address => mapping(address => mapping(uint => Offer[]))) offered;
     mapping(address => mapping(uint => Offer[])) accepted;
-    
-    modifier isOwner() {
-        // If the first argument of 'require' evaluates to 'false', execution terminates and all
-        // changes to the state and to Ether balances are reverted.
-        // This used to consume all gas in old EVM versions, but not anymore.
-        // It is often a good idea to use 'require' to check if functions are called correctly.
-        // As a second argument, you can also provide an explanation about what went wrong.
-        require(msg.sender == owner, "Caller is not owner");
-        _;
-    }
-
-    // function kill() public isOwner returns (bool) {
-    //     selfdestruct(msg.sender);     
-    //     return true;
-    // }
     
     modifier notLocked() {
         require(!locked, "Contract is locked");
@@ -115,24 +75,11 @@ contract NFTrade_v3 {
     function init(address _paymentAddress, address _recipientAddress) public {
         require(!initialized, 'Already initialized');
         initialized = true;
-        owner = payable(msg.sender); // 'msg.sender' is sender of current call, contract deployer for a constructor
-        emit OwnerSet(address(0), owner);
         configs[1337] = Config(_recipientAddress, _paymentAddress, 0, 0, 0, false, false, false, false, true, 0, 0);
-        // paymentAddress = _paymentAddress;
-        // recipientAddress = _recipientAddress;
     }
     
     function getVersion() public pure returns (uint) {
         return 1;
-    }
-    
-    /**
-     * @dev Change owner
-     * @param newOwner address of new owner
-     */
-    function transferOwnership(address payable newOwner) public isOwner {
-        emit OwnerSet(owner, newOwner);
-        owner = newOwner;
     }
     
     /**
@@ -143,10 +90,7 @@ contract NFTrade_v3 {
         return owner;
     }
     event OfferAccepted(address token, uint256 _tokenId, address _forNft, uint256 _for, uint256 _amount);
-    // function acceptOffer(address token, uint _tokenId, uint index) public notLocked {
-    //     acceptOffer(token, _tokenId, index, 1337);
-    // }
-    function acceptOffer(address token, uint _tokenId, uint index, uint apikey) public notLocked {
+    function acceptOffer(address token, uint _tokenId, uint index, uint apikey) public notLocked nonReentrant {
         Config memory _config = configs[apikey];
         Offer memory _offer = offers[token][_tokenId][index];
         IERC721 nftToken1 = IERC721(token);
@@ -189,16 +133,16 @@ contract NFTrade_v3 {
                 IERC20Token(_offer.token).transferFrom(_offer._from, msg.sender, _offer.amount);
             }
         } else if (checkInterface(_offer.token, _INTERFACE_ID_ERC1155)){
-            IERC1155(_offer.token).safeTransferFrom(_offer._from, msg.sender, _offer.tokenId, 1, "");
+            IERC1155(_offer.token).safeTransferFrom(_offer._from, msg.sender, _offer.tokenId, _offer.amount, "");
         } else {
             nftToken2.safeTransferFrom(_offer._from, msg.sender, _offer.tokenId);
         }
 
         if (checkInterface(token, _INTERFACE_ID_ERC20)) {
-            // IERC20Token(token).transferFrom(msg.sender,  _offer._from, _offer.amount);
-            revert('not allowed to make offers for erc20');
+            IERC20Token(token).transferFrom(msg.sender,  _offer._from, _offer.amount);
+            // revert('not allowed to make offers for erc20');
         } else if (checkInterface(token, _INTERFACE_ID_ERC1155)){
-            IERC1155(token).safeTransferFrom(msg.sender, _offer._from, _tokenId, 1, "");
+            IERC1155(token).safeTransferFrom(msg.sender, _offer._from, _tokenId, _offer.amount, "");
         } else {
             nftToken1.safeTransferFrom(msg.sender, _offer._from, _tokenId);
         }
@@ -210,10 +154,7 @@ contract NFTrade_v3 {
     }
     
     event OfferAdded(address token, uint256 _tokenId, address _forNft, uint256 _for, uint256 amount);
-    // function addOffer(address token, uint256 _tokenId, address _forNft, uint256 _for, uint256 amount) public notLocked {
-    //     addOffer( token, _tokenId, _forNft, _for, amount, 1337);
-    // }
-    function addOffer(address token, uint256 _tokenId, address _forNft, uint256 _for, uint256 amount, uint256 apikey) public notLocked {
+    function addOffer(address token, uint256 _tokenId, address _forNft, uint256 _for, uint256 amount, uint256 apikey) public notLocked nonReentrant {
         Config memory _config = configs[apikey];
         IERC721 nftToken1 = IERC721(token);
         IERC20Token paymentToken = IERC20Token(_config.paymentAddress);
@@ -261,42 +202,42 @@ contract NFTrade_v3 {
         delete offered[_offer.token][_offer._from][_offer.tokenId];
     }
     
-    // function togglePayToMakeOffer() public isOwner {
+    // function togglePayToMakeOffer() public onlyOwner {
     //     togglePayToMakeOffer(1337);
     // }
     
-    function togglePayToMakeOffer(uint apikey) public isOwner {
+    function togglePayToMakeOffer(uint apikey) public onlyOwner {
         Config storage _config = configs[apikey];
         _config.payToMakeOffer = !_config.payToMakeOffer;
     }
     
-    // function togglePayToAcceptOffer() public isOwner {
+    // function togglePayToAcceptOffer() public onlyOwner {
     //     togglePayToAcceptOffer(1337);
     // }
     
-    function togglePayToAcceptOffer(uint apikey) public isOwner {
+    function togglePayToAcceptOffer(uint apikey) public onlyOwner {
         Config storage _config = configs[apikey];
         _config.payToAcceptOffer = !_config.payToAcceptOffer;
     }
     
-    function toggleLocked() public isOwner {
+    function toggleLocked() public onlyOwner {
         locked = !locked;
     }
 
-    // function toggleCanOfferERC20() public isOwner {
+    // function toggleCanOfferERC20() public onlyOwner {
     //     toggleCanOfferERC20(1337);
     // }
     
-    function toggleCanOfferERC20(uint256 apikey) public isOwner {
+    function toggleCanOfferERC20(uint256 apikey) public onlyOwner {
         Config storage _config = configs[apikey];
         _config.canOfferERC20 = !_config.canOfferERC20;
     }
 
-    // function toggleTakePercentageOfERC20() public isOwner {
+    // function toggleTakePercentageOfERC20() public onlyOwner {
     //     toggleTakePercentageOfERC20(1337);
     // }
     
-    function toggleTakePercentageOfERC20(uint apikey) public isOwner {
+    function toggleTakePercentageOfERC20(uint apikey) public onlyOwner {
         Config storage _config = configs[apikey];
         _config.takePercentageOfERC20 = !_config.takePercentageOfERC20;
     }
@@ -325,21 +266,21 @@ contract NFTrade_v3 {
         return rejected[token][_tokenId];
     }
     
-    // function changeOfferPrices(uint256 _makeOfferPrice, uint256 _acceptOfferPrice, uint _percentageFee) public isOwner {
+    // function changeOfferPrices(uint256 _makeOfferPrice, uint256 _acceptOfferPrice, uint _percentageFee) public onlyOwner {
     //     changeOfferPrices(_makeOfferPrice, _acceptOfferPrice, _percentageFee, 1337);
     // }
-    function changeOfferPrices(uint256 _makeOfferPrice, uint256 _acceptOfferPrice, uint _percentageFee, uint apikey) public isOwner {
+    function changeOfferPrices(uint256 _makeOfferPrice, uint256 _acceptOfferPrice, uint _percentageFee, uint apikey) public onlyOwner {
         Config storage _config = configs[apikey];
         _config.makeOfferPrice = _makeOfferPrice;
         _config.acceptOfferPrice = _acceptOfferPrice;
         _config.percentageFee = _percentageFee;
     }
     
-    // function changeRecipientAddress(address _recipientAddress) public isOwner {
+    // function changeRecipientAddress(address _recipientAddress) public onlyOwner {
     //     changeRecipientAddress(_recipientAddress, 1337);
     // }
     
-    function changeRecipientAddress(address _recipientAddress, uint apikey) public isOwner {
+    function changeRecipientAddress(address _recipientAddress, uint apikey) public onlyOwner {
         Config storage _config = configs[apikey];
         _config.recipientAddress = _recipientAddress;
     }
@@ -363,56 +304,5 @@ contract NFTrade_v3 {
 
     function toPercent(uint amount, uint total) public pure returns (uint) {
         return amount.mul(100).div(total);
-    }
-}
-
-library SafeMath {
-    function add(uint256 a, uint256 b) internal pure returns (uint256) {
-        uint256 c = a + b;
-        require(c >= a, "SafeMath: addition overflow");
-
-        return c;
-    }
-
-    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
-        return sub(a, b, "SafeMath: subtraction overflow");
-    }
-
-    function sub(
-        uint256 a,
-        uint256 b,
-        string memory errorMessage
-    ) internal pure returns (uint256) {
-        require(b <= a, errorMessage);
-        uint256 c = a - b;
-
-        return c;
-    }
-
-    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
-        if (a == 0) {
-            return 0;
-        }
-
-        uint256 c = a * b;
-        require(c / a == b, "SafeMath: multiplication overflow");
-
-        return c;
-    }
-
-    function div(uint256 a, uint256 b) internal pure returns (uint256) {
-        return div(a, b, "SafeMath: division by zero");
-    }
-
-    function div(
-        uint256 a,
-        uint256 b,
-        string memory errorMessage
-    ) internal pure returns (uint256) {
-        // Solidity only automatically asserts when dividing by 0
-        require(b > 0, errorMessage);
-        uint256 c = a / b;
-
-        return c;
     }
 }
