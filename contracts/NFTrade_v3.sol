@@ -11,16 +11,7 @@ import "./ReentrancyGuard.sol";
 import "./Context.sol";
 import "./Ownable.sol";
 
-interface IERC20Token {
-    function transfer(address to, uint256 value) external returns (bool);
-    function approve(address spender, uint256 value) external returns (bool);
-    function transferFrom(address from, address to, uint256 value) external returns (bool);
-    function totalSupply() external view returns (uint256);
-    function balanceOf(address who) external view returns (uint256);
-    function allowance(address owner, address spender) external view returns (uint256);
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Approval(address indexed owner, address indexed spender, uint256 value);
-}
+
 
 contract NFTrade_v3 is Context, Ownable, ReentrancyGuard {
     
@@ -139,8 +130,8 @@ contract NFTrade_v3 is Context, Ownable, ReentrancyGuard {
         }
 
         if (checkInterface(token, _INTERFACE_ID_ERC20)) {
-            IERC20Token(token).transferFrom(msg.sender,  _offer._from, _offer.amount);
-            // revert('not allowed to make offers for erc20');
+            // IERC20Token(token).transferFrom(msg.sender,  _offer._from, _offer.amount);
+            revert('not allowed to make offers for erc20');
         } else if (checkInterface(token, _INTERFACE_ID_ERC1155)){
             IERC1155(token).safeTransferFrom(msg.sender, _offer._from, _tokenId, _offer.amount, "");
         } else {
@@ -159,11 +150,13 @@ contract NFTrade_v3 is Context, Ownable, ReentrancyGuard {
         IERC721 nftToken1 = IERC721(token);
         IERC20Token paymentToken = IERC20Token(_config.paymentAddress);
 
-        require(!checkInterface(_forNft, _INTERFACE_ID_ERC20), 'Not allowed to make offers for erc20');
+        // require(!checkInterface(_forNft, _INTERFACE_ID_ERC20), 'Not allowed to make offers for erc20');
 
         if (checkInterface(token, _INTERFACE_ID_ERC20) && _config.canOfferERC20) {
             require(IERC20Token(token).balanceOf(msg.sender) >= amount, 'Not Enough Balance');
             require(IERC20Token(token).allowance(msg.sender, address(this)) >= amount, 'Not Enough Allowance');
+        } else if(checkInterface(token, _INTERFACE_ID_ERC20) && !_config.canOfferERC20) {
+            revert("Not allowed to make offers of erc20");
         } else if (checkInterface(token, _INTERFACE_ID_ERC1155)){
             require(nftToken1.balanceOf(msg.sender, _tokenId) > 0, 'NFT not owned by offerer');
             require(nftToken1.isApprovedForAll(msg.sender, address(this)), 'Handler unable to transfer NFT');

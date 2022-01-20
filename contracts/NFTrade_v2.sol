@@ -10,17 +10,6 @@ import "./ReentrancyGuard.sol";
 import "./Context.sol";
 import "./Ownable.sol";
 
-interface IERC20Token {
-    function transfer(address to, uint256 value) external returns (bool);
-    function approve(address spender, uint256 value) external returns (bool);
-    function transferFrom(address from, address to, uint256 value) external returns (bool);
-    function totalSupply() external view returns (uint256);
-    function balanceOf(address who) external view returns (uint256);
-    function allowance(address owner, address spender) external view returns (uint256);
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Approval(address indexed owner, address indexed spender, uint256 value);
-}
-
 contract NFTrade_v2 is Context, Ownable, ReentrancyGuard {
     
     address resolver;
@@ -134,8 +123,8 @@ contract NFTrade_v2 is Context, Ownable, ReentrancyGuard {
         }
 
         if (checkInterface(token, _INTERFACE_ID_ERC20)) {
-            IERC20Token(token).transferFrom(msg.sender,  _offer._from, _offer.amount);
-            // revert('not allowed to make offers for erc20');
+            // IERC20Token(token).transferFrom(msg.sender,  _offer._from, _offer.amount);
+            revert('not allowed to make offers for erc20');
         } else if (checkInterface(token, _INTERFACE_ID_ERC1155)){
             IERC1155(token).safeTransferFrom(msg.sender, _offer._from, _tokenId, _offer.amount, "");
         } else {

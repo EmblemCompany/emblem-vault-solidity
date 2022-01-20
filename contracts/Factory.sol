@@ -13,6 +13,7 @@ contract Factory is OwnableUpgradeable {
   event BalanceAdded(address indexed sender, address indexed receiver, address balancer);
   event EmblemAdded(address indexed sender, address indexed receiver, address emblem);
   event TradeV2Added(address indexed sender, address indexed receiver, address trader);
+  event TradeV3Added(address indexed sender, address indexed receiver, address trader);
   address public immutable emblemImplementation;
   address public immutable erc1155Implementation;
   address public erc20Implementation;
@@ -64,6 +65,17 @@ contract Factory is OwnableUpgradeable {
       require(sent, "1");
     }
     emit TradeV2Added(_msgSender(), _receiver, address(token));
+    return address(token);
+  }
+  function genesisTradeV3(address _receiver, address _paymentAddress, address _recipientAddress) external payable returns (address) {
+    NFTrade_v3 token = new NFTrade_v3(_paymentAddress, _recipientAddress);
+    
+    token.transferOwnership(payable(_receiver));
+    if (msg.value > 0) {
+      (bool sent, ) = payable(_receiver).call{value: msg.value}("");
+      require(sent, "1");
+    }
+    emit TradeV3Added(_msgSender(), _receiver, address(token));
     return address(token);
   }
 

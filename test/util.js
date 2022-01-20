@@ -80,6 +80,11 @@ class Util {
     let contract = new ethers.Contract(address, ABI, signer)
     return contract;
   }
+  getTradeV3 (address, signer) {
+    let ABI = require(path.resolve(__dirname, "../abi/contracts/NFTrade_v3.sol/NFTrade_v3.json"))
+    let contract = new ethers.Contract(address, ABI, signer)
+    return contract;
+  }
   async collections (address) {
     let ABI = require(path.resolve(__dirname, "../abi/contracts/Factory.sol/Factory.json"))
     let _interface = new ethers.utils.Interface(ABI)
@@ -123,6 +128,19 @@ class Util {
     let ABI = require(path.resolve(__dirname, "../abi/contracts/Factory.sol/Factory.json"))
     let _interface = new ethers.utils.Interface(ABI)
     let filter = this.factory.filters.TradeV2Added(null, address)
+    filter.fromBlock = 0
+    filter.toBlock = 'latest'
+    let events = await ethers.provider.getLogs(filter).then((events) => {
+      return events.map((e) => {
+        return _interface.parseLog(e).args.trader
+      })
+    })
+    return events;
+  }
+  async tradersV3 (address) {
+    let ABI = require(path.resolve(__dirname, "../abi/contracts/Factory.sol/Factory.json"))
+    let _interface = new ethers.utils.Interface(ABI)
+    let filter = this.factory.filters.TradeV3Added(null, address)
     filter.fromBlock = 0
     filter.toBlock = 'latest'
     let events = await ethers.provider.getLogs(filter).then((events) => {
@@ -203,6 +221,21 @@ class Util {
     let ABI = require(path.resolve(__dirname, "../abi/contracts/NFTrade_v2.sol/NFTrade_v2.json"))
     this.signer = ethers.provider.getSigner()
     this.traderV2 = new ethers.Contract(addr[0], ABI, this.signer)
+  }
+  async cloneTradeV3 (address, val) {
+    if (val) {      
+      let tx = await this.factory.genesisTradeV3(address, await this.factory.erc20Implementation(), address, val)
+      await tx.wait()
+    } else {
+      let tx = await this.factory.genesisTradeV3(address, await this.factory.erc20Implementation(), address)
+      await tx.wait()
+    }
+
+    let addr = await this.tradersV3(address);
+
+    let ABI = require(path.resolve(__dirname, "../abi/contracts/NFTrade_v3.sol/NFTrade_v3.json"))
+    this.signer = ethers.provider.getSigner()
+    this.traderV3 = new ethers.Contract(addr[0], ABI, this.signer)
   }
   async cloneERC20 (address, val) {
     if (val) {      

@@ -38,6 +38,7 @@ import "./BalanceStorage.sol";
 import "./Claimed.sol";
 import "./Balance.sol";
 import "./NFTrade_v2.sol";
+import "./NFTrade_v3.sol";
 import "./ReentrancyGuard.sol";
 import "./Ownable.sol";
 
