@@ -30,7 +30,7 @@ class Util {
     let contract = new ethers.Contract(this.factory.address, ABI, signer)
     return contract;
   }
-  getHandler (address) {
+  getHandler (address, signer = this.deployer) {
     let ABI = require(path.resolve(__dirname, "../abi/contracts/VaultHandlerV8.sol/VaultHandlerV8.json"))
     let contract = new ethers.Contract(address, ABI, signer)
     return contract;

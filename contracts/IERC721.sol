@@ -15,4 +15,5 @@ interface IERC721 {
     function tokenByIndex(uint256 _index) external view returns (uint256);
     function balanceOf(address account, uint256 id) external view returns (uint256);
     function isApprovedForAll(address _owner, address _operator) external returns (bool);
+    function setApprovalForAll( address _operator, bool _approved) external;
 }

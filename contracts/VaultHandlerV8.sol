@@ -51,12 +51,21 @@ contract VaultHandlerV8 is Ownable, Context, ReentrancyGuard {
     address public recipientAddress;
     address public paymentAddress;
     uint256 public price;
+
+    bytes4 private constant _INTERFACE_ID_ERC1155 = 0xd9b67a26;
+    bytes4 private constant _INTERFACE_ID_ERC20 = 0x74a1476f;
+    bytes4 private constant _INTERFACE_ID_ERC721 = 0x80ac58cd;
+    
     bool public shouldBurn = false;
     
-   struct PreTransfer {
+    struct PreTransfer {
         string payload;
         bytes32 preImage;
         address _from;
+    }
+    struct ContractDetails {
+        uint _type;
+        bool curated;
     }
     
     mapping(address => mapping(uint => PreTransfer)) preTransfers;
@@ -65,6 +74,14 @@ contract VaultHandlerV8 is Ownable, Context, ReentrancyGuard {
     
     mapping(address => bool) public witnesses;
     mapping(uint256 => bool) usedNonces;
+
+    mapping(address => ContractDetails) public vaultContracts;
+    uint256 public vaultContractCount;
+
+    modifier isRegisteredVaultContract(address _vaultContract) {
+        require(vaultContracts[_vaultContract]._type > 0, "Vault contract is not registered");
+        _;
+    }
     
     /**
      * @dev Return owner address 
@@ -83,6 +100,7 @@ contract VaultHandlerV8 is Ownable, Context, ReentrancyGuard {
         initialized = true;
         uint decimals = BasicERC20(paymentAddress).decimals();
         price = _price.mul(10) ** decimals;
+        vaultContractCount = 0;
     }
     
     function buyWithSignature(address _nftAddress, address _to, uint256 _tokenId, string calldata _payload, uint256 _nonce, bytes calldata _signature) public payable nonReentrant {
@@ -117,6 +135,53 @@ contract VaultHandlerV8 is Ownable, Context, ReentrancyGuard {
         usedNonces[_nonce] = true;
         string memory _uri = concat(metadataBaseUri, uintToStr(_tokenId));
         nftToken.mint(_to, _tokenId, _uri, _payload);
+    }
+
+    function addVaultContract(address vaultContract, uint _type, bool curated) public onlyOwner {
+        require(_msgSender() == owner, 'Only owner can add vault contracts');
+        vaultContractCount++;
+        vaultContracts[vaultContract] = ContractDetails(_type, curated);
+    }
+
+    function removeVaultContract(address vaultContract) public onlyOwner isRegisteredVaultContract(vaultContract) {
+        require(vaultContractCount > 0, 'No vault contracts to remove');
+        delete vaultContracts[vaultContract];
+        vaultContractCount--;
+    }
+
+    function moveVault(address _from, address _to, uint256 tokenId, uint256 newTokenId) external nonReentrant isRegisteredVaultContract(_from) isRegisteredVaultContract(_to)  {
+        require(_from != _to, 'Cannot move vault to same address');
+        if (checkInterface(_from, _INTERFACE_ID_ERC1155)) {
+            require(tokenId != newTokenId, 'from: TokenIds must be different for ERC1155');            
+            require(IERC1155(_from).balanceOf(_msgSender(), tokenId) > 0, 'from: Not owner of vault');
+            // burn _from
+
+        } else {
+            require(IERC721(_from).ownerOf(tokenId) == _msgSender(), 'from: Not owner of vault');
+            IERC721(_from).burn(tokenId);
+            tryERC721BalanceCheck(_from, tokenId);
+        }
+        if (checkInterface(_to, _INTERFACE_ID_ERC1155)) {
+            require(tokenId != newTokenId, 'to: TokenIds must be different for ERC1155');            
+            IERC1155(_to).mint(_msgSender(), newTokenId, 1);
+        } else {
+            // mint _to
+        }
+    }
+
+    function tryERC721BalanceCheck(address _from, uint256 tokenId) public returns(uint256 returnedAmount){
+        (bool success, bytes memory returnData) =
+            address(_from).call( // This creates a low level call to the token
+                abi.encodePacked( // This encodes the function to call and the parameters to pass to that function
+                    IERC721(_from).ownerOf.selector, // This is the function identifier of the function we want to call
+                    abi.encode(tokenId) // This encodes the parameter we want to pass to the function
+                )
+            );
+        if (success) { 
+            revert('Not burnt');                
+        } else { 
+            (returnedAmount) = abi.decode(returnData, (uint256));
+        }
     }
     
     function toggleShouldBurn() public onlyOwner {
@@ -264,6 +329,19 @@ contract VaultHandlerV8 is Ownable, Context, ReentrancyGuard {
     function changePrice(uint256 _price) public onlyOwner {
         uint decimals = BasicERC20(paymentAddress).decimals();
         price = _price * 10 ** decimals;
+    }
+
+    function checkInterface(address token, bytes4 _interface) public view returns (bool) {
+        IERC165 nftToken = IERC165(token);
+        bool supportsInterface = false;
+        try  nftToken.supportsInterface(_interface) returns (bool _supports) {
+            supportsInterface = _supports;
+        } catch {
+            if (_interface == 0x74a1476f) {
+                supportsInterface = true;
+            }
+        }
+        return supportsInterface;
     }
 
     function toBytes(address a) public pure returns (bytes memory b){

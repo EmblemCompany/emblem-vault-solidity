@@ -6,21 +6,81 @@ const Util = require('./util.js')
 const HDWalletProvider = require("@truffle/hdwallet-provider")
 const Web3 = require('web3');
 const util = new Util()
+let ERC721, ERC1155
 beforeEach(async ()=>{
   await util.deploy();
+  await util.cloneEmblem(util.deployer.address)
+  await util.cloneHandler(util.deployer.address)
+  ERC721 = util.getEmblemVault(util.emblem.address, util.deployer)
+  ERC721.mint(util.deployer.address, 1, "test", 0x0)
+  ERC1155 = util.getERC1155((await util.factory.erc1155Implementation()), util.deployer)
 })
 describe('Vault Handler', () => {    
   it('should deploy handler', async ()=>{
-    await util.cloneHandler(util.deployer.address)
     let initialized = await util.handler.initialized()
     expect(initialized).to.equal(true)
   })
   it('should transfer vault ownership to handler', async ()=>{
-    await util.cloneHandler(util.deployer.address)
     let emblemAddress = await util.factory.emblemImplementation()
     let emblemContract = await util.getEmblemVault(emblemAddress, util.deployer)
     let owner = await emblemContract.owner()
     expect(owner).to.equal(util.handler.address)
+  })
+  it('should deploy ERC721 and ERC1155 Vaults', async ()=>{
+    expect(ERC721.address).to.exist
+    expect(ERC1155.address).to.exist
+  })
+
+  it('non existant vaultContract returns empty record', async ()=>{
+    let contractRecord = await util.handler.vaultContracts(ERC721.address)
+    expect(contractRecord._type).to.equal(0)
+    expect(contractRecord.curated).to.equal(false)
+  })
+  it('non admin can not add vaultContract', async ()=>{
+    let handler = util.getHandler(util.handler.address, util.alice)
+    let tx = handler.addVaultContract(ERC721.address, 0, true)
+    await expect(tx).to.be.revertedWith('018001')
+  })
+  
+  it('admin can add vaultContract', async ()=>{
+    await util.handler.addVaultContract(ERC721.address, 1, true)
+    let contractRecord = await util.handler.vaultContracts(ERC721.address)
+    expect(contractRecord._type).to.equal(1)
+    expect(contractRecord.curated).to.equal(true)
+  })
+
+  it('admin can remove vaultContract', async ()=>{
+    await util.handler.addVaultContract(ERC721.address, 2, false)
+    let contractRecord = await util.handler.vaultContracts(ERC721.address)
+    expect(contractRecord._type).to.equal(2)
+    expect(contractRecord.curated).to.equal(false)
+    expect(await util.handler.vaultContractCount()).to.equal(1)
+    await util.handler.removeVaultContract(ERC721.address)
+    contractRecord = await util.handler.vaultContracts(ERC721.address)
+    expect(contractRecord._type).to.equal(0)
+    expect(contractRecord.curated).to.equal(false)
+    expect(await util.handler.vaultContractCount()).to.equal(0)
+  })
+
+  it('can not move from unregistered contract', async ()=>{
+    let tx = util.handler.moveVault(ERC721.address, ERC1155.address, 1, 0)
+    await expect(tx).to.be.revertedWith('Vault contract is not registered')
+  })
+
+  it('can move from registered contract', async ()=>{
+    await ERC1155.transferOwnership(util.handler.address)
+    await ERC721.setApprovalForAll(util.handler.address, true)
+    await util.handler.addVaultContract(ERC721.address, 2, false)
+    await util.handler.addVaultContract(ERC1155.address, 2, false)
+    let balanceERC721 = await ERC721.balanceOf(util.deployer.address)
+    let balanceERC1155 = await ERC1155.balanceOf(util.deployer.address, 1337)
+    expect(balanceERC1155).to.equal(0)
+    expect(balanceERC721).to.equal(1)
+    await util.handler.moveVault(ERC721.address, ERC1155.address, 1, 1337)
+    balanceERC721 = await ERC721.balanceOf(util.deployer.address)
+    balanceERC1155 = await ERC1155.balanceOf(util.deployer.address, 1337)
+    expect(balanceERC1155).to.equal(1)
+    expect(balanceERC721).to.equal(0)
   })
   
 })

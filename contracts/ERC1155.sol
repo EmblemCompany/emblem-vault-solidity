@@ -64,7 +64,7 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI, Ownable {
         _mint(msg.sender,1337, 1, "");
     }
 
-    function mint(address _to, uint256 _tokenId, uint256 _amount) public onlyOwner {
+    function mint(address _to, uint256 _tokenId, uint256 _amount) public override onlyOwner {
         _mint(_to, _tokenId, _amount, "");
     }
 
