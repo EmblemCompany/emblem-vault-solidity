@@ -992,12 +992,12 @@ abstract contract NFTokenEnumerableMetadata is
   
 function _setTokenPayload(
     uint256 _tokenId,
-    string memory _uri
+    string memory _payload
   )
     internal
     validNFToken(_tokenId)
   {
-    idToPayload[_tokenId] = _uri;
+    idToPayload[_tokenId] = _payload;
   }
   
   /**
