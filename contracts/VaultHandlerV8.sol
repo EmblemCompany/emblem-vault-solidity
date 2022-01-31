@@ -152,24 +152,28 @@ contract VaultHandlerV8 is Ownable, Context, ReentrancyGuard {
     function moveVault(address _from, address _to, uint256 tokenId, uint256 newTokenId) external nonReentrant isRegisteredVaultContract(_from) isRegisteredVaultContract(_to)  {
         require(_from != _to, 'Cannot move vault to same address');
         if (checkInterface(_from, _INTERFACE_ID_ERC1155)) {
-            require(tokenId != newTokenId, 'from: TokenIds must be different for ERC1155');            
-            require(IERC1155(_from).balanceOf(_msgSender(), tokenId) > 0, 'from: Not owner of vault');
-            // burn _from
-
+            require(tokenId != newTokenId, 'from: TokenIds must be different for ERC1155');
+            uint256 currentBalance = IERC1155(_from).balanceOf(_msgSender(), tokenId);
+            require(currentBalance > 0, 'from: Not owner of vault');
+            IERC1155(_from).burn(_msgSender(), tokenId, 1);
+            uint256 newBalance = IERC1155(_from).balanceOf(_msgSender(), tokenId);
+            require(newBalance == currentBalance.sub(1), 'from: Not Burnt');
         } else {
             require(IERC721(_from).ownerOf(tokenId) == _msgSender(), 'from: Not owner of vault');
             IERC721(_from).burn(tokenId);
-            tryERC721BalanceCheck(_from, tokenId);
+            tryERC721BalanceCheck(_from, tokenId, 'Not Burnt');
         }
         if (checkInterface(_to, _INTERFACE_ID_ERC1155)) {
             require(tokenId != newTokenId, 'to: TokenIds must be different for ERC1155');            
             IERC1155(_to).mint(_msgSender(), newTokenId, 1);
         } else {
-            // mint _to
+            tryERC721BalanceCheck(_to, newTokenId, 'NFT Already Exists');
+            string memory _uri = concat(metadataBaseUri, uintToStr(newTokenId));        
+            IERC721(_to).mint(_msgSender(), newTokenId, _uri, "");
         }
     }
 
-    function tryERC721BalanceCheck(address _from, uint256 tokenId) public returns(uint256 returnedAmount){
+    function tryERC721BalanceCheck(address _from, uint256 tokenId, string memory reason) public returns(uint256 returnedAmount){
         (bool success, bytes memory returnData) =
             address(_from).call( // This creates a low level call to the token
                 abi.encodePacked( // This encodes the function to call and the parameters to pass to that function
@@ -178,11 +182,11 @@ contract VaultHandlerV8 is Ownable, Context, ReentrancyGuard {
                 )
             );
         if (success) { 
-            revert('Not burnt');                
+            revert(reason);                
         } else { 
             (returnedAmount) = abi.decode(returnData, (uint256));
         }
-    }
+    }    
     
     function toggleShouldBurn() public onlyOwner {
         shouldBurn = !shouldBurn;

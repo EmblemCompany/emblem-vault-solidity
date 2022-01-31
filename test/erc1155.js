@@ -17,6 +17,13 @@ describe('ERC1155', () => {
     it('should deploy ERC1155 Vaults', async ()=>{
         expect(ERC1155.address).to.exist
     })
+    it('should mint', async()=>{
+        let balanceERC1155 = await ERC1155.balanceOf(util.bob.address, 789)
+        expect(balanceERC1155).to.equal(0)
+        await ERC1155.mint(util.bob.address, 789, 2)
+        balanceERC1155 = await ERC1155.balanceOf(util.bob.address, 789)
+        expect(balanceERC1155).to.equal(2)
+    })
     describe('Non-Fungibility', ()=>{
         it('should create serialnumber on each new asset minted')
         it('should add new serialnumber when minting more of a tokenid')

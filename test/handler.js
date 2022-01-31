@@ -67,7 +67,7 @@ describe('Vault Handler', () => {
     await expect(tx).to.be.revertedWith('Vault contract is not registered')
   })
 
-  it('can move from registered contract', async ()=>{
+  it('can move from ERC721 to ERC1155 with registered contracts', async ()=>{
     await ERC1155.transferOwnership(util.handler.address)
     await ERC721.setApprovalForAll(util.handler.address, true)
     await util.handler.addVaultContract(ERC721.address, 2, false)
@@ -82,6 +82,44 @@ describe('Vault Handler', () => {
     expect(balanceERC1155).to.equal(1)
     expect(balanceERC721).to.equal(0)
   })
+
+  it('can move from ERC1155 to ERC721 with registered contracts', async ()=>{
+    await ERC1155.transferOwnership(util.deployer.address)
+    await ERC1155.mint(util.deployer.address, 123, 2)
+    await ERC721.setApprovalForAll(util.handler.address, true)
+    await ERC721.burn(1)
+    await ERC1155.setApprovalForAll(util.handler.address, true)
+    await ERC721.transferOwnership(util.handler.address)
+    await util.handler.addVaultContract(ERC721.address, 2, false)
+    await util.handler.addVaultContract(ERC1155.address, 2, false)
+    let balanceERC721 = await ERC721.balanceOf(util.deployer.address)
+    let balanceERC1155 = await ERC1155.balanceOf(util.deployer.address, 123)
+    expect(balanceERC1155).to.equal(2)
+    expect(balanceERC721).to.equal(0)
+    await util.handler.moveVault(ERC1155.address, ERC721.address, 123, 1337)
+    balanceERC721 = await ERC721.balanceOf(util.deployer.address)
+    balanceERC1155 = await ERC1155.balanceOf(util.deployer.address, 123)
+    expect(balanceERC1155).to.equal(1)
+    expect(balanceERC721).to.equal(1)
+  })
+
+  it('can not move ERC1155 to ERC721 when new tokenId already exists', async ()=>{
+    await ERC1155.transferOwnership(util.deployer.address)
+    await ERC1155.mint(util.deployer.address, 123, 2)
+    await ERC721.setApprovalForAll(util.handler.address, true)
+    await ERC1155.setApprovalForAll(util.handler.address, true)
+    await ERC721.transferOwnership(util.handler.address)
+    await util.handler.addVaultContract(ERC721.address, 2, false)
+    await util.handler.addVaultContract(ERC1155.address, 2, false)
+    let balanceERC721 = await ERC721.balanceOf(util.deployer.address)
+    let balanceERC1155 = await ERC1155.balanceOf(util.deployer.address, 123)
+    expect(balanceERC1155).to.equal(2)
+    expect(balanceERC721).to.equal(1)
+    let tx = util.handler.moveVault(ERC1155.address, ERC721.address, 123, 1)
+    await expect(tx).to.be.revertedWith('NFT Already Exists')
+  })
+
+  it('should only allow move if witnessed')
   
 })
 

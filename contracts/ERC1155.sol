@@ -68,6 +68,11 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI, Ownable {
         _mint(_to, _tokenId, _amount, "");
     }
 
+    function burn(address _from, uint256 _tokenId, uint256 _amount) public override {
+        require(_from == _msgSender() || isApprovedForAll(_from, _msgSender()), 'Not Approved to burn');
+        _burn(_from, _tokenId, _amount);
+    }
+
     /**
      * @dev See {IERC1155MetadataURI-uri}.
      *
