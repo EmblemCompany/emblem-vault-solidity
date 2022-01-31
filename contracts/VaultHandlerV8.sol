@@ -23,7 +23,7 @@
 
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 
 import "./BasicERC20.sol";
 import "./EmblemVault.sol";

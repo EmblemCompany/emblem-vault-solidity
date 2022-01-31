@@ -1,17 +1,8 @@
-/**
- *Submitted for verification at Etherscan.io on 2020-09-09
-*/
-
-// File: browser/github/0xcert/ethereum-erc721/src/contracts/ownership/ownable.sol
-
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
+pragma experimental ABIEncoderV2;
 import "./SafeMath.sol";
 import "./Ownable.sol";
 import "./ERC165.sol";
-
-// File: browser/github/0xcert/ethereum-erc721/src/contracts/tokens/erc721-enumerable.sol
-
-// pragma solidity ^0.8.4;
 
 /**
  * @dev Optional enumeration extension for ERC-721 non-fungible token standard.
@@ -60,10 +51,6 @@ interface ERC721Enumerable
 
 }
 
-// File: browser/github/0xcert/ethereum-erc721/src/contracts/tokens/erc721-metadata.sol
-
-// pragma solidity ^0.8.4;
-
 /**
  * @dev Optional metadata extension for ERC-721 non-fungible token standard.
  * See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md.
@@ -102,10 +89,6 @@ interface ERC721Metadata
 
 }
 
-// File: browser/github/0xcert/ethereum-erc721/src/contracts/utils/address-utils.sol
-
-// pragma solidity ^0.8.4;
-
 /**
  * @dev Utility library of inline functions on addresses.
  * @notice Based on:
@@ -142,10 +125,6 @@ library AddressUtils
 
 }
 
-// File: browser/github/0xcert/ethereum-erc721/src/contracts/tokens/erc721-token-receiver.sol
-
-// pragma solidity ^0.8.4;
-
 /**
  * @dev ERC-721 interface for accepting safe transfers.
  * See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md.
@@ -176,10 +155,6 @@ interface ERC721TokenReceiver
     returns(bytes4);
 
 }
-
-// File: browser/github/0xcert/ethereum-erc721/src/contracts/tokens/erc721.sol
-
-// pragma solidity ^0.8.4;
 
 /**
  * @dev ERC-721 non-fungible token standard.
@@ -354,14 +329,6 @@ interface ERC721
     returns (bool);
 
 }
-
-// File: browser/github/0xcert/ethereum-erc721/src/contracts/tokens/nf-token.sol
-
-// pragma solidity ^0.8.4;
-
-
-
-
 
 
 /**
@@ -860,13 +827,6 @@ contract NFToken is
 
 }
 
-// File: browser/github/0xcert/ethereum-erc721/src/contracts/tokens/nf-token-enumerable-metadata.sol
-
-// pragma solidity ^0.8.4;
-
-
-
-
 /**
  * @dev Optional metadata implementation for ERC-721 non-fungible token standard.
  */
@@ -1205,13 +1165,6 @@ function _setTokenPayload(
   }
 
 }
-
-// File: browser/EmblemVault_v2.sol
-
-pragma experimental ABIEncoderV2;
-// pragma solidity ^0.8.4;
-
-
 
 /**
  * @dev This is an example contract implementation of NFToken with metadata extension.

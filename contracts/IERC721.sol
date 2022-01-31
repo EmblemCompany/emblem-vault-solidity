@@ -1,4 +1,4 @@
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 interface IERC721 {
     function burn(uint256 tokenId) external;
     function transferFrom(address from, address to, uint256 tokenId) external;

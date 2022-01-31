@@ -1,4 +1,4 @@
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 // import "./IERC1155.sol";
 /**
  * @dev Interface of the ERC165 standard, as defined in the

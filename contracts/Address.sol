@@ -1,4 +1,4 @@
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 library Address {
     function isContract(address account) internal view returns (bool) {
         bytes32 codehash;

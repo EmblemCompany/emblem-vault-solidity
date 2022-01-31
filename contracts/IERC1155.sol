@@ -1,4 +1,4 @@
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 import "./ERC165.sol";
 /**
  * @dev Required interface of an ERC1155 compliant contract, as defined in the
