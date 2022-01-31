@@ -66,7 +66,7 @@ contract VaultHandlerV8 is Ownable, Context, ReentrancyGuard {
     struct ContractDetails {
         uint _type;
         bool curated;
-    }
+    }    
     
     mapping(address => mapping(uint => PreTransfer)) preTransfers;
     mapping(address => mapping(uint => mapping(uint => PreTransfer))) preTransfersByIndex;
@@ -408,34 +408,6 @@ contract VaultHandlerV8 is Ownable, Context, ReentrancyGuard {
             _i /= 10;
         }
         return string(bstr);
-    }    
-    function stringToBytes32(string memory source) internal pure returns (bytes32 result) {
-        bytes memory tempEmptyStringTest = bytes(source);
-        if (tempEmptyStringTest.length == 0) {
-            return 0x0;
-        }
-    
-        assembly {
-            result := mload(add(source, 32))
-        }
-    }
-    function bytes32ToStr(bytes32 _bytes32) internal pure returns (string memory) {      
-        bytes memory bytesArray = new bytes(32);
-        for (uint256 i; i < 32; i++) {
-            bytesArray[i] = _bytes32[i];
-            }
-        return string(bytesArray);
-    }
-    function asciiToInteger(bytes32 x) public pure returns (uint256) {
-        uint256 y;
-        for (uint256 i = 0; i < 32; i++) {
-            uint256 c = (uint256(x) >> (i * 8)) & 0xff;
-            if (48 <= c && c <= 57)
-                y += (c - 48) * 10 ** i;
-            else
-                break;
-        }
-        return y;
     }
     function toString(address account) public pure returns(string memory) {
         return toString(abi.encodePacked(account));

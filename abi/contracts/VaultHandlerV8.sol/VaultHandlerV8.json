@@ -132,25 +132,6 @@
   {
     "inputs": [
       {
-        "internalType": "bytes32",
-        "name": "x",
-        "type": "bytes32"
-      }
-    ],
-    "name": "asciiToInteger",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "pure",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "address",
         "name": "_nftAddress",
         "type": "address"
