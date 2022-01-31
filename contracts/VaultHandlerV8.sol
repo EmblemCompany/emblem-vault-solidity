@@ -328,7 +328,7 @@ contract VaultHandlerV8 is Ownable, Context, ReentrancyGuard {
     
     function changePrice(uint256 _price) public onlyOwner {
         uint decimals = BasicERC20(paymentAddress).decimals();
-        price = _price * 10 ** decimals;
+        price = _price.mul(10 ** decimals);
     }
 
     function checkInterface(address token, bytes4 _interface) public view returns (bool) {
