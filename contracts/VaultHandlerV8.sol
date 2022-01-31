@@ -103,7 +103,7 @@ contract VaultHandlerV8 is Ownable, Context, ReentrancyGuard {
         vaultContractCount = 0;
     }
     
-    function buyWithSignature(address _nftAddress, address _to, uint256 _tokenId, string calldata _payload, uint256 _nonce, bytes calldata _signature) public payable nonReentrant {
+    function buyWithSignature(address _nftAddress, address _to, uint256 _tokenId, string calldata _payload, uint256 _nonce, bytes calldata _signature) public nonReentrant {
         IERC20Token paymentToken = IERC20Token(paymentAddress);
         IERC721 nftToken = IERC721(_nftAddress);
         if (shouldBurn && price > 0) {
@@ -120,7 +120,7 @@ contract VaultHandlerV8 is Ownable, Context, ReentrancyGuard {
         nftToken.mint(_to, _tokenId, _uri, _payload);
     }
 
-    function buyWithSignedPrice(address _nftAddress, address _payment, uint _price, address _to, uint256 _tokenId, string calldata _payload, uint256 _nonce, bytes calldata _signature) public payable nonReentrant {
+    function buyWithSignedPrice(address _nftAddress, address _payment, uint _price, address _to, uint256 _tokenId, string calldata _payload, uint256 _nonce, bytes calldata _signature) public nonReentrant {
         IERC20Token paymentToken = IERC20Token(_payment);
         IERC721 nftToken = IERC721(_nftAddress);
         if (shouldBurn) {
@@ -230,7 +230,7 @@ contract VaultHandlerV8 is Ownable, Context, ReentrancyGuard {
         return witnesses[addressFromSig];
     }
     
-    function transferWithCode(address _nftAddress, uint256 _tokenId, string calldata code, address _to, uint256 _nonce,  bytes calldata signature) public payable nonReentrant {
+    function transferWithCode(address _nftAddress, uint256 _tokenId, string calldata code, address _to, uint256 _nonce,  bytes calldata signature) public nonReentrant {
         require(witnesses[getAddressFromSignature(_to, _tokenId, _nonce, signature)], 'Not Witnessed');
         IERC721 nftToken = IERC721(_nftAddress);
         PreTransfer memory preTransfer = preTransfers[_nftAddress][_tokenId];

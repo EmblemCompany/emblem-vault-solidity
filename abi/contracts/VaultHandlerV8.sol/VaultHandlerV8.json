@@ -183,7 +183,7 @@
     ],
     "name": "buyWithSignature",
     "outputs": [],
-    "stateMutability": "payable",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -231,7 +231,7 @@
     ],
     "name": "buyWithSignedPrice",
     "outputs": [],
-    "stateMutability": "payable",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -1139,7 +1139,7 @@
     ],
     "name": "transferWithCode",
     "outputs": [],
-    "stateMutability": "payable",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
