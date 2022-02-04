@@ -2,20 +2,20 @@ pragma solidity 0.8.4;
 import "./IERC721.sol";
 import "./Ownable.sol";
 import "./Context.sol";
-import "./Storage.sol";
 import "./ReentrancyGuard.sol";
 
 interface IStorage {
     function getZero() external view returns(address);
     function getDead() external view returns(address);
     function addToLegacy(address nftAddress, bytes32 root) external;
-    function addToLegacyClaimedBy(address nftAddress, bytes32 root) external;    
+    function addToLegacyClaimedBy(address nftAddress, bytes32 root) external;
     function getLegacyClaims(address nftAddress) external view returns (bytes32);
     function getLegacyClaimsBy(address nftAddress) external view returns (bytes32);
     function addToClaims(address nftAddress, uint tokenId, address _owner) external;
     function getClaims(address nftAddress, uint tokenId) external view returns (address);
     function getBurnAddresses() external view returns (address[] memory);
     function addToBurnAddresses(address burnAddress) external;
+    function upgradeVersion(address _newVersion) external;
 }
 
 contract Claimed is Ownable, Context, ReentrancyGuard {
@@ -29,7 +29,7 @@ contract Claimed is Ownable, Context, ReentrancyGuard {
     
     function initialize() public {
         require(!initialized, 'already initialized');
-        Storage _storage = Storage(StorageAddress);
+        IStorage _storage = IStorage(StorageAddress);
         _storage.upgradeVersion(address(this));
         initialized = true;
     }

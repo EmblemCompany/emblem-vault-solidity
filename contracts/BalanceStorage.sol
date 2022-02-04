@@ -84,9 +84,5 @@ contract BalanceStorage is Ownable {
         require(!usedNonces[nonce], 'Nonce already used');
         return usedNonces[nonce] = true;
     }
-
-    
-
-    
     
 }

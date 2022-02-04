@@ -29,9 +29,7 @@ import "./BasicERC20.sol";
 import "./EmblemVault.sol";
 import "./ConfigurableERC20.sol";
 import "./ERC1155.sol";
-import "./Context.sol";
 import "./SafeMath.sol";
-import "./Ownable.sol";
 import "./IERC721.sol";
 import "./Storage.sol";
 import "./BalanceStorage.sol";
@@ -41,8 +39,9 @@ import "./NFTrade_v2.sol";
 import "./NFTrade_v3.sol";
 import "./ReentrancyGuard.sol";
 import "./Ownable.sol";
+import "./HasCallbacks.sol";
 
-contract VaultHandlerV8 is Ownable, Context, ReentrancyGuard {
+contract VaultHandlerV8 is ReentrancyGuard, HasCallbacks, ERC165 {
     
     using SafeMath for uint256;
     string public metadataBaseUri;
@@ -55,6 +54,7 @@ contract VaultHandlerV8 is Ownable, Context, ReentrancyGuard {
     bytes4 private constant _INTERFACE_ID_ERC1155 = 0xd9b67a26;
     bytes4 private constant _INTERFACE_ID_ERC20 = 0x74a1476f;
     bytes4 private constant _INTERFACE_ID_ERC721 = 0x80ac58cd;
+    bytes4 private constant _INTERFACE_ID_HANDLER = bytes4(keccak256('handler'));
     
     bool public shouldBurn = false;
     
@@ -63,33 +63,13 @@ contract VaultHandlerV8 is Ownable, Context, ReentrancyGuard {
         bytes32 preImage;
         address _from;
     }
-    struct ContractDetails {
-        uint _type;
-        bool curated;
-    }    
-    
+
     mapping(address => mapping(uint => PreTransfer)) preTransfers;
     mapping(address => mapping(uint => mapping(uint => PreTransfer))) preTransfersByIndex;
     mapping(address => mapping(uint => uint)) preTransferCounts;
     
     mapping(address => bool) public witnesses;
     mapping(uint256 => bool) usedNonces;
-
-    mapping(address => ContractDetails) public vaultContracts;
-    uint256 public vaultContractCount;
-
-    modifier isRegisteredVaultContract(address _vaultContract) {
-        require(vaultContracts[_vaultContract]._type > 0, "Vault contract is not registered");
-        _;
-    }
-    
-    /**
-     * @dev Return owner address 
-     * @return address of owner
-     */
-    function getOwner() external view returns (address) {
-        return owner;
-    }
     
     constructor(address _nftAddress, address _paymentAddress, address _recipientAddress, uint256 _price) {
         addWitness(owner);
@@ -100,7 +80,16 @@ contract VaultHandlerV8 is Ownable, Context, ReentrancyGuard {
         initialized = true;
         uint decimals = BasicERC20(paymentAddress).decimals();
         price = _price.mul(10) ** decimals;
-        vaultContractCount = 0;
+        _registerInterface(_INTERFACE_ID_HANDLER);
+        // HasCallbacks.initialize();
+    }    
+    
+    /**
+     * @dev Return owner address 
+     * @return address of owner
+     */
+    function getOwner() external view returns (address) {
+        return owner;
     }
     
     function buyWithSignature(address _nftAddress, address _to, uint256 _tokenId, string calldata _payload, uint256 _nonce, bytes calldata _signature) public nonReentrant {
@@ -137,19 +126,7 @@ contract VaultHandlerV8 is Ownable, Context, ReentrancyGuard {
         nftToken.mint(_to, _tokenId, _uri, _payload);
     }
 
-    function addVaultContract(address vaultContract, uint _type, bool curated) public onlyOwner {
-        require(_msgSender() == owner, 'Only owner can add vault contracts');
-        vaultContractCount++;
-        vaultContracts[vaultContract] = ContractDetails(_type, curated);
-    }
-
-    function removeVaultContract(address vaultContract) public onlyOwner isRegisteredVaultContract(vaultContract) {
-        require(vaultContractCount > 0, 'No vault contracts to remove');
-        delete vaultContracts[vaultContract];
-        vaultContractCount--;
-    }
-
-    function moveVault(address _from, address _to, uint256 tokenId, uint256 newTokenId) external nonReentrant isRegisteredVaultContract(_from) isRegisteredVaultContract(_to)  {
+    function moveVault(address _from, address _to, uint256 tokenId, uint256 newTokenId) external nonReentrant isRegisteredContract(_from) isRegisteredContract(_to)  {
         require(_from != _to, 'Cannot move vault to same address');
         if (checkInterface(_from, _INTERFACE_ID_ERC1155)) {
             require(tokenId != newTokenId, 'from: TokenIds must be different for ERC1155');
@@ -168,7 +145,7 @@ contract VaultHandlerV8 is Ownable, Context, ReentrancyGuard {
             IERC1155(_to).mint(_msgSender(), newTokenId, 1);
         } else {
             tryERC721BalanceCheck(_to, newTokenId, 'NFT Already Exists');
-            string memory _uri = concat(metadataBaseUri, uintToStr(newTokenId));        
+            string memory _uri = concat(metadataBaseUri, uintToStr(newTokenId));
             IERC721(_to).mint(_msgSender(), newTokenId, _uri, "");
         }
     }

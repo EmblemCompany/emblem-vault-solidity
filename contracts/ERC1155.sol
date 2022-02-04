@@ -5,10 +5,10 @@
 
 pragma solidity 0.8.4;
 import "./SafeMath.sol";
-import "./Context.sol";
 import "./Address.sol";
 import "./IERC1155.sol";
-import "./Ownable.sol";
+import "./HasRegistration.sol";
+import "./IHandlerCallback.sol";
 
 /**
  *
@@ -18,7 +18,8 @@ import "./Ownable.sol";
  *
  * _Available since v3.1._
  */
-contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI, Ownable {
+
+contract ERC1155 is ERC165, IERC1155, IERC1155MetadataURI, HasRegistration {
     using SafeMath for uint256;
     using Address for address;
 
@@ -66,6 +67,9 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI, Ownable {
 
     function mint(address _to, uint256 _tokenId, uint256 _amount) public override onlyOwner {
         _mint(_to, _tokenId, _amount, "");
+        if (registeredOfType[3] == _msgSender()) {
+            IHandlerCallback(_msgSender()).executeCallbacks(HasRegistration.ZEROADDRESS, _to, _tokenId, IHandlerCallback.CallbackType.MINT);
+        }
     }
 
     function burn(address _from, uint256 _tokenId, uint256 _amount) public override {
@@ -174,6 +178,9 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI, Ownable {
         emit TransferSingle(operator, from, to, id, amount);
 
         _doSafeTransferAcceptanceCheck(operator, from, to, id, amount, data);
+        if (registeredOfType[3] != HasRegistration.ZEROADDRESS) {
+            IHandlerCallback(registeredOfType[3]).executeCallbacks(from, to, id, IHandlerCallback.CallbackType.TRANSFER);
+        }
     }
 
     /**
@@ -210,6 +217,9 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI, Ownable {
                 "ERC1155: insufficient balance for transfer"
             );
             _balances[id][to] = _balances[id][to].add(amount);
+            if (registeredOfType[3] != HasRegistration.ZEROADDRESS) {
+                IHandlerCallback(registeredOfType[3]).executeCallbacks(from, to, id, IHandlerCallback.CallbackType.TRANSFER);
+            }
         }
 
         emit TransferBatch(operator, from, to, ids, amounts);

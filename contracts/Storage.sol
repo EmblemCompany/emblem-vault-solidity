@@ -52,7 +52,7 @@ contract Storage is Ownable {
         return Claims[nftAddress][tokenId];
     }    
     
-    /* ADD Protedted by only current version */
+    /* ADD : Protected by only current version */
     
     function addToBurnAddresses(address burnAddress) external onlyLatestVersion() {
          BurnAddresses.push(burnAddress);
