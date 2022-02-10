@@ -79,7 +79,7 @@ contract VaultHandlerV8 is ReentrancyGuard, HasCallbacks, ERC165 {
         recipientAddress = _recipientAddress;
         initialized = true;
         uint decimals = BasicERC20(paymentAddress).decimals();
-        price = _price.mul(10) ** decimals;
+        price = _price.mul(10 ** decimals);
         _registerInterface(_INTERFACE_ID_HANDLER);
         // HasCallbacks.initialize();
     }    
