@@ -33,7 +33,7 @@ const infuraEndpoints = [
 ]
 
 var provider = selectProvider("mainnet")
-var web3 = new Web3(provider)
+var web3 = new Web3()
 
 beforeEach(async ()=>{
   await util.deploy();
@@ -121,6 +121,7 @@ describe('Balance', () => {
   })
 
   it('should revert with invalid signature', async()=>{
+
     await util.cloneBalance(util.deployer.address)
     await util.cloneHandler(util.deployer.address)
     let balanceContract = util.getBalance(util.balancer.address, util.deployer)
@@ -495,8 +496,9 @@ function getRandom(myArray) {
 }
 
 async function sign(hash) {
-  let accounts = await web3.eth.getAccounts()
-  let signature = await web3.eth.sign(hash, accounts[0])
+  web3_signer = new Web3(provider);
+  let accounts = await web3_signer.eth.getAccounts()
+  let signature = await web3_signer.eth.sign(hash, accounts[0])
   return signature
 }
 

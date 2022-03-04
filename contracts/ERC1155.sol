@@ -9,6 +9,7 @@ import "./Address.sol";
 import "./IERC1155.sol";
 import "./HasRegistration.sol";
 import "./IHandlerCallback.sol";
+import "./IsSerialized.sol";
 
 /**
  *
@@ -19,7 +20,7 @@ import "./IHandlerCallback.sol";
  * _Available since v3.1._
  */
 
-contract ERC1155 is ERC165, IERC1155, IERC1155MetadataURI, HasRegistration {
+contract ERC1155 is ERC165, IERC1155, IERC1155MetadataURI, HasRegistration, IsSerialized {
     using SafeMath for uint256;
     using Address for address;
 
@@ -63,11 +64,12 @@ contract ERC1155 is ERC165, IERC1155, IERC1155MetadataURI, HasRegistration {
         _registerInterface(_INTERFACE_ID_ERC1155_METADATA_URI);
         _mint(msg.sender,789, 2, "");
         _mint(msg.sender,1337, 1, "");
+        serialized = true;
     }
 
     function mint(address _to, uint256 _tokenId, uint256 _amount) public override onlyOwner {
         _mint(_to, _tokenId, _amount, "");
-        if (registeredOfType[3] == _msgSender()) {
+        if (registeredOfType[3].length > 0 && registeredOfType[3][0] == _msgSender()) {
             IHandlerCallback(_msgSender()).executeCallbacks(HasRegistration.ZEROADDRESS, _to, _tokenId, IHandlerCallback.CallbackType.MINT);
         }
     }
@@ -175,11 +177,20 @@ contract ERC1155 is ERC165, IERC1155, IERC1155MetadataURI, HasRegistration {
         _balances[id][from] = _balances[id][from].sub(amount, "ERC1155: insufficient balance for transfer");
         _balances[id][to] = _balances[id][to].add(amount);
 
+        if (isSerialized()) {
+            for (uint i = 0; i < amount; i++) {            
+                bytes20 serialNumber = getFirstSerialByOwner(from, id);
+                if (serialNumber != 0 ) {
+                    transferSerial(serialNumber, from, to);
+                }
+            }
+        }
+
         emit TransferSingle(operator, from, to, id, amount);
 
         _doSafeTransferAcceptanceCheck(operator, from, to, id, amount, data);
-        if (registeredOfType[3] != HasRegistration.ZEROADDRESS) {
-            IHandlerCallback(registeredOfType[3]).executeCallbacks(from, to, id, IHandlerCallback.CallbackType.TRANSFER);
+        if (registeredOfType[3].length > 0 && registeredOfType[3][0] != HasRegistration.ZEROADDRESS) {
+            IHandlerCallback(registeredOfType[3][0]).executeCallbacks(from, to, id, IHandlerCallback.CallbackType.TRANSFER);
         }
     }
 
@@ -217,8 +228,8 @@ contract ERC1155 is ERC165, IERC1155, IERC1155MetadataURI, HasRegistration {
                 "ERC1155: insufficient balance for transfer"
             );
             _balances[id][to] = _balances[id][to].add(amount);
-            if (registeredOfType[3] != HasRegistration.ZEROADDRESS) {
-                IHandlerCallback(registeredOfType[3]).executeCallbacks(from, to, id, IHandlerCallback.CallbackType.TRANSFER);
+            if (registeredOfType[3][0] != HasRegistration.ZEROADDRESS) {
+                IHandlerCallback(registeredOfType[3][0]).executeCallbacks(from, to, id, IHandlerCallback.CallbackType.TRANSFER);
             }
         }
 
@@ -269,6 +280,11 @@ contract ERC1155 is ERC165, IERC1155, IERC1155MetadataURI, HasRegistration {
         _beforeTokenTransfer(operator, address(0), account, _asSingletonArray(id), _asSingletonArray(amount), data);
 
         _balances[id][account] = _balances[id][account].add(amount);
+        if (isSerialized()) {
+            for (uint i = 0; i < amount; i++) {
+                mintSerial(id, account);
+            }            
+        }
         emit TransferSingle(operator, address(0), account, id, amount);
 
         _doSafeTransferAcceptanceCheck(operator, address(0), account, id, amount, data);

@@ -81,8 +81,7 @@ contract VaultHandlerV8 is ReentrancyGuard, HasCallbacks, ERC165 {
         uint decimals = BasicERC20(paymentAddress).decimals();
         price = _price.mul(10 ** decimals);
         _registerInterface(_INTERFACE_ID_HANDLER);
-        // HasCallbacks.initialize();
-    }    
+    }
     
     /**
      * @dev Return owner address 
@@ -90,6 +89,31 @@ contract VaultHandlerV8 is ReentrancyGuard, HasCallbacks, ERC165 {
      */
     function getOwner() external view returns (address) {
         return owner;
+    }
+
+    
+
+    function claim(address _nftAddress, uint256 tokenId, uint256 serialNumber) public nonReentrant isRegisteredContract(_nftAddress) {
+        Claimed claimer = Claimed(registeredOfType[6][0]);
+        bytes32[] memory proof;
+        
+
+        if (checkInterface(_nftAddress, _INTERFACE_ID_ERC1155)) {
+            // revert('expected');
+            // require('is serial number valid for tokenid and owned by _msgSender()')
+            require(!claimer.isClaimed(_nftAddress, serialNumber, proof), "Already Claimed");
+            IERC1155(_nftAddress).burn(_msgSender(), tokenId, 1);
+            claimer.claim(_nftAddress, serialNumber, _msgSender());
+        } else {            
+            require(!claimer.isClaimed(_nftAddress, tokenId, proof), "Already Claimed");
+            IERC721 token = IERC721(nftAddress);
+            token.burn(tokenId);
+            claimer.claim(_nftAddress, tokenId, _msgSender());
+        }
+        
+        // if (registeredOfType[3].length > 0 ) {
+        //     IHandlerCallback(_msgSender()).executeCallbacks(HasRegistration.ZEROADDRESS, _msgSender(), tokenId, IHandlerCallback.CallbackType.CLAIM);
+        // }
     }
     
     function buyWithSignature(address _nftAddress, address _to, uint256 _tokenId, string calldata _payload, uint256 _nonce, bytes calldata _signature) public nonReentrant {

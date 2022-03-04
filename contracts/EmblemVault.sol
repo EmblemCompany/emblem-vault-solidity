@@ -3,6 +3,8 @@ pragma experimental ABIEncoderV2;
 import "./SafeMath.sol";
 import "./Ownable.sol";
 import "./ERC165.sol";
+import "./HasRegistration.sol";
+import "./HasCallbacks.sol";
 // import "./IHandler.sol";
 
 /**
@@ -1172,7 +1174,9 @@ function _setTokenPayload(
  */
 contract EmblemVault is
   NFTokenEnumerableMetadata,
-  Ownable
+  Ownable,
+  HasRegistration,
+  HasCallbacks
 {
 
   /**

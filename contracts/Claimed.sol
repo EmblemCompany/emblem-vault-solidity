@@ -3,6 +3,7 @@ import "./IERC721.sol";
 import "./Ownable.sol";
 import "./Context.sol";
 import "./ReentrancyGuard.sol";
+import "./HasRegistration.sol";
 
 interface IStorage {
     function getZero() external view returns(address);
@@ -18,7 +19,7 @@ interface IStorage {
     function upgradeVersion(address _newVersion) external;
 }
 
-contract Claimed is Ownable, Context, ReentrancyGuard {
+contract Claimed is ReentrancyGuard, HasRegistration {
     
     address StorageAddress;
     bool initialized = false;
@@ -49,10 +50,8 @@ contract Claimed is Ownable, Context, ReentrancyGuard {
         return false;
     }
     
-    function claim(address nftAddress, uint tokenId) public nonReentrant {
-        IERC721 token = IERC721(nftAddress);
-        token.transferFrom(msg.sender, IStorage(StorageAddress).getDead(), tokenId);
-        IStorage(StorageAddress).addToClaims(nftAddress, tokenId, msg.sender);
+    function claim(address nftAddress, uint tokenId, address _claimedBy) public nonReentrant isRegisteredContract(_msgSender()) {        
+        IStorage(StorageAddress).addToClaims(nftAddress, tokenId, _claimedBy);
     }
     
     function isClaimed(address nftAddress, uint tokenId, bytes32[] calldata proof ) public view returns(bool) {

@@ -45,26 +45,24 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "ZEROADDRESS",
-    "outputs": [
+    "inputs": [
       {
         "internalType": "address",
-        "name": "",
+        "name": "owner",
         "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "contractCount",
-    "outputs": [
+      },
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "tokenId",
         "type": "uint256"
+      }
+    ],
+    "name": "getFirstSerialByOwner",
+    "outputs": [
+      {
+        "internalType": "bytes20",
+        "name": "",
+        "type": "bytes20"
       }
     ],
     "stateMutability": "view",
@@ -73,17 +71,68 @@
   {
     "inputs": [
       {
+        "internalType": "bytes20",
+        "name": "serialNumber",
+        "type": "bytes20"
+      }
+    ],
+    "name": "getOwnerOfSerial",
+    "outputs": [
+      {
         "internalType": "address",
-        "name": "_contract",
+        "name": "",
         "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "_type",
+        "name": "index",
         "type": "uint256"
       }
     ],
-    "name": "isRegistered",
+    "name": "getSerial",
+    "outputs": [
+      {
+        "internalType": "bytes20",
+        "name": "",
+        "type": "bytes20"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes20",
+        "name": "serialNumber",
+        "type": "bytes20"
+      }
+    ],
+    "name": "getSerialForTokenId",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "isSerialized",
     "outputs": [
       {
         "internalType": "bool",
@@ -92,6 +141,24 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      }
+    ],
+    "name": "mintSerial",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -108,64 +175,10 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_contract",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_type",
-        "type": "uint256"
-      }
-    ],
-    "name": "registerContract",
+    "inputs": [],
+    "name": "toggleSerialization",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "registeredContracts",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "registeredOfType",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -184,17 +197,22 @@
   {
     "inputs": [
       {
+        "internalType": "bytes20",
+        "name": "serialNumber",
+        "type": "bytes20"
+      },
+      {
         "internalType": "address",
-        "name": "_contract",
+        "name": "from",
         "type": "address"
       },
       {
-        "internalType": "uint256",
-        "name": "index",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
       }
     ],
-    "name": "unregisterContract",
+    "name": "transferSerial",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

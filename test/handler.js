@@ -33,32 +33,28 @@ describe('Vault Handler', () => {
 
   it('non existant vaultContract returns empty record', async ()=>{
     let contractRecord = await util.handler.registeredContracts(ERC721.address)
-    expect(contractRecord._type).to.equal(0)
-    expect(contractRecord.curated).to.equal(false)
+    expect(contractRecord).to.equal(0)
   })
   it('non admin can not add vaultContract', async ()=>{
     let handler = util.getHandler(util.handler.address, util.alice)
-    let tx = handler.registerContract(ERC721.address, 0, true)
+    let tx = handler.registerContract(ERC721.address, 0)
     await expect(tx).to.be.revertedWith('018001')
   })
   
   it('admin can add vaultContract', async ()=>{
-    await util.handler.registerContract(ERC721.address, 1, true)
+    await util.handler.registerContract(ERC721.address, 1)
     let contractRecord = await util.handler.registeredContracts(ERC721.address)
-    expect(contractRecord._type).to.equal(1)
-    expect(contractRecord.curated).to.equal(true)
+    expect(contractRecord).to.equal(1)
   })
 
   it('admin can remove vaultContract', async ()=>{
-    await util.handler.registerContract(ERC721.address, 2, false)
+    await util.handler.registerContract(ERC721.address, 2)
     let contractRecord = await util.handler.registeredContracts(ERC721.address)
-    expect(contractRecord._type).to.equal(2)
-    expect(contractRecord.curated).to.equal(false)
+    expect(contractRecord).to.equal(2)
     expect(await util.handler.contractCount()).to.equal(1)
-    await util.handler.unregisterContract(ERC721.address)
+    await util.handler.unregisterContract(ERC721.address,0)
     contractRecord = await util.handler.registeredContracts(ERC721.address)
-    expect(contractRecord._type).to.equal(0)
-    expect(contractRecord.curated).to.equal(false)
+    expect(contractRecord).to.equal(0)
     expect(await util.handler.contractCount()).to.equal(0)
   })
 
@@ -68,10 +64,12 @@ describe('Vault Handler', () => {
   })
 
   it('can move from ERC721 to ERC1155 with registered contracts', async ()=>{
+    await ERC1155.registerContract(util.handler.address, 3)
+    // await ERC721.registerContract(util.handler.address, 3)
     await ERC1155.transferOwnership(util.handler.address)
     await ERC721.setApprovalForAll(util.handler.address, true)
-    await util.handler.registerContract(ERC721.address, 2, false)
-    await util.handler.registerContract(ERC1155.address, 2, false)
+    await util.handler.registerContract(ERC721.address, 2)
+    await util.handler.registerContract(ERC1155.address, 1)
     let balanceERC721 = await ERC721.balanceOf(util.deployer.address)
     let balanceERC1155 = await ERC1155.balanceOf(util.deployer.address, 1337)
     expect(balanceERC1155).to.equal(0)
@@ -84,14 +82,16 @@ describe('Vault Handler', () => {
   })
 
   it('can move from ERC1155 to ERC721 with registered contracts', async ()=>{
+    await ERC1155.registerContract(util.handler.address, 3)
+    // await ERC721.registerContract(util.handler.address, 3)
     await ERC1155.transferOwnership(util.deployer.address)
     await ERC1155.mint(util.deployer.address, 123, 2)
     await ERC721.setApprovalForAll(util.handler.address, true)
     await ERC721.burn(1)
     await ERC1155.setApprovalForAll(util.handler.address, true)
     await ERC721.transferOwnership(util.handler.address)
-    await util.handler.registerContract(ERC721.address, 2, false)
-    await util.handler.registerContract(ERC1155.address, 2, false)
+    await util.handler.registerContract(ERC721.address, 2)
+    await util.handler.registerContract(ERC1155.address, 1)
     let balanceERC721 = await ERC721.balanceOf(util.deployer.address)
     let balanceERC1155 = await ERC1155.balanceOf(util.deployer.address, 123)
     expect(balanceERC1155).to.equal(2)
@@ -104,13 +104,15 @@ describe('Vault Handler', () => {
   })
 
   it('can not move ERC1155 to ERC721 when new tokenId already exists', async ()=>{
+    await ERC1155.registerContract(util.handler.address, 3)
+    // await ERC721.registerContract(util.handler.address, 3)
     await ERC1155.transferOwnership(util.deployer.address)
     await ERC1155.mint(util.deployer.address, 123, 2)
     await ERC721.setApprovalForAll(util.handler.address, true)
     await ERC1155.setApprovalForAll(util.handler.address, true)
     await ERC721.transferOwnership(util.handler.address)
-    await util.handler.registerContract(ERC721.address, 2, false)
-    await util.handler.registerContract(ERC1155.address, 2, false)
+    await util.handler.registerContract(ERC721.address, 2)
+    await util.handler.registerContract(ERC1155.address, 2)
     let balanceERC721 = await ERC721.balanceOf(util.deployer.address)
     let balanceERC1155 = await ERC1155.balanceOf(util.deployer.address, 123)
     expect(balanceERC1155).to.equal(2)

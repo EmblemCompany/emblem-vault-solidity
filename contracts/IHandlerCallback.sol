@@ -2,7 +2,7 @@ pragma solidity 0.8.4;
 
 interface IHandlerCallback {
     enum CallbackType {
-        MINT, TRANSFER, CLAIM, BURN
+        MINT, TRANSFER, CLAIM
     }
 
     struct Callback {

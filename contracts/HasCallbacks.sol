@@ -133,7 +133,7 @@ contract HasCallbacks is HasRegistration {
         lastContract = _msgSender();
     }
 
-    function testRevertCallback(address _from, address _to, uint256 tokenId) public {
+    function testRevertCallback(address _from, address _to, uint256 tokenId) public pure {
         revert("reverted by design");
     }
 

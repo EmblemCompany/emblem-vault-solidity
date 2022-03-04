@@ -487,6 +487,29 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_nftAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "serialNumber",
+        "type": "uint256"
+      }
+    ],
+    "name": "claim",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "contractCount",
     "outputs": [
@@ -1223,11 +1246,6 @@
         "internalType": "uint256",
         "name": "_type",
         "type": "uint256"
-      },
-      {
-        "internalType": "bool",
-        "name": "curated",
-        "type": "bool"
       }
     ],
     "name": "registerContract",
@@ -1334,13 +1352,8 @@
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "_type",
+        "name": "",
         "type": "uint256"
-      },
-      {
-        "internalType": "bool",
-        "name": "curated",
-        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -1348,6 +1361,11 @@
   },
   {
     "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
       {
         "internalType": "uint256",
         "name": "",
@@ -1502,7 +1520,7 @@
     ],
     "name": "testRevertCallback",
     "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "pure",
     "type": "function"
   },
   {
@@ -1798,6 +1816,11 @@
         "internalType": "address",
         "name": "_contract",
         "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
       }
     ],
     "name": "unregisterContract",
