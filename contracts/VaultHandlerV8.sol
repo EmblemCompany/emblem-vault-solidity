@@ -1,25 +1,17 @@
-/**
- *Submitted for verification at Etherscan.io on 2021-07-14
-*/
-
-// ___________      ___.   .__                                          
-// \_   _____/ _____\_ |__ |  |   ____   _____                          
-//  |    __)_ /     \| __ \|  | _/ __ \ /     \                         
-//  |        \  Y Y  \ \_\ \  |_\  ___/|  Y Y  \                        
-// /_______  /__|_|  /___  /____/\___  >__|_|  /                        
-//         \/      \/    \/          \/      \/                         
-//     ____   ____            .__   __                                  
-//     \   \ /   /____   __ __|  |_/  |_                                
-//      \   Y   /\__  \ |  |  \  |\   __\                               
-//       \     /  / __ \|  |  /  |_|  |                                 
-//       \___/  (____  /____/|____/__|                                 
-//                   \/                                                
-//   ___ ___                    .___.__                          _________
-//  /   |   \_____    ____    __| _/|  |   ___________  ___  __ |  ____  /
-// /    ~    \__  \  /    \  / __ | |  | _/ __ \_  __ \ \  \/   /    / /
-// \    Y    // __ \|   |  \/ /_/ | |  |_\  ___/|  | \/  \    /    / /
-//  \___|_  /(____  /___|  /\____ | |____/\___  >__|      \_/    /_/
-//       \/      \/     \/      \/           \/                     
+//     ______          __    __                          
+//    / ____/___ ___  / /_  / /__  ____ ___              
+//   / __/ / __ `__ \/ __ \/ / _ \/ __ `__ \             
+//  / /___/ / / / / / /_/ / /  __/ / / / / /             
+// /_____/_/ /_/ /_/_.___/_/\___/_/ /_/ /_/              
+// | |  / /___ ___  __/ / /_                             
+// | | / / __ `/ / / / / __/                             
+// | |/ / /_/ / /_/ / / /_                               
+// |___/\__,_/\__,_/_/\__/                               
+//     __  __                ____                   ____ 
+//    / / / /___ _____  ____/ / /__  _____   _   __( __ )
+//   / /_/ / __ `/ __ \/ __  / / _ \/ ___/  | | / / __  |
+//  / __  / /_/ / / / / /_/ / /  __/ /      | |/ / /_/ / 
+// /_/ /_/\__,_/_/ /_/\__,_/_/\___/_/       |___/\____/  
 
 // SPDX-License-Identifier: MIT
 
@@ -93,65 +85,85 @@ contract VaultHandlerV8 is ReentrancyGuard, HasCallbacks, ERC165 {
 
     
 
-    function claim(address _nftAddress, uint256 tokenId, uint256 serialNumber) public nonReentrant isRegisteredContract(_nftAddress) {
+    function claim(address _nftAddress, uint256 tokenId) public nonReentrant isRegisteredContract(_nftAddress) {
         Claimed claimer = Claimed(registeredOfType[6][0]);
         bytes32[] memory proof;
         
-
         if (checkInterface(_nftAddress, _INTERFACE_ID_ERC1155)) {
-            // revert('expected');
-            // require('is serial number valid for tokenid and owned by _msgSender()')
+            IIsSerialized serialized = IIsSerialized(_nftAddress);
+            uint256 serialNumber = serialized.getFirstSerialByOwner(_msgSender(), tokenId);
+            require(serialized.getTokenIdForSerialNumber(serialNumber) == tokenId, "Invalid tokenId serialnumber combination");
+            require(serialized.getOwnerOfSerial(serialNumber) == _msgSender(), "Not owner of serial number");
             require(!claimer.isClaimed(_nftAddress, serialNumber, proof), "Already Claimed");
             IERC1155(_nftAddress).burn(_msgSender(), tokenId, 1);
             claimer.claim(_nftAddress, serialNumber, _msgSender());
         } else {            
             require(!claimer.isClaimed(_nftAddress, tokenId, proof), "Already Claimed");
             IERC721 token = IERC721(nftAddress);
+            require(token.ownerOf(tokenId) == _msgSender(), "Not Token Owner");
             token.burn(tokenId);
             claimer.claim(_nftAddress, tokenId, _msgSender());
         }
-        
-        // if (registeredOfType[3].length > 0 ) {
-        //     IHandlerCallback(_msgSender()).executeCallbacks(HasRegistration.ZEROADDRESS, _msgSender(), tokenId, IHandlerCallback.CallbackType.CLAIM);
-        // }
+        executeCallbacksInternal(_nftAddress, _msgSender(), address(0), tokenId, IHandlerCallback.CallbackType.CLAIM);
+    }
+
+    function getConvertedSerial(address _nftAddress, uint256 tokenId) public view returns (uint256) {
+        uint256 serialNumber = IIsSerialized(_nftAddress).getFirstSerialByOwner(_msgSender(), tokenId);
+        return serialNumber;
     }
     
     function buyWithSignature(address _nftAddress, address _to, uint256 _tokenId, string calldata _payload, uint256 _nonce, bytes calldata _signature) public nonReentrant {
         IERC20Token paymentToken = IERC20Token(paymentAddress);
-        IERC721 nftToken = IERC721(_nftAddress);
         if (shouldBurn && price > 0) {
             require(paymentToken.transferFrom(msg.sender, address(this), price), 'Transfer ERROR'); // Payment sent to recipient
             BasicERC20(paymentAddress).burn(price);
         } else if(price > 0) {
             require(paymentToken.transferFrom(msg.sender, address(recipientAddress), price), 'Transfer ERROR'); // Payment sent to recipient
         }
-        
         address signer = getAddressFromSignatureMint(_nftAddress, _to, _tokenId, _nonce, _payload, _signature);
         require(witnesses[signer], 'Not Witnessed');
         usedNonces[_nonce] = true;
         string memory _uri = concat(metadataBaseUri, uintToStr(_tokenId));
-        nftToken.mint(_to, _tokenId, _uri, _payload);
+        if (checkInterface(_nftAddress, _INTERFACE_ID_ERC1155)) {
+            IERC1155(_nftAddress).mint(_to, _tokenId, 1);
+        } else {
+            IERC721(_nftAddress).mint(_to, _tokenId, _uri, _payload);
+        }
+        
     }
 
     function buyWithSignedPrice(address _nftAddress, address _payment, uint _price, address _to, uint256 _tokenId, string calldata _payload, uint256 _nonce, bytes calldata _signature) public nonReentrant {
         IERC20Token paymentToken = IERC20Token(_payment);
-        IERC721 nftToken = IERC721(_nftAddress);
         if (shouldBurn) {
             require(paymentToken.transferFrom(msg.sender, address(this), _price), 'Transfer ERROR'); // Payment sent to recipient
             BasicERC20(_payment).burn(_price);
         } else {
             require(paymentToken.transferFrom(msg.sender, address(recipientAddress), _price), 'Transfer ERROR'); // Payment sent to recipient
         }
-        // pass in price
         address signer = getAddressFromSignature(_nftAddress, _payment, _price, _to, _tokenId, _nonce, _payload, _signature);
         require(witnesses[signer], 'Not Witnessed');
         usedNonces[_nonce] = true;
         string memory _uri = concat(metadataBaseUri, uintToStr(_tokenId));
-        nftToken.mint(_to, _tokenId, _uri, _payload);
+        if (checkInterface(_nftAddress, _INTERFACE_ID_ERC1155)) {
+            IERC1155(_nftAddress).mint(_to, _tokenId, 1);
+        } else {
+            IERC721(_nftAddress).mint(_to, _tokenId, _uri, _payload);
+        }
     }
 
-    function moveVault(address _from, address _to, uint256 tokenId, uint256 newTokenId) external nonReentrant isRegisteredContract(_from) isRegisteredContract(_to)  {
+    function mint(address _nftAddress, address _to, uint256 _tokenId, string calldata _uri, string calldata _payload, uint256 amount) external onlyOwner {
+        if (checkInterface(_nftAddress, _INTERFACE_ID_ERC1155)) {
+            IERC1155(_nftAddress).mint(_to, _tokenId, amount);
+        } else {
+            IERC721(_nftAddress).mint(_to, _tokenId, _uri, _payload);
+        }        
+    }
+
+    function moveVault(address _from, address _to, uint256 tokenId, uint256 newTokenId, uint256 nonce, bytes calldata signature) external nonReentrant isRegisteredContract(_from) isRegisteredContract(_to)  {
         require(_from != _to, 'Cannot move vault to same address');
+        address signer = getAddressFromSignatureMove(_from, _to, tokenId, newTokenId, nonce, signature);
+        require(witnesses[signer], 'Not Witnessed');
+        usedNonces[nonce] = true;
         if (checkInterface(_from, _INTERFACE_ID_ERC1155)) {
             require(tokenId != newTokenId, 'from: TokenIds must be different for ERC1155');
             uint256 currentBalance = IERC1155(_from).balanceOf(_msgSender(), tokenId);
@@ -230,6 +242,12 @@ contract VaultHandlerV8 is ReentrancyGuard, HasCallbacks, ERC165 {
         return getAddressFromSignatureHash(_hash, signature);
     }
 
+    function getAddressFromSignatureMove(address _from, address _to, uint256 tokenId, uint256 newTokenId, uint256 _nonce, bytes calldata signature) public view returns (address) {
+        require(!usedNonces[_nonce]);
+        bytes32 _hash = keccak256(abi.encodePacked(_from, _to, tokenId, newTokenId, _nonce));
+        return getAddressFromSignatureHash(_hash, signature);
+    }
+
     function isWitnessed(bytes32 _hash, bytes calldata signature) public view returns (bool) {
         address addressFromSig = recoverSigner(_hash, signature);
         return witnesses[addressFromSig];
@@ -297,11 +315,6 @@ contract VaultHandlerV8 is ReentrancyGuard, HasCallbacks, ERC165 {
     function transferNftOwnership(address _nftAddress, address newOwner) external onlyOwner {
         Ownable nftToken = Ownable(_nftAddress);
         nftToken.transferOwnership(newOwner);
-    }
-    
-    function mint(address _nftAddress, address _to, uint256 _tokenId, string calldata _uri, string calldata _payload) external onlyOwner {
-        IERC721 nftToken = IERC721(_nftAddress);
-        nftToken.mint(_to, _tokenId, _uri, _payload);
     }
     
     function changeName(address _nftAddress, string calldata name, string calldata symbol) external onlyOwner {
@@ -392,6 +405,13 @@ contract VaultHandlerV8 is ReentrancyGuard, HasCallbacks, ERC165 {
         address addr = ecrecover(prefixedHash, v, r, s);
 
         return addr;
+    }
+    function bytesToUint(bytes20 b) public pure returns (uint256){
+        uint256 number;
+        for(uint i=0;i<b.length;i++){
+            number = number + uint8(b[i]);
+        }
+        return number;
     }
     function uintToStr(uint _i) internal pure returns (string memory _uintAsString) {
         if (_i == 0) {

@@ -6,7 +6,6 @@ import "./ReentrancyGuard.sol";
 import "./HasRegistration.sol";
 
 interface IStorage {
-    function getZero() external view returns(address);
     function getDead() external view returns(address);
     function addToLegacy(address nftAddress, bytes32 root) external;
     function addToLegacyClaimedBy(address nftAddress, bytes32 root) external;
@@ -14,6 +13,7 @@ interface IStorage {
     function getLegacyClaimsBy(address nftAddress) external view returns (bytes32);
     function addToClaims(address nftAddress, uint tokenId, address _owner) external;
     function getClaims(address nftAddress, uint tokenId) external view returns (address);
+    function getClaimsFor(address _owner) external view returns (uint256[] memory);
     function getBurnAddresses() external view returns (address[] memory);
     function addToBurnAddresses(address burnAddress) external;
     function upgradeVersion(address _newVersion) external;
@@ -23,6 +23,7 @@ contract Claimed is ReentrancyGuard, HasRegistration {
     
     address StorageAddress;
     bool initialized = false;
+    bool canClaim = true;
     
     constructor(address storageContract) {
         StorageAddress = storageContract;
@@ -35,11 +36,6 @@ contract Claimed is ReentrancyGuard, HasRegistration {
         initialized = true;
     }
     
-    
-    function getZeroFromStorage() public view returns (address) {
-        return IStorage(StorageAddress).getZero();
-    }
-    
     function isBurnAddress(address needle) public view returns (bool) {
         address[] memory BurnAddresses = IStorage(StorageAddress).getBurnAddresses();
         for (uint i=0; i < BurnAddresses.length; i++) {
@@ -49,16 +45,24 @@ contract Claimed is ReentrancyGuard, HasRegistration {
         }
         return false;
     }
+
+    function toggleCanClaim() public onlyOwner {
+        canClaim = !canClaim;
+    }
     
     function claim(address nftAddress, uint tokenId, address _claimedBy) public nonReentrant isRegisteredContract(_msgSender()) {        
-        IStorage(StorageAddress).addToClaims(nftAddress, tokenId, _claimedBy);
+        if (canClaim) {
+            IStorage(StorageAddress).addToClaims(nftAddress, tokenId, _claimedBy);
+        } else { 
+            revert("Claiming is turned off");
+        }
     }
     
     function isClaimed(address nftAddress, uint tokenId, bytes32[] calldata proof ) public view returns(bool) {
         bytes32 _hash = keccak256(abi.encodePacked(tokenId));
         IERC721 token = IERC721(nftAddress);        
         if (proof.length == 0) {
-            bool claimed = IStorage(StorageAddress).getClaims(nftAddress, tokenId) != getZeroFromStorage();
+            bool claimed = IStorage(StorageAddress).getClaims(nftAddress, tokenId) != address(0);
             bool addressClaimed = false;
             try token.ownerOf(tokenId) returns (address _owner) {
                 if (isBurnAddress(_owner)) {
@@ -70,7 +74,11 @@ contract Claimed is ReentrancyGuard, HasRegistration {
             bytes32 root = IStorage(StorageAddress).getLegacyClaims(nftAddress);
             return verifyScript(root, _hash, proof);
         }
-    }   
+    }
+
+    function getClaimsFor(address _owner) public view returns (uint256[] memory) {
+        return IStorage(StorageAddress).getClaimsFor(_owner);
+    }
 
     function getLegacyClaims(address nftAddress) external view returns(bytes32) {
         return IStorage(StorageAddress).getLegacyClaims(nftAddress);
@@ -78,10 +86,10 @@ contract Claimed is ReentrancyGuard, HasRegistration {
     
     function claimedBy(address nftAddress, uint tokenId) public view returns (address _owner, string memory _type) {
         address claimed = IStorage(StorageAddress).getClaims(nftAddress, tokenId);
-        if (claimed != getZeroFromStorage()) {
+        if (claimed != address(0)) {
             return (claimed, "record");
         } else {
-            return (getZeroFromStorage(), "unknown");
+            return (address(0), "unknown");
         }
     }
 

@@ -141,6 +141,29 @@ describe('Balance', () => {
     expect(tx).to.be.revertedWith('Not a witness')
   })
 
+  it('admin can disable adding balances', async ()=>{
+    await util.cloneBalance(util.deployer.address)
+    await util.cloneHandler(util.deployer.address)
+    let balanceContract = util.getBalance(util.balancer.address, util.deployer)
+    await balanceContract.initialize()
+    
+    let emblemAddress = await util.factory.emblemImplementation()
+    let emblemContract = util.getEmblemVault(emblemAddress, util.deployer)
+    await balanceContract.addWitness(emblemAddress, "0xB35a0b332657efE5d69792FCA9436537d263472F")
+    await util.handler.transferNftOwnership(emblemAddress, util.deployer.address)
+    await emblemContract.mint(util.deployer.address, 123, "test", 0x0)
+    let balances = {
+      balances: [
+        {balance: 1, blockchain: 1, name: "token", symbol: "t", tokenId: 0,  _address: "0x0000000000000000000000000000000000000000", _type: 0}
+      ]
+    }
+    let localhashed = hashBalancesAndNonce(balances, 123456)
+    let signature = await sign(localhashed)
+    await balanceContract.toggleCanAddBalances()
+    let tx = balanceContract.addBalanceToAsset(emblemAddress, 123, balances, 123456, signature)
+    await expect(tx).to.be.revertedWith("Adding balances is disabled")
+  })
+
   it('initialized storage and valid signature can add single balance', async ()=>{
     await util.cloneBalance(util.deployer.address)
     await util.cloneHandler(util.deployer.address)

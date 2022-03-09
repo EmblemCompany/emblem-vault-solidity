@@ -174,19 +174,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "ZEROADDRESS",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "address",
@@ -258,6 +245,29 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "ids",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "amounts",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "burnBatch",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "contractCount",
     "outputs": [
@@ -286,9 +296,9 @@
     "name": "getFirstSerialByOwner",
     "outputs": [
       {
-        "internalType": "bytes20",
+        "internalType": "uint256",
         "name": "",
-        "type": "bytes20"
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -297,9 +307,9 @@
   {
     "inputs": [
       {
-        "internalType": "bytes20",
+        "internalType": "uint256",
         "name": "serialNumber",
-        "type": "bytes20"
+        "type": "uint256"
       }
     ],
     "name": "getOwnerOfSerial",
@@ -329,9 +339,9 @@
     "name": "getSerial",
     "outputs": [
       {
-        "internalType": "bytes20",
+        "internalType": "uint256",
         "name": "",
-        "type": "bytes20"
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -340,12 +350,12 @@
   {
     "inputs": [
       {
-        "internalType": "bytes20",
+        "internalType": "uint256",
         "name": "serialNumber",
-        "type": "bytes20"
+        "type": "uint256"
       }
     ],
-    "name": "getSerialForTokenId",
+    "name": "getTokenIdForSerialNumber",
     "outputs": [
       {
         "internalType": "uint256",
@@ -436,6 +446,34 @@
       }
     ],
     "name": "mint",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "ids",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "amounts",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "bytes",
+        "name": "data",
+        "type": "bytes"
+      }
+    ],
+    "name": "mintBatch",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -651,29 +689,6 @@
       }
     ],
     "name": "transferOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes20",
-        "name": "serialNumber",
-        "type": "bytes20"
-      },
-      {
-        "internalType": "address",
-        "name": "from",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      }
-    ],
-    "name": "transferSerial",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

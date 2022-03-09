@@ -5,13 +5,13 @@ contract Storage is Ownable {
 
     address public latestVersion;
     
-    address ZEROADDRESS = 0x0000000000000000000000000000000000000000;
     address DEADADDRESS = 0x000000000000000000000000000000000000dEaD;
     address BURNADDRESS = 0x5D152dd902CC9198B97E5b6Cf5fc23a8e4330180;
     
     mapping(address => bytes32) LegacyClaims;
     mapping(address => bytes32) LegacyClaimsBy;
     mapping(address => mapping(uint => address)) Claims;
+    mapping(address => uint256[]) ClaimsFor;
     address[] BurnAddresses;
     
     constructor() {
@@ -27,10 +27,6 @@ contract Storage is Ownable {
     function upgradeVersion(address _newVersion) public {
         require(msg.sender == owner || msg.sender == _newVersion, 'Only owner can upgrade');
         latestVersion = _newVersion;
-    }
-    
-    function getZero() external view returns(address) {
-        return ZEROADDRESS;
     }
     
     function getDead() external view returns(address) {
@@ -50,8 +46,12 @@ contract Storage is Ownable {
     
     function getClaims(address nftAddress, uint tokenId) external view returns (address) {
         return Claims[nftAddress][tokenId];
-    }    
+    }
     
+    function getClaimsFor(address _owner) external view returns (uint256[] memory) {
+        return ClaimsFor[_owner];
+    }
+
     /* ADD : Protected by only current version */
     
     function addToBurnAddresses(address burnAddress) external onlyLatestVersion() {
@@ -67,5 +67,6 @@ contract Storage is Ownable {
     
     function addToClaims(address nftAddress, uint tokenId, address _owner) external onlyLatestVersion() {
         Claims[nftAddress][tokenId] = _owner;
+        ClaimsFor[_owner].push(tokenId);
     }
 }

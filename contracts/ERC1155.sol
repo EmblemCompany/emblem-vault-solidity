@@ -62,21 +62,27 @@ contract ERC1155 is ERC165, IERC1155, IERC1155MetadataURI, HasRegistration, IsSe
 
         // register the supported interfaces to conform to ERC1155MetadataURI via ERC165
         _registerInterface(_INTERFACE_ID_ERC1155_METADATA_URI);
-        _mint(msg.sender,789, 2, "");
-        _mint(msg.sender,1337, 1, "");
+        // _mint(msg.sender,789, 2, "");
+        // _mint(msg.sender,1337, 1, "");
         serialized = true;
     }
 
     function mint(address _to, uint256 _tokenId, uint256 _amount) public override onlyOwner {
         _mint(_to, _tokenId, _amount, "");
-        if (registeredOfType[3].length > 0 && registeredOfType[3][0] == _msgSender()) {
-            IHandlerCallback(_msgSender()).executeCallbacks(HasRegistration.ZEROADDRESS, _to, _tokenId, IHandlerCallback.CallbackType.MINT);
-        }
+    }
+
+    function mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data) public onlyOwner {
+        _mintBatch(to, ids, amounts, data);
     }
 
     function burn(address _from, uint256 _tokenId, uint256 _amount) public override {
         require(_from == _msgSender() || isApprovedForAll(_from, _msgSender()), 'Not Approved to burn');
         _burn(_from, _tokenId, _amount);
+    }
+
+    function burnBatch(address account, uint256[] memory ids, uint256[] memory amounts) public {
+        require(account == _msgSender() || isApprovedForAll(account, _msgSender()), 'Not Approved to burn');
+        _burnBatch(account, ids, amounts);
     }
 
     /**
@@ -179,7 +185,7 @@ contract ERC1155 is ERC165, IERC1155, IERC1155MetadataURI, HasRegistration, IsSe
 
         if (isSerialized()) {
             for (uint i = 0; i < amount; i++) {            
-                bytes20 serialNumber = getFirstSerialByOwner(from, id);
+                uint256 serialNumber = getFirstSerialByOwner(from, id);
                 if (serialNumber != 0 ) {
                     transferSerial(serialNumber, from, to);
                 }
@@ -189,8 +195,10 @@ contract ERC1155 is ERC165, IERC1155, IERC1155MetadataURI, HasRegistration, IsSe
         emit TransferSingle(operator, from, to, id, amount);
 
         _doSafeTransferAcceptanceCheck(operator, from, to, id, amount, data);
-        if (registeredOfType[3].length > 0 && registeredOfType[3][0] != HasRegistration.ZEROADDRESS) {
-            IHandlerCallback(registeredOfType[3][0]).executeCallbacks(from, to, id, IHandlerCallback.CallbackType.TRANSFER);
+        if (registeredOfType[3].length > 0 && registeredOfType[3][0] != address(0)) {
+            for (uint i = 0; i < amount; i++) {
+                IHandlerCallback(registeredOfType[3][0]).executeCallbacks(from, to, id, IHandlerCallback.CallbackType.TRANSFER);
+            }
         }
     }
 
@@ -223,14 +231,15 @@ contract ERC1155 is ERC165, IERC1155, IERC1155MetadataURI, HasRegistration, IsSe
             uint256 id = ids[i];
             uint256 amount = amounts[i];
 
-            _balances[id][from] = _balances[id][from].sub(
-                amount,
-                "ERC1155: insufficient balance for transfer"
-            );
-            _balances[id][to] = _balances[id][to].add(amount);
-            if (registeredOfType[3][0] != HasRegistration.ZEROADDRESS) {
-                IHandlerCallback(registeredOfType[3][0]).executeCallbacks(from, to, id, IHandlerCallback.CallbackType.TRANSFER);
-            }
+            // _balances[id][from] = _balances[id][from].sub(
+            //     amount,
+            //     "ERC1155: insufficient balance for transfer"
+            // );
+            // _balances[id][to] = _balances[id][to].add(amount);
+            // if (registeredOfType[3][0] != address(0)) {
+            //     IHandlerCallback(registeredOfType[3][0]).executeCallbacks(from, to, id, IHandlerCallback.CallbackType.TRANSFER);
+            // }
+            safeTransferFrom(from, to, id, amount, data);
         }
 
         emit TransferBatch(operator, from, to, ids, amounts);
@@ -285,6 +294,11 @@ contract ERC1155 is ERC165, IERC1155, IERC1155MetadataURI, HasRegistration, IsSe
                 mintSerial(id, account);
             }            
         }
+        if (registeredOfType[3].length > 0 && registeredOfType[3][0] == _msgSender()) {
+            for (uint i = 0; i < amount; i++) {
+                IHandlerCallback(_msgSender()).executeCallbacks(address(0), account, id, IHandlerCallback.CallbackType.MINT);
+            }
+        }
         emit TransferSingle(operator, address(0), account, id, amount);
 
         _doSafeTransferAcceptanceCheck(operator, address(0), account, id, amount, data);
@@ -308,7 +322,8 @@ contract ERC1155 is ERC165, IERC1155, IERC1155MetadataURI, HasRegistration, IsSe
         _beforeTokenTransfer(operator, address(0), to, ids, amounts, data);
 
         for (uint i = 0; i < ids.length; i++) {
-            _balances[ids[i]][to] = amounts[i].add(_balances[ids[i]][to]);
+            // _balances[ids[i]][to] = amounts[i].add(_balances[ids[i]][to]);
+            _mint(to, ids[i], amounts[i], data);
         }
 
         emit TransferBatch(operator, address(0), to, ids, amounts);
@@ -336,6 +351,13 @@ contract ERC1155 is ERC165, IERC1155, IERC1155MetadataURI, HasRegistration, IsSe
             "ERC1155: burn amount exceeds balance"
         );
 
+        if (isSerialized()) {            
+            uint256 serialNumber = getFirstSerialByOwner(account, id);
+            if (serialNumber != 0 ) {
+                transferSerial(serialNumber, account, address(0));
+            }            
+        }
+
         emit TransferSingle(operator, account, address(0), id, amount);
     }
 
@@ -355,10 +377,11 @@ contract ERC1155 is ERC165, IERC1155, IERC1155MetadataURI, HasRegistration, IsSe
         _beforeTokenTransfer(operator, account, address(0), ids, amounts, "");
 
         for (uint i = 0; i < ids.length; i++) {
-            _balances[ids[i]][account] = _balances[ids[i]][account].sub(
-                amounts[i],
-                "ERC1155: burn amount exceeds balance"
-            );
+            _burn(account, ids[i], amounts[i]);
+            // _balances[ids[i]][account] = _balances[ids[i]][account].sub(
+            //     amounts[i],
+            //     "ERC1155: burn amount exceeds balance"
+            // );
         }
 
         emit TransferBatch(operator, account, address(0), ids, amounts);

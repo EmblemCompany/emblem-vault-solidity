@@ -2,12 +2,20 @@ pragma solidity 0.8.4;
 import "./Context.sol";
 import "./Ownable.sol";
 
+interface IIsSerialized {
+    function isSerialized() external view returns (bool);
+    function getSerial(uint256 tokenId, uint256 index) external view returns (uint256);
+    function getFirstSerialByOwner(address owner, uint256 tokenId) external view returns (uint256);
+    function getOwnerOfSerial(uint256 serialNumber) external view returns (address);
+    function getTokenIdForSerialNumber(uint256 serialNumber) external view returns (uint256);
+}
+
 contract IsSerialized is Context, Ownable {
     bool internal serialized;
     bool internal hasSerialized = false;
-    mapping(uint256 => bytes20[]) internal tokenIdToSerials;
-    mapping(bytes20 => uint256) internal serialToTokenId;
-    mapping(bytes20 => address) internal serialToOwner;
+    mapping(uint256 => uint256[]) internal tokenIdToSerials;
+    mapping(uint256 => uint256) internal serialToTokenId;
+    mapping(uint256 => address) internal serialToOwner;
 
     function isSerialized() public view returns (bool) {
         return serialized;
@@ -20,7 +28,7 @@ contract IsSerialized is Context, Ownable {
 
     function mintSerial(uint256 tokenId, address owner) public onlyOwner {
         uint256 index = tokenIdToSerials[tokenId].length;
-        bytes20 serialNumber = ripemd160(abi.encode(tokenId, block.number, index));
+        uint256 serialNumber = uint256(keccak256(abi.encode(tokenId, block.number, index)));
         tokenIdToSerials[tokenId].push(serialNumber);
         serialToTokenId[serialNumber] = tokenId;
         serialToOwner[serialNumber] = owner;
@@ -29,12 +37,12 @@ contract IsSerialized is Context, Ownable {
         }
     }
 
-    function transferSerial(bytes20 serialNumber, address from, address to) public onlyOwner {
+    function transferSerial(uint256 serialNumber, address from, address to) internal {
         require(serialToOwner[serialNumber] == from, 'Not correct owner of serialnumber');
         serialToOwner[serialNumber] = to;
     }
 
-    function getSerial(uint256 tokenId, uint256 index) public view returns (bytes20) {
+    function getSerial(uint256 tokenId, uint256 index) public view returns (uint256) {
         if(tokenIdToSerials[tokenId].length == 0) {
             return 0;
         } else {
@@ -42,9 +50,9 @@ contract IsSerialized is Context, Ownable {
         }
     }
 
-    function getFirstSerialByOwner(address owner, uint256 tokenId) public view returns (bytes20) {
+    function getFirstSerialByOwner(address owner, uint256 tokenId) public view returns (uint256) {
         for (uint256 i = 0; i < tokenIdToSerials[tokenId].length; ++i) {
-           bytes20 serialNumber = tokenIdToSerials[tokenId][i];
+           uint256 serialNumber = tokenIdToSerials[tokenId][i];
            if (serialToOwner[serialNumber] == owner) {
                return serialNumber;
            }
@@ -52,11 +60,11 @@ contract IsSerialized is Context, Ownable {
         return 0;
     }
 
-    function getOwnerOfSerial(bytes20 serialNumber) public view returns (address) {
+    function getOwnerOfSerial(uint256 serialNumber) public view returns (address) {
         return serialToOwner[serialNumber];
     }
 
-    function getSerialForTokenId(bytes20 serialNumber) public view returns (uint256) {
+    function getTokenIdForSerialNumber(uint256 serialNumber) public view returns (uint256) {
         return serialToTokenId[serialNumber];
     }
     

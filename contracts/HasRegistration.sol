@@ -15,7 +15,6 @@ contract HasRegistration is Context, Ownable {
     mapping(uint256 => address[]) public registeredOfType;
     
     uint256 public contractCount = 0;
-    address public ZEROADDRESS = 0x0000000000000000000000000000000000000000;
 
     modifier isRegisteredContract(address _contract) {
         require(registeredContracts[_contract] > 0, "Contract is not registered");

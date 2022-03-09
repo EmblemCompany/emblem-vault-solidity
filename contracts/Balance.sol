@@ -3,6 +3,7 @@ import "./IERC721.sol";
 import "./Ownable.sol";
 import "./Context.sol";
 import "./ReentrancyGuard.sol";
+import "./HasRegistration.sol";
 
 struct BalanceObject {
     uint balance;
@@ -33,10 +34,11 @@ interface IBalanceStorage {
     function getTokensFromMap(address nftAddress, bytes32 token) external view returns (uint256[] memory);
 }
 
-contract Balance is Ownable, Context, ReentrancyGuard {
+contract Balance is ReentrancyGuard, HasRegistration {
 
     address StorageAddress;
     bool initialized = false;
+    bool canAddBalances = true;
     
     constructor(address storageContract) {
         StorageAddress = storageContract;
@@ -65,18 +67,26 @@ contract Balance is Ownable, Context, ReentrancyGuard {
         _storage.upgradeVersion(balanceContract);
     }
 
+    function toggleCanAddBalances() public onlyOwner {
+        canAddBalances = !canAddBalances;
+    }
+
     /* USER WRITE */
 
     function addBalanceToAsset(address nftAddress, uint256 tokenId, Balances calldata balance, uint256 nonce, bytes calldata signature) public nonReentrant {
-        IBalanceStorage _storage = IBalanceStorage(StorageAddress);
-        require(IERC721(nftAddress).ownerOf(tokenId) == _msgSender(), 'Only owner can add balance');
-        require(!_storage.usedNonce(nonce), 'Nonce already used');
-        require(_storage.addNonce(nonce), 'Nonce not added');
-        bytes32 serializedBalance = getSerializedBalance(balance);
-        bytes32 _hash = addNonceToSerializedBalance(serializedBalance, nonce);
-        require(isWitnessed(nftAddress, _hash, signature), 'Not a witness');
-        _storage.addBalanceToAsset(nftAddress, tokenId, balance);
-        addTokensToMap(nftAddress, tokenId, balance);
+        if (canAddBalances) {
+            IBalanceStorage _storage = IBalanceStorage(StorageAddress);
+            require(IERC721(nftAddress).ownerOf(tokenId) == _msgSender(), 'Only owner can add balance');
+            require(!_storage.usedNonce(nonce), 'Nonce already used');
+            require(_storage.addNonce(nonce), 'Nonce not added');
+            bytes32 serializedBalance = getSerializedBalance(balance);
+            bytes32 _hash = addNonceToSerializedBalance(serializedBalance, nonce);
+            require(isWitnessed(nftAddress, _hash, signature), 'Not a witness');
+            _storage.addBalanceToAsset(nftAddress, tokenId, balance);
+            addTokensToMap(nftAddress, tokenId, balance);
+        } else {
+            revert("Adding balances is disabled");
+        }
         
     }
 

@@ -181,19 +181,6 @@
   },
   {
     "inputs": [],
-    "name": "ZEROADDRESS",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "contractCount",
     "outputs": [
       {
@@ -674,6 +661,13 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "toggleAllowCallbacks",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {

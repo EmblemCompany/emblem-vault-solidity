@@ -15,6 +15,7 @@ beforeEach(async ()=>{
   ERC721.mint(util.deployer.address, 1, "test", 0x0)
   ERC1155 = util.getERC1155((await util.factory.erc1155Implementation()), util.deployer)
 })
+
 describe('Vault Handler', () => {    
   it('should deploy handler', async ()=>{
     let initialized = await util.handler.initialized()
@@ -59,13 +60,18 @@ describe('Vault Handler', () => {
   })
 
   it('can not move from unregistered contract', async ()=>{
-    let tx = util.handler.moveVault(ERC721.address, ERC1155.address, 1, 0)
+    var provider = selectProvider("mainnet")
+    var web3 = new Web3(provider)
+    let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, 111)
+    let sig = await sign(web3, hash)
+    await util.handler.addWitness("0xB35a0b332657efE5d69792FCA9436537d263472F")
+
+    let tx = util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig)
     await expect(tx).to.be.revertedWith('Contract is not registered')
   })
 
   it('can move from ERC721 to ERC1155 with registered contracts', async ()=>{
     await ERC1155.registerContract(util.handler.address, 3)
-    // await ERC721.registerContract(util.handler.address, 3)
     await ERC1155.transferOwnership(util.handler.address)
     await ERC721.setApprovalForAll(util.handler.address, true)
     await util.handler.registerContract(ERC721.address, 2)
@@ -74,7 +80,14 @@ describe('Vault Handler', () => {
     let balanceERC1155 = await ERC1155.balanceOf(util.deployer.address, 1337)
     expect(balanceERC1155).to.equal(0)
     expect(balanceERC721).to.equal(1)
-    await util.handler.moveVault(ERC721.address, ERC1155.address, 1, 1337)
+
+    var provider = selectProvider("mainnet")
+    var web3 = new Web3(provider)
+    let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 1, 1337, 111)
+    let sig = await sign(web3, hash)
+    await util.handler.addWitness("0xB35a0b332657efE5d69792FCA9436537d263472F")
+
+    await util.handler.moveVault(ERC721.address, ERC1155.address, 1, 1337, 111, sig)
     balanceERC721 = await ERC721.balanceOf(util.deployer.address)
     balanceERC1155 = await ERC1155.balanceOf(util.deployer.address, 1337)
     expect(balanceERC1155).to.equal(1)
@@ -83,7 +96,6 @@ describe('Vault Handler', () => {
 
   it('can move from ERC1155 to ERC721 with registered contracts', async ()=>{
     await ERC1155.registerContract(util.handler.address, 3)
-    // await ERC721.registerContract(util.handler.address, 3)
     await ERC1155.transferOwnership(util.deployer.address)
     await ERC1155.mint(util.deployer.address, 123, 2)
     await ERC721.setApprovalForAll(util.handler.address, true)
@@ -96,7 +108,14 @@ describe('Vault Handler', () => {
     let balanceERC1155 = await ERC1155.balanceOf(util.deployer.address, 123)
     expect(balanceERC1155).to.equal(2)
     expect(balanceERC721).to.equal(0)
-    await util.handler.moveVault(ERC1155.address, ERC721.address, 123, 1337)
+
+    var provider = selectProvider("mainnet")
+    var web3 = new Web3(provider)
+    let hash = web3.utils.soliditySha3(ERC1155.address, ERC721.address, 123, 1337, 111)
+    let sig = await sign(web3, hash)
+    await util.handler.addWitness("0xB35a0b332657efE5d69792FCA9436537d263472F")
+    
+    await util.handler.moveVault(ERC1155.address, ERC721.address, 123, 1337, 111, sig)
     balanceERC721 = await ERC721.balanceOf(util.deployer.address)
     balanceERC1155 = await ERC1155.balanceOf(util.deployer.address, 123)
     expect(balanceERC1155).to.equal(1)
@@ -105,7 +124,6 @@ describe('Vault Handler', () => {
 
   it('can not move ERC1155 to ERC721 when new tokenId already exists', async ()=>{
     await ERC1155.registerContract(util.handler.address, 3)
-    // await ERC721.registerContract(util.handler.address, 3)
     await ERC1155.transferOwnership(util.deployer.address)
     await ERC1155.mint(util.deployer.address, 123, 2)
     await ERC721.setApprovalForAll(util.handler.address, true)
@@ -117,11 +135,16 @@ describe('Vault Handler', () => {
     let balanceERC1155 = await ERC1155.balanceOf(util.deployer.address, 123)
     expect(balanceERC1155).to.equal(2)
     expect(balanceERC721).to.equal(1)
-    let tx = util.handler.moveVault(ERC1155.address, ERC721.address, 123, 1)
+
+    var provider = selectProvider("mainnet")
+    var web3 = new Web3(provider)
+    let hash = web3.utils.soliditySha3(ERC1155.address, ERC721.address, 123, 1, 111)
+    let sig = await sign(web3, hash)
+    await util.handler.addWitness("0xB35a0b332657efE5d69792FCA9436537d263472F")
+
+    let tx = util.handler.moveVault(ERC1155.address, ERC721.address, 123, 1, 111, sig)
     await expect(tx).to.be.revertedWith('NFT Already Exists')
   })
-
-  it('should only allow move if witnessed')
   
 })
 
@@ -137,6 +160,11 @@ function getWitnessSignature(web3, hash, cb) {
           return cb(res)
       })
   })
+}
+async function sign(web3, hash){
+  let accounts = await web3.eth.getAccounts()
+  let signature = await web3.eth.sign(hash, accounts[0])
+  return signature
 }
 function selectProvider(network) {
   return new HDWalletProvider(process.env.ETHKEY || "c1fc1fe3db1e71bb457c5f8f10de8ff349d24f30f56a1e6a92e55ef90d961328", selectProviderEndpoint(network), 0, 1)

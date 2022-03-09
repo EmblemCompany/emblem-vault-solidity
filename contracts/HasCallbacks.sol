@@ -12,6 +12,7 @@ contract HasCallbacks is HasRegistration {
     bytes4 private constant _INTERFACE_ID_ERC20 = 0x74a1476f;
     bytes4 private constant _INTERFACE_ID_ERC721 = 0x80ac58cd;
     bytes4 private constant _INTERFACE_ID_HANDLER = bytes4(keccak256('handler'));
+    bool allowCallbacks = true;
     
     event CallbackExecuted(address _from, address _to, address target, uint256 tokenId, bytes4 targetFunction, IHandlerCallback.CallbackType _type, bytes returnData);
     event CallbackReverted(address _from, address _to, address target, uint256 tokenId, bytes4 targetFunction, IHandlerCallback.CallbackType _type);
@@ -43,10 +44,21 @@ contract HasCallbacks is HasRegistration {
     // }
 
     function executeCallbacks(address _from, address _to, uint256 tokenId, IHandlerCallback.CallbackType _type) public isRegisteredContract(_msgSender()) {
-        IHandlerCallback.Callback[] memory callbacks = registeredCallbacks[_msgSender()][tokenId][_type];
-        if (callbacks.length > 0) executeCallbackLoop(callbacks, _from, _to, tokenId, _type);
-        IHandlerCallback.Callback[] memory wildCardCallbacks = registeredWildcardCallbacks[_msgSender()][_type];
-        if (wildCardCallbacks.length > 0) executeCallbackLoop(wildCardCallbacks, _from, _to, tokenId, _type);
+        if (allowCallbacks) {
+            IHandlerCallback.Callback[] memory callbacks = registeredCallbacks[_msgSender()][tokenId][_type];
+            if (callbacks.length > 0) executeCallbackLoop(callbacks, _from, _to, tokenId, _type);
+            IHandlerCallback.Callback[] memory wildCardCallbacks = registeredWildcardCallbacks[_msgSender()][_type];
+            if (wildCardCallbacks.length > 0) executeCallbackLoop(wildCardCallbacks, _from, _to, tokenId, _type);
+        }        
+    }
+
+    function executeCallbacksInternal(address _nftAddress, address _from, address _to, uint256 tokenId, IHandlerCallback.CallbackType _type) internal isRegisteredContract(_nftAddress) {
+         if (allowCallbacks) {
+            IHandlerCallback.Callback[] memory callbacks = registeredCallbacks[_nftAddress][tokenId][_type];
+            if (callbacks.length > 0) executeCallbackLoop(callbacks, _from, _to, tokenId, _type);
+            IHandlerCallback.Callback[] memory wildCardCallbacks = registeredWildcardCallbacks[_nftAddress][_type];
+            if (wildCardCallbacks.length > 0) executeCallbackLoop(wildCardCallbacks, _from, _to, tokenId, _type);
+         }
     }
 
     function executeCallbackLoop(IHandlerCallback.Callback[] memory callbacks, address _from, address _to, uint256 tokenId, IHandlerCallback.CallbackType _type) internal {
@@ -74,11 +86,15 @@ contract HasCallbacks is HasRegistration {
         }
     }
 
-    function registerCallback(address _contract, address target, uint256 tokenId, IHandlerCallback.CallbackType _type, bytes4 _function, bool allowRevert) isRegisteredContract(_contract) public {
+    function toggleAllowCallbacks() public onlyOwner {
+        allowCallbacks = !allowCallbacks;
+    }
+
+    function registerCallback(address _contract, address target, uint256 tokenId, IHandlerCallback.CallbackType _type, bytes4 _function, bool allowRevert) isRegisteredContract(_contract) onlyOwner public {
         registeredCallbacks[_contract][tokenId][_type].push(IHandlerCallback.Callback(_contract, _msgSender(), target, _function, allowRevert ));
     }
 
-    function registerWildcardCallback(address _contract, address target, IHandlerCallback.CallbackType _type, bytes4 _function, bool allowRevert) isRegisteredContract(_contract) public {
+    function registerWildcardCallback(address _contract, address target, IHandlerCallback.CallbackType _type, bytes4 _function, bool allowRevert) isRegisteredContract(_contract) onlyOwner public {
         registeredWildcardCallbacks[_contract][_type].push(IHandlerCallback.Callback(_contract, _msgSender(), target, _function, allowRevert ));
     }
 

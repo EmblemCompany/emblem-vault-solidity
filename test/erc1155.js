@@ -53,13 +53,55 @@ describe('ERC1155', () => {
     it('should deploy ERC1155 Vaults', async ()=>{
         expect(ERC1155.address).to.exist
     })
-    it('should mint', async()=>{
-        let balanceERC1155 = await ERC1155.balanceOf(util.bob.address, 789)
-        expect(balanceERC1155).to.equal(0)
-        await ERC1155.mint(util.bob.address, 789, 2)
-        balanceERC1155 = await ERC1155.balanceOf(util.bob.address, 789)
-        expect(balanceERC1155).to.equal(2)
+    describe('Mint', ()=>{
+        it('should mint', async()=>{
+            let balanceERC1155 = await ERC1155.balanceOf(util.bob.address, 789)
+            expect(balanceERC1155).to.equal(0)
+            await ERC1155.mint(util.bob.address, 789, 2)
+            balanceERC1155 = await ERC1155.balanceOf(util.bob.address, 789)
+            expect(balanceERC1155).to.equal(2)
+        })
+    
+        it('should not mint directly if owned by handler', async()=>{
+            let balanceERC1155 = await ERC1155.balanceOf(util.bob.address, 789)
+            expect(balanceERC1155).to.equal(0)
+            await ERC1155.transferOwnership(util.handler.address)
+            let tx = ERC1155.mint(util.bob.address, 789, 2)
+            expect(tx).to.be.revertedWith('018001')
+        })
+    
+        it('should mint via handler with signature if signer is a witness', async () => {
+            await ERC1155.transferOwnership(util.handler.address)
+            await util.handler.changePrice(0)
+            await util.handler.addWitness("0xB35a0b332657efE5d69792FCA9436537d263472F")
+            var provider = selectProvider("mainnet")
+            var web3 = new Web3(provider)
+            let hash = web3.utils.soliditySha3(ERC1155.address, util.deployer.address, 123, 111, "payload")
+            let sig = await sign(web3, hash)
+            let balance = await ERC1155.balanceOf(util.deployer.address, 123)
+            expect(balance.toNumber()).to.equal(0)
+            await util.handler.buyWithSignature(ERC1155.address, util.deployer.address, 123, "payload", 111, sig)
+            balance = await ERC1155.balanceOf(util.deployer.address, 123)
+            expect(balance.toNumber()).to.equal(1)
+          })
+    
+        it('should mint via handler with signed price', async () => {
+            await ERC1155.transferOwnership(util.handler.address)
+            let covalAddress = await util.factory.erc20Implementation()
+            await util.handler.changePrice(0)
+            await util.handler.addWitness("0xB35a0b332657efE5d69792FCA9436537d263472F")
+            var provider = selectProvider("mainnet")
+            var web3 = new Web3(provider)
+            let hash = web3.utils.soliditySha3(ERC1155.address, covalAddress, 0, util.deployer.address, 123, 111, "payload")
+            let sig = await sign(web3, hash)
+            let balance = await ERC1155.balanceOf(util.deployer.address, 123)
+            expect(balance.toNumber()).to.equal(0)
+            await util.handler.buyWithSignedPrice(ERC1155.address, covalAddress, 0, util.deployer.address, 123, "payload", 111, sig)
+            balance = await ERC1155.balanceOf(util.deployer.address, 123)
+            expect(balance.toNumber()).to.equal(1)
+          })
     })
+    
     
     describe('Non-Fungibility', ()=>{
         it('should be serialized by default', async ()=>{
@@ -85,9 +127,11 @@ describe('ERC1155', () => {
         })
 
         it('should mint serialnumber if serialization is enabled', async ()=>{
+            let serialNumber =  await ERC1155.getSerial(789, 0)
+            expect(serialNumber).to.equal('0x0000000000000000000000000000000000000000')
             await ERC1155.mint(util.deployer.address, 789, 1)
-            let serialNumber =  await ERC1155.getSerial(789, 0)            
-            expect(serialNumber).to.equal('0xc1aa66045693c092577bd3ebd433d17a8a51c564')
+            serialNumber =  await ERC1155.getSerial(789, 0)
+            expect(serialNumber).to.not.equal('0x0000000000000000000000000000000000000000')
         })
         it('should not allow turning off serization if any serialized items exist', async()=>{
             await ERC1155.mint(util.deployer.address, 789, 1)
@@ -100,16 +144,20 @@ describe('ERC1155', () => {
             let serialNumber1 =  await ERC1155.getSerial(789, 1)
             let AbiCoder = new ethers.utils.AbiCoder()
             let currentBlockNumber = await ethers.provider.getBlockNumber();
-            let calculatedSerial0 = await ethers.utils.ripemd160(AbiCoder.encode([ "uint","uint","uint"], [789, currentBlockNumber, 0]))
-            let calculatedSerial1 = await ethers.utils.ripemd160(AbiCoder.encode([ "uint","uint","uint"], [789, currentBlockNumber, 1]))
+            let calculatedSerial0 = await ethers.utils.keccak256(AbiCoder.encode([ "uint","uint","uint"], [789, currentBlockNumber, 0]))
+            let calculatedSerial1 = await ethers.utils.keccak256(AbiCoder.encode([ "uint","uint","uint"], [789, currentBlockNumber, 1]))
             expect(serialNumber0).to.equal(calculatedSerial0)
             expect(serialNumber1).to.equal(calculatedSerial1)
         })
         it('should add new serialnumber when minting more of a tokenid', async ()=>{
+            let AbiCoder = new ethers.utils.AbiCoder()
             await ERC1155.mint(util.deployer.address, 789, 2)            
             await ERC1155.mint(util.deployer.address, 789, 1)
+            let currentBlockNumber = await ethers.provider.getBlockNumber();
             let serialNumber2 =  await ERC1155.getSerial(789, 2)
-            expect(serialNumber2).to.equal('0x52f77f601f8269cf483e3398746adafce52a139b')
+            let calculatedSerial2 = await ethers.utils.keccak256(AbiCoder.encode([ "uint","uint","uint"], [789, currentBlockNumber, 2]))
+            
+            expect(serialNumber2).to.equal(calculatedSerial2)
         })
         it('should assign serialnumber to owner of asset', async ()=>{
             await ERC1155.mint(util.deployer.address, 789, 1)
@@ -119,8 +167,11 @@ describe('ERC1155', () => {
         })
         it('should get first serialnumber when provided with tokenId and address', async ()=>{
             await ERC1155.mint(util.deployer.address, 789, 2)
+            let AbiCoder = new ethers.utils.AbiCoder()
+            let currentBlockNumber = await ethers.provider.getBlockNumber();
+            let calculatedSerial0 = await ethers.utils.keccak256(AbiCoder.encode([ "uint","uint","uint"], [789, currentBlockNumber, 0]))
             let serialNumber = await ERC1155.getFirstSerialByOwner(util.deployer.address, 789)
-            expect(serialNumber).to.equal("0x99954d9b7e5c53e2a8403328001fbefbade9334f")
+            expect(serialNumber).to.equal(calculatedSerial0)
         })
         it('should transfer correct serialnumber from old owner to new owner on transfer', async()=>{
             await ERC1155.mint(util.deployer.address, 789, 2)
@@ -138,9 +189,68 @@ describe('ERC1155', () => {
             expect(ownerOfSerial1).to.equal(util.bob.address)
             expect(ownerOfSerial0).to.equal(util.bob.address)
         })
-        it('should mark correct serialnumber claimed upon claiming')
+        
         it('should handle batch mint')
         it('should handle batch transfer')
+    })
+    describe('Claim', ()=>{
+        it('should claim erc1155 via handler with permission', async()=>{
+            await util.cloneClaimed(util.deployer.address)
+            let claimedContract = util.getClaimed(util.claimer.address, util.deployer)
+            await claimedContract.initialize()
+            await util.handler.registerContract(util.claimer.address, 6)
+            await claimedContract.registerContract(util.handler.address, 3)
+            await util.handler.registerContract(ERC1155.address, 1)
+            await ERC1155.mint(util.deployer.address, 789, 1)
+            let serialNumber = await ERC1155.getSerial(789, 0)
+            await ERC1155.setApprovalForAll(util.handler.address, true)
+            let isClaimed = await util.claimer.isClaimed(ERC1155.address, serialNumber, [])
+            expect(isClaimed).to.be.false
+            let hasClaimed = await util.claimer.getClaimsFor(util.deployer.address)
+            expect(hasClaimed.length).to.equal(0)
+            await util.handler.claim(ERC1155.address, 789)
+            isClaimed = await util.claimer.isClaimed(ERC1155.address, serialNumber, [])
+            expect(isClaimed).to.be.true
+            let claimedBy = await util.claimer.claimedBy(ERC1155.address, serialNumber)
+            expect(claimedBy[0]).to.equal(util.deployer.address)
+            expect(claimedBy[1]).to.equal('record')
+            let serialTokenId = await ERC1155.getTokenIdForSerialNumber(serialNumber)
+            expect(serialTokenId).to.equal(789)
+            let newOwner = await ERC1155.getOwnerOfSerial(serialNumber)
+            expect(newOwner).to.equal("0x0000000000000000000000000000000000000000")
+            hasClaimed = await util.claimer.getClaimsFor(util.deployer.address)
+            expect(serialNumber).to.equal(hasClaimed[0])
+          })
+        it('should get correct serialNumber for owner and tokenId after claims', async()=>{
+            await util.cloneClaimed(util.deployer.address)
+            let claimedContract = util.getClaimed(util.claimer.address, util.deployer)
+            await claimedContract.initialize()
+            await util.handler.registerContract(util.claimer.address, 6)
+            await claimedContract.registerContract(util.handler.address, 3)
+            await util.handler.registerContract(ERC1155.address, 1)
+            await ERC1155.mint(util.deployer.address, 789, 2)
+            let AbiCoder = new ethers.utils.AbiCoder()
+            let currentBlockNumber = await ethers.provider.getBlockNumber();
+            let calculatedSerial0 = await ethers.utils.keccak256(AbiCoder.encode([ "uint","uint","uint"], [789, currentBlockNumber, 0]))
+            let calculatedSerial1 = await ethers.utils.keccak256(AbiCoder.encode([ "uint","uint","uint"], [789, currentBlockNumber, 1]))
+            await ERC1155.mint(util.deployer.address, 789, 1)
+            currentBlockNumber = await ethers.provider.getBlockNumber();
+            let calculatedSerial2 = await ethers.utils.keccak256(AbiCoder.encode([ "uint","uint","uint"], [789, currentBlockNumber, 2]))
+            await ERC1155.setApprovalForAll(util.handler.address, true)
+            let firstSerialByOwner = await ERC1155.getFirstSerialByOwner(util.deployer.address, 789)
+            expect(firstSerialByOwner).to.equal(calculatedSerial0)
+            await util.handler.claim(ERC1155.address, 789)
+            firstSerialByOwner = await ERC1155.getFirstSerialByOwner(util.deployer.address, 789)
+            expect(firstSerialByOwner).to.equal(calculatedSerial1)
+            await util.handler.claim(ERC1155.address, 789)
+            firstSerialByOwner = await ERC1155.getFirstSerialByOwner(util.deployer.address, 789)
+            expect(firstSerialByOwner).to.equal(calculatedSerial2)
+            await util.handler.claim(ERC1155.address, 789)
+            let hasClaimed = await util.claimer.getClaimsFor(util.deployer.address)
+            expect(calculatedSerial0).to.equal(hasClaimed[0])
+            expect(calculatedSerial1).to.equal(hasClaimed[1])
+            expect(calculatedSerial2).to.equal(hasClaimed[2])
+        })
     })
     describe('Handler Callbacks', ()=>{        
         it('should not allow callback registration in handler without witness')
@@ -197,12 +307,34 @@ describe('ERC1155', () => {
             await ERC1155.transferOwnership(util.handler.address)
             let ticks = await util.handler.ticks()
             expect(ticks).to.equal(0)
-            await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1)
+
+            var provider = selectProvider("mainnet")
+            var web3 = new Web3(provider)
+            let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, 111)
+            let sig = await sign(web3, hash)
+            await util.handler.addWitness("0xB35a0b332657efE5d69792FCA9436537d263472F")
+
+            await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig)
             ticks = await util.handler.ticks();
             let lastTokenId = await util.handler.lastTokenId()
             let lastTo = await util.handler.lastTo()
             expect(ticks).to.equal(1)
             expect(lastTokenId).to.equal(1)
+            expect(lastTo).to.equal(util.deployer.address)
+        })
+        it('can execute multple mint callbacks', async()=>{
+            await ERC1155.registerContract(util.handler.address, REGISTRATION_TYPE.HANDLER)
+            await util.handler.registerContract(ERC1155.address, REGISTRATION_TYPE.ERC1155)
+            await util.handler.registerCallback(ERC1155.address, util.handler.address, 789, CALLBACK_TYPE.MINT, TEST_CALLBACK_FUNCTION, true)
+            await ERC1155.transferOwnership(util.handler.address)
+            let ticks = await util.handler.ticks()
+            expect(ticks).to.equal(0)
+            await util.handler.mint(ERC1155.address, util.deployer.address, 789, "", "", 2)
+            ticks = await util.handler.ticks();
+            let lastTokenId = await util.handler.lastTokenId()
+            let lastTo = await util.handler.lastTo()
+            expect(ticks).to.equal(2)
+            expect(lastTokenId).to.equal(789)
             expect(lastTo).to.equal(util.deployer.address)
         })
         it('can handle transfer when no callbacks registered', async()=>{
@@ -259,6 +391,30 @@ describe('ERC1155', () => {
             expect(lastTo).to.equal(util.bob.address)
             expect(lastFrom).to.equal(util.deployer.address)
         })
+        it('can execute single claim callback', async()=>{
+            await util.cloneClaimed(util.deployer.address)
+            let claimedContract = util.getClaimed(util.claimer.address, util.deployer)
+            await claimedContract.initialize()
+            await util.handler.registerContract(util.claimer.address, 6)
+            await claimedContract.registerContract(util.handler.address, 3)
+            await ERC1155.mint(util.deployer.address, 789, 1)
+            await ERC1155.registerContract(util.handler.address, REGISTRATION_TYPE.HANDLER)
+            await util.handler.registerContract(ERC1155.address, REGISTRATION_TYPE.ERC1155)
+            await util.handler.registerCallback(ERC1155.address, util.handler.address, 789, CALLBACK_TYPE.CLAIM, TEST_CALLBACK_FUNCTION, true)
+            await ERC1155.transferOwnership(util.handler.address)
+            await ERC1155.setApprovalForAll(util.handler.address, true)
+            let ticks = await util.handler.ticks()
+            expect(ticks).to.equal(0)
+            await util.handler.claim(ERC1155.address, 789)
+            ticks = await util.handler.ticks()
+            let lastTokenId = await util.handler.lastTokenId()
+            let lastTo = await util.handler.lastTo()
+            let lastFrom = await util.handler.lastFrom()
+            expect(ticks).to.equal(1)
+            expect(lastTokenId).to.equal(789)
+            expect(lastTo).to.equal("0x0000000000000000000000000000000000000000")
+            expect(lastFrom).to.equal(util.deployer.address)
+        })
         it('can execute multiple mint callbacks', async()=>{
             let ERC721 = util.getEmblemVault(util.emblem.address, util.deployer)
             ERC721.mint(util.deployer.address, 2, "test", 0x0)            
@@ -271,7 +427,14 @@ describe('ERC1155', () => {
             await ERC1155.transferOwnership(util.handler.address)
             let ticks = await util.handler.ticks()
             expect(ticks).to.equal(0)
-            await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1)
+
+            var provider = selectProvider("mainnet")
+            var web3 = new Web3(provider)
+            let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, 111)
+            let sig = await sign(web3, hash)
+            await util.handler.addWitness("0xB35a0b332657efE5d69792FCA9436537d263472F")
+
+            await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig)
             ticks = await util.handler.ticks();
             let lastTokenId = await util.handler.lastTokenId()
             let lastTo = await util.handler.lastTo()
@@ -317,7 +480,14 @@ describe('ERC1155', () => {
             await ERC1155.transferOwnership(util.handler.address)
             let ticks = await util.handler.ticks()
             expect(ticks).to.equal(0)
-            await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1)
+
+            var provider = selectProvider("mainnet")
+            var web3 = new Web3(provider)
+            let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, 111)
+            let sig = await sign(web3, hash)
+            await util.handler.addWitness("0xB35a0b332657efE5d69792FCA9436537d263472F")
+
+            await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig)
             ticks = await util.handler.ticks();
             let lastTokenId = await util.handler.lastTokenId()
             let lastTo = await util.handler.lastTo()
@@ -337,7 +507,14 @@ describe('ERC1155', () => {
             await ERC1155.transferOwnership(util.handler.address)
             let ticks = await util.handler.ticks()
             expect(ticks).to.equal(0)
-            await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1)
+
+            var provider = selectProvider("mainnet")
+            var web3 = new Web3(provider)
+            let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, 222)
+            let sig = await sign(web3, hash)
+            await util.handler.addWitness("0xB35a0b332657efE5d69792FCA9436537d263472F")
+
+            await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 222, sig)
             ticks = await util.handler.ticks();
             let lastTokenId = await util.handler.lastTokenId()
             let lastTo = await util.handler.lastTo()
@@ -353,7 +530,14 @@ describe('ERC1155', () => {
             await ERC1155.registerContract(util.handler.address, REGISTRATION_TYPE.HANDLER)
             await util.handler.registerContract(ERC1155.address, REGISTRATION_TYPE.ERC1155)
             await ERC1155.transferOwnership(util.handler.address)
-            await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1)
+
+            var provider = selectProvider("mainnet")
+            var web3 = new Web3(provider)
+            let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, 111)
+            let sig = await sign(web3, hash)
+            await util.handler.addWitness("0xB35a0b332657efE5d69792FCA9436537d263472F")
+
+            await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig)
             ticks = await util.handler.ticks()
             let lastTokenId = await util.handler.lastTokenId()
             let lastTo = await util.handler.lastTo()
@@ -370,7 +554,14 @@ describe('ERC1155', () => {
             await util.handler.registerContract(ERC1155.address, REGISTRATION_TYPE.ERC1155)
             await util.handler.registerCallback(ERC1155.address, util.handler.address, 1, CALLBACK_TYPE.MINT, TEST_REVERT_CALLBACK_FUNCTION, true)
             await ERC1155.transferOwnership(util.handler.address)
-            let tx = util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1)
+
+            var provider = selectProvider("mainnet")
+            var web3 = new Web3(provider)
+            let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, 111)
+            let sig = await sign(web3, hash)
+            await util.handler.addWitness("0xB35a0b332657efE5d69792FCA9436537d263472F")
+
+            let tx = util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig)
             await expect(tx).to.be.revertedWith("Callback Reverted")
         })
         it('can revert when registered callback type allows reversion and callback is invalid', async()=>{
@@ -382,7 +573,14 @@ describe('ERC1155', () => {
             await util.handler.registerContract(ERC1155.address, REGISTRATION_TYPE.ERC1155)
             await util.handler.registerCallback(ERC1155.address, util.handler.address, 1, CALLBACK_TYPE.MINT, TEST_FAKE_CALLBACK_FUNCTION, true)
             await ERC1155.transferOwnership(util.handler.address)
-            let tx = util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1)
+
+            var provider = selectProvider("mainnet")
+            var web3 = new Web3(provider)
+            let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, 111)
+            let sig = await sign(web3, hash)
+            await util.handler.addWitness("0xB35a0b332657efE5d69792FCA9436537d263472F")
+
+            let tx = util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig)
             await expect(tx).to.be.revertedWith("Callback Reverted")
         })
         it('can catch revert when registered callback type does not allow reversion', async()=>{
@@ -393,8 +591,15 @@ describe('ERC1155', () => {
             await ERC1155.registerContract(util.handler.address, REGISTRATION_TYPE.HANDLER)
             await util.handler.registerContract(ERC1155.address, REGISTRATION_TYPE.ERC1155)
             await util.handler.registerCallback(ERC1155.address, util.handler.address, 1, CALLBACK_TYPE.MINT, TEST_REVERT_CALLBACK_FUNCTION, false)
-            await ERC1155.transferOwnership(util.handler.address)            
-            await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1)
+            await ERC1155.transferOwnership(util.handler.address)
+            
+            var provider = selectProvider("mainnet")
+            var web3 = new Web3(provider)
+            let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, 111)
+            let sig = await sign(web3, hash)
+            await util.handler.addWitness("0xB35a0b332657efE5d69792FCA9436537d263472F")
+
+            await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig)
             let ticks = await util.handler.ticks()
             let lastTokenId = await util.handler.lastTokenId()
             let lastTo = await util.handler.lastTo()
@@ -410,8 +615,15 @@ describe('ERC1155', () => {
             await ERC1155.registerContract(util.handler.address, REGISTRATION_TYPE.HANDLER)
             await util.handler.registerContract(ERC1155.address, REGISTRATION_TYPE.ERC1155)
             await util.handler.registerCallback(ERC1155.address, util.handler.address, 1, CALLBACK_TYPE.MINT, TEST_FAKE_CALLBACK_FUNCTION, false)
-            await ERC1155.transferOwnership(util.handler.address)            
-            await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1)
+            await ERC1155.transferOwnership(util.handler.address)
+            
+            var provider = selectProvider("mainnet")
+            var web3 = new Web3(provider)
+            let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, 111)
+            let sig = await sign(web3, hash)
+            await util.handler.addWitness("0xB35a0b332657efE5d69792FCA9436537d263472F")
+
+            await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig)
             let ticks = await util.handler.ticks()
             let lastTokenId = await util.handler.lastTokenId()
             let lastTo = await util.handler.lastTo()
@@ -428,8 +640,15 @@ describe('ERC1155', () => {
             await util.handler.registerContract(ERC1155.address, REGISTRATION_TYPE.ERC1155)
             await util.handler.registerCallback(ERC1155.address, util.handler.address, 1, CALLBACK_TYPE.MINT, TEST_REVERT_CALLBACK_FUNCTION, false)
             await util.handler.registerCallback(ERC1155.address, util.handler.address, 1, CALLBACK_TYPE.MINT, TEST_CALLBACK_FUNCTION, true)
-            await ERC1155.transferOwnership(util.handler.address)            
-            await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1)
+            await ERC1155.transferOwnership(util.handler.address)
+            
+            var provider = selectProvider("mainnet")
+            var web3 = new Web3(provider)
+            let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, 111)
+            let sig = await sign(web3, hash)
+            await util.handler.addWitness("0xB35a0b332657efE5d69792FCA9436537d263472F")
+
+            await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig)
             let ticks = await util.handler.ticks()
             let lastTokenId = await util.handler.lastTokenId()
             let lastTo = await util.handler.lastTo()
@@ -447,7 +666,14 @@ describe('ERC1155', () => {
             await util.handler.registerCallback(ERC1155.address, util.handler.address, 1, CALLBACK_TYPE.MINT, TEST_CALLBACK_FUNCTION, false)
             await util.handler.registerCallback(ERC1155.address, util.handler.address, 1, CALLBACK_TYPE.MINT, TEST_REVERT_CALLBACK_FUNCTION, true)
             await ERC1155.transferOwnership(util.handler.address)
-            let tx = util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1)
+
+            var provider = selectProvider("mainnet")
+            var web3 = new Web3(provider)
+            let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, 111)
+            let sig = await sign(web3, hash)
+            await util.handler.addWitness("0xB35a0b332657efE5d69792FCA9436537d263472F")
+
+            let tx = util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig)
             await expect(tx).to.be.revertedWith("Callback Reverted")
             let ticks = await util.handler.ticks()
             let lastTokenId = await util.handler.lastTokenId()
@@ -457,7 +683,7 @@ describe('ERC1155', () => {
             expect(lastTo).to.equal('0x0000000000000000000000000000000000000000')
         })
         
-        it('should now allow callback non registrant to remove callback', async()=>{
+        it('should not allow callback non registrant to remove callback', async()=>{
             await util.handler.registerContract(ERC1155.address, REGISTRATION_TYPE.ERC1155)
             await util.handler.registerCallback(ERC1155.address, util.handler.address, 789, CALLBACK_TYPE.TRANSFER, TEST_CALLBACK_FUNCTION, true)
             let handler = util.getHandler(util.handler.address, util.bob)
@@ -507,7 +733,47 @@ describe('ERC1155', () => {
             expect(hasCallback).to.equal(false)
         })
 
-        it('should execute callbacks on batch transfer')
+        it('should execute multiple callbacks on batch transfer', async()=>{
+            await ERC1155.mint(util.deployer.address, 789, 1)
+            await ERC1155.mint(util.deployer.address, 456, 1)
+            await ERC1155.registerContract(util.handler.address, REGISTRATION_TYPE.HANDLER)
+            await util.handler.registerContract(ERC1155.address, REGISTRATION_TYPE.ERC1155)
+            await util.handler.registerCallback(ERC1155.address, util.handler.address, 789, CALLBACK_TYPE.TRANSFER, TEST_CALLBACK_FUNCTION, true)
+            await util.handler.registerCallback(ERC1155.address, util.handler.address, 456, CALLBACK_TYPE.TRANSFER, TEST_CALLBACK_FUNCTION, true)
+            let ticks = await util.handler.ticks()
+            expect(ticks).to.equal(0)
+            await ERC1155.safeBatchTransferFrom(util.deployer.address, util.bob.address, [789, 456], [1,1], 0)
+            ticks = await util.handler.ticks()
+            let lastTokenId = await util.handler.lastTokenId()
+            let lastTo = await util.handler.lastTo()
+            let lastFrom = await util.handler.lastFrom()
+            expect(ticks).to.equal(2)
+            expect(lastTokenId).to.equal(456)
+            expect(lastTo).to.equal(util.bob.address)
+            expect(lastFrom).to.equal(util.deployer.address)
+        })
+        it('should execute multiple callbacks on transfer of multiple amount', async()=>{
+            await ERC1155.mint(util.deployer.address, 789, 2)
+            await ERC1155.registerContract(util.handler.address, REGISTRATION_TYPE.HANDLER)
+            await util.handler.registerContract(ERC1155.address, REGISTRATION_TYPE.ERC1155)
+            await util.handler.registerCallback(ERC1155.address, util.handler.address, 789, CALLBACK_TYPE.TRANSFER, TEST_CALLBACK_FUNCTION, true)
+            let ticks = await util.handler.ticks()
+            expect(ticks).to.equal(0)
+            await ERC1155.safeTransferFrom(util.deployer.address, util.bob.address, 789, 2, 0)
+            ticks = await util.handler.ticks()
+            let lastTokenId = await util.handler.lastTokenId()
+            let lastTo = await util.handler.lastTo()
+            let lastFrom = await util.handler.lastFrom()
+            expect(ticks).to.equal(2)
+            expect(lastTokenId).to.equal(789)
+            expect(lastTo).to.equal(util.bob.address)
+            expect(lastFrom).to.equal(util.deployer.address)
+        })
         it('should execute callbacks on batch mint')
     })
 })
+async function sign(web3, hash){
+    let accounts = await web3.eth.getAccounts()
+    let signature = await web3.eth.sign(hash, accounts[0])
+    return signature
+}

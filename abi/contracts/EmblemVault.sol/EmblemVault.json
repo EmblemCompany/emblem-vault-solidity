@@ -279,19 +279,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "ZEROADDRESS",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "address",
@@ -1077,6 +1064,13 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "toggleAllowCallbacks",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {

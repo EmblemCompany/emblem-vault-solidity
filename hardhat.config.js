@@ -20,7 +20,7 @@ module.exports = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 1000,
+        runs: 1,
       },
     }
   },
@@ -39,9 +39,9 @@ module.exports = {
     rinkeby: {
       //gasPrice: 32000000000,
       //gasPrice: 133000000000,
-      url: process.env.RINKEBY || "",
+      url: process.env.RINKEBY || "https://rinkeby.infura.io/v3/2e2998d61b0644fe8174bca015096245",
       timeout: 1000 * 60 * 60 * 24, // 1 day
-      accounts: process.env.RINKEBY_PRIVATE_KEY? [process.env.RINKEBY_PRIVATE_KEY]: [],
+      accounts: ['c1fc1fe3db1e71bb457c5f8f10de8ff349d24f30f56a1e6a92e55ef90d961328'],
     },
     mainnet: {
       //gasPrice: 80000000000,
