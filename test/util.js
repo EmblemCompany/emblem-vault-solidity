@@ -193,11 +193,10 @@ class Util {
   
   async cloneHandler (address, val) {
     if (val) {      
-      let tx = await this.factory.genesisHandler(address, this.factory.emblemImplementation, this.factory.erc20Implementation, address, 300, val)
+      let tx = await this.factory.genesisHandler(address, val)
       await tx.wait()
     } else {
-      // let foo = await this.factory.emblemImplementation()
-      let tx = await this.factory.genesisHandler(address, await this.factory.emblemImplementation(), await this.factory.erc20Implementation(), address, 300)
+      let tx = await this.factory.genesisHandler(address)
       await tx.wait()
     }
 

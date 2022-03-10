@@ -19,64 +19,33 @@
     "type": "event"
   },
   {
-    "inputs": [],
-    "name": "CANNOT_TRANSFER_TO_ZERO_ADDRESS",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "NOT_CURRENT_OWNER",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
+    "anonymous": false,
     "inputs": [
       {
+        "indexed": true,
         "internalType": "address",
-        "name": "owner",
+        "name": "newThingAddress",
         "type": "address"
       },
       {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
+        "indexed": true,
+        "internalType": "address",
+        "name": "libraryAddress",
+        "type": "address"
       }
     ],
-    "name": "getFirstSerialByOwner",
-    "outputs": [
+    "name": "ThingCreated",
+    "type": "event"
+  },
+  {
+    "inputs": [
       {
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
       }
     ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "serialNumber",
-        "type": "uint256"
-      }
-    ],
-    "name": "getOwnerOfSerial",
+    "name": "clones",
     "outputs": [
       {
         "internalType": "address",
@@ -90,22 +59,35 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
+        "internalType": "string",
+        "name": "_name",
+        "type": "string"
       },
       {
         "internalType": "uint256",
-        "name": "index",
+        "name": "_value",
         "type": "uint256"
       }
     ],
-    "name": "getSerial",
+    "name": "createThing",
     "outputs": [
       {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "clone",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getOwner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -114,25 +96,12 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "serialNumber",
-        "type": "uint256"
+        "internalType": "address[]",
+        "name": "things",
+        "type": "address[]"
       }
     ],
-    "name": "getTokenIdForSerialNumber",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "isSerialized",
+    "name": "incrementThings",
     "outputs": [
       {
         "internalType": "bool",
@@ -140,25 +109,33 @@
         "type": "bool"
       }
     ],
-    "stateMutability": "view",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
         "internalType": "address",
-        "name": "owner",
+        "name": "_libraryAddress",
         "type": "address"
       }
     ],
-    "name": "mintSerial",
+    "name": "initialize",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "libraryAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -175,27 +152,8 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "ownerSerialCount",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [],
-    "name": "toggleSerialization",
+    "name": "renounceOwnership",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -204,13 +162,39 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "_newOwner",
+        "name": "newOwner",
         "type": "address"
       }
     ],
     "name": "transferOwnership",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_libraryAddress",
+        "type": "address"
+      }
+    ],
+    "name": "updateLibrary",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "version",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "version",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   }
 ]

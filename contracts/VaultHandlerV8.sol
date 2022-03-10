@@ -36,43 +36,42 @@ import "./HasCallbacks.sol";
 contract VaultHandlerV8 is ReentrancyGuard, HasCallbacks, ERC165 {
     
     using SafeMath for uint256;
-    string public metadataBaseUri;
-    bool public initialized;
-    address public nftAddress;
+    string public metadataBaseUri = "https://api.emblemvault.io/s:evmetadata/meta/";
+    // bool public initialized;
+    // address public nftAddress;
     address public recipientAddress;
-    address public paymentAddress;
-    uint256 public price;
+    // address public paymentAddress;
+    // uint256 public price;
 
     bytes4 private constant _INTERFACE_ID_ERC1155 = 0xd9b67a26;
     bytes4 private constant _INTERFACE_ID_ERC20 = 0x74a1476f;
     bytes4 private constant _INTERFACE_ID_ERC721 = 0x80ac58cd;
-    bytes4 private constant _INTERFACE_ID_HANDLER = bytes4(keccak256('handler'));
-    
+    // bytes4 private constant _INTERFACE_ID_HANDLER = bytes4(keccak256("handler"));
     bool public shouldBurn = false;
     
-    struct PreTransfer {
-        string payload;
-        bytes32 preImage;
-        address _from;
-    }
+    // struct PreTransfer {
+    //     string payload;
+    //     bytes32 preImage;
+    //     address _from;
+    // }
 
-    mapping(address => mapping(uint => PreTransfer)) preTransfers;
-    mapping(address => mapping(uint => mapping(uint => PreTransfer))) preTransfersByIndex;
-    mapping(address => mapping(uint => uint)) preTransferCounts;
+    // mapping(address => mapping(uint => PreTransfer)) preTransfers;
+    // mapping(address => mapping(uint => mapping(uint => PreTransfer))) preTransfersByIndex;
+    // mapping(address => mapping(uint => uint)) preTransferCounts;
     
     mapping(address => bool) public witnesses;
     mapping(uint256 => bool) usedNonces;
     
-    constructor(address _nftAddress, address _paymentAddress, address _recipientAddress, uint256 _price) {
+    constructor() {
         addWitness(owner);
-        metadataBaseUri = "https://api.emblemvault.io/s:evmetadata/meta/";
-        nftAddress = _nftAddress;
-        paymentAddress = _paymentAddress;
-        recipientAddress = _recipientAddress;
-        initialized = true;
-        uint decimals = BasicERC20(paymentAddress).decimals();
-        price = _price.mul(10 ** decimals);
-        _registerInterface(_INTERFACE_ID_HANDLER);
+        
+        // nftAddress = _nftAddress;
+        // paymentAddress = _paymentAddress;
+        recipientAddress = _msgSender();
+        // initialized = true;
+        // uint decimals = BasicERC20(paymentAddress).decimals();
+        // price = _price.mul(10 ** decimals);
+        // _registerInterface(_INTERFACE_ID_HANDLER);
     }
     
     /**
@@ -82,8 +81,6 @@ contract VaultHandlerV8 is ReentrancyGuard, HasCallbacks, ERC165 {
     function getOwner() external view returns (address) {
         return owner;
     }
-
-    
 
     function claim(address _nftAddress, uint256 tokenId) public nonReentrant isRegisteredContract(_nftAddress) {
         Claimed claimer = Claimed(registeredOfType[6][0]);
@@ -99,38 +96,32 @@ contract VaultHandlerV8 is ReentrancyGuard, HasCallbacks, ERC165 {
             claimer.claim(_nftAddress, serialNumber, _msgSender());
         } else {            
             require(!claimer.isClaimed(_nftAddress, tokenId, proof), "Already Claimed");
-            IERC721 token = IERC721(nftAddress);
+            IERC721 token = IERC721(_nftAddress);
             require(token.ownerOf(tokenId) == _msgSender(), "Not Token Owner");
             token.burn(tokenId);
             claimer.claim(_nftAddress, tokenId, _msgSender());
         }
         executeCallbacksInternal(_nftAddress, _msgSender(), address(0), tokenId, IHandlerCallback.CallbackType.CLAIM);
     }
-
-    function getConvertedSerial(address _nftAddress, uint256 tokenId) public view returns (uint256) {
-        uint256 serialNumber = IIsSerialized(_nftAddress).getFirstSerialByOwner(_msgSender(), tokenId);
-        return serialNumber;
-    }
     
-    function buyWithSignature(address _nftAddress, address _to, uint256 _tokenId, string calldata _payload, uint256 _nonce, bytes calldata _signature) public nonReentrant {
-        IERC20Token paymentToken = IERC20Token(paymentAddress);
-        if (shouldBurn && price > 0) {
-            require(paymentToken.transferFrom(msg.sender, address(this), price), 'Transfer ERROR'); // Payment sent to recipient
-            BasicERC20(paymentAddress).burn(price);
-        } else if(price > 0) {
-            require(paymentToken.transferFrom(msg.sender, address(recipientAddress), price), 'Transfer ERROR'); // Payment sent to recipient
-        }
-        address signer = getAddressFromSignatureMint(_nftAddress, _to, _tokenId, _nonce, _payload, _signature);
-        require(witnesses[signer], 'Not Witnessed');
-        usedNonces[_nonce] = true;
-        string memory _uri = concat(metadataBaseUri, uintToStr(_tokenId));
-        if (checkInterface(_nftAddress, _INTERFACE_ID_ERC1155)) {
-            IERC1155(_nftAddress).mint(_to, _tokenId, 1);
-        } else {
-            IERC721(_nftAddress).mint(_to, _tokenId, _uri, _payload);
-        }
-        
-    }
+    // function buyWithSignature(address _nftAddress, address _to, uint256 _tokenId, string calldata _payload, uint256 _nonce, bytes calldata _signature) public nonReentrant {
+    //     IERC20Token paymentToken = IERC20Token(paymentAddress);
+    //     if (shouldBurn && price > 0) {
+    //         require(paymentToken.transferFrom(msg.sender, address(this), price), 'Transfer ERROR'); // Payment sent to recipient
+    //         BasicERC20(paymentAddress).burn(price);
+    //     } else if(price > 0) {
+    //         require(paymentToken.transferFrom(msg.sender, address(recipientAddress), price), 'Transfer ERROR'); // Payment sent to recipient
+    //     }
+    //     address signer = getAddressFromSignatureMint(_nftAddress, _to, _tokenId, _nonce, _payload, _signature);
+    //     require(witnesses[signer], 'Not Witnessed');
+    //     usedNonces[_nonce] = true;
+    //     string memory _uri = concat(metadataBaseUri, uintToStr(_tokenId));
+    //     if (checkInterface(_nftAddress, _INTERFACE_ID_ERC1155)) {
+    //         IERC1155(_nftAddress).mint(_to, _tokenId, 1);
+    //     } else {
+    //         IERC721(_nftAddress).mint(_to, _tokenId, _uri, _payload);
+    //     }
+    // }
 
     function buyWithSignedPrice(address _nftAddress, address _payment, uint _price, address _to, uint256 _tokenId, string calldata _payload, uint256 _nonce, bytes calldata _signature) public nonReentrant {
         IERC20Token paymentToken = IERC20Token(_payment);
@@ -214,10 +205,10 @@ contract VaultHandlerV8 is ReentrancyGuard, HasCallbacks, ERC165 {
         witnesses[_witness] = false;
     }
 
-    function transferToStaking(address _nftAddress, address _to, uint256 tokenId, uint256 value) external nonReentrant {
-        IERC721 nftToken = IERC721(_nftAddress);
-        nftToken.safeTransferFrom(_msgSender(), _to, tokenId, abi.encode(_nftAddress, value));
-    }
+    // function transferToStaking(address _nftAddress, address _to, uint256 tokenId, uint256 value) external nonReentrant {
+    //     IERC721 nftToken = IERC721(_nftAddress);
+    //     nftToken.safeTransferFrom(_msgSender(), _to, tokenId, abi.encode(_nftAddress, value));
+    // }
 
     function getAddressFromSignatureHash(bytes32 _hash, bytes calldata signature) public pure returns (address) {
         address addressFromSig = recoverSigner(_hash, signature);
@@ -253,64 +244,64 @@ contract VaultHandlerV8 is ReentrancyGuard, HasCallbacks, ERC165 {
         return witnesses[addressFromSig];
     }
     
-    function transferWithCode(address _nftAddress, uint256 _tokenId, string calldata code, address _to, uint256 _nonce,  bytes calldata signature) public nonReentrant {
-        require(witnesses[getAddressFromSignature(_to, _tokenId, _nonce, signature)], 'Not Witnessed');
-        IERC721 nftToken = IERC721(_nftAddress);
-        PreTransfer memory preTransfer = preTransfers[_nftAddress][_tokenId];
-        require(preTransfer.preImage == sha256(abi.encodePacked(code)), 'Code does not match'); // Payload should match
-        nftToken.transferFrom(preTransfer._from, _to,  _tokenId);
-        delete preTransfers[_nftAddress][_tokenId];
-        delete preTransfersByIndex[_nftAddress][_tokenId][preTransferCounts[_nftAddress][_tokenId]];
-        preTransferCounts[_nftAddress][_tokenId] = preTransferCounts[_nftAddress][_tokenId].sub(1);
-        usedNonces[_nonce] = true;
-    }
+    // function transferWithCode(address _nftAddress, uint256 _tokenId, string calldata code, address _to, uint256 _nonce,  bytes calldata signature) public nonReentrant {
+    //     require(witnesses[getAddressFromSignature(_to, _tokenId, _nonce, signature)], 'Not Witnessed');
+    //     IERC721 nftToken = IERC721(_nftAddress);
+    //     PreTransfer memory preTransfer = preTransfers[_nftAddress][_tokenId];
+    //     require(preTransfer.preImage == sha256(abi.encodePacked(code)), 'Code does not match'); // Payload should match
+    //     nftToken.transferFrom(preTransfer._from, _to,  _tokenId);
+    //     delete preTransfers[_nftAddress][_tokenId];
+    //     delete preTransfersByIndex[_nftAddress][_tokenId][preTransferCounts[_nftAddress][_tokenId]];
+    //     preTransferCounts[_nftAddress][_tokenId] = preTransferCounts[_nftAddress][_tokenId].sub(1);
+    //     usedNonces[_nonce] = true;
+    // }
     
-    function addPreTransfer(address _nftAddress, uint256 _tokenId, bytes32 preImage) public nonReentrant {
-        require(!_duplicatePretransfer(_nftAddress, _tokenId), 'Duplicate PreTransfer');
-        preTransferCounts[_nftAddress][_tokenId] = preTransferCounts[_nftAddress][_tokenId].add(1);
-        preTransfers[_nftAddress][_tokenId] = PreTransfer("payload", preImage, msg.sender);
-        preTransfersByIndex[_nftAddress][_tokenId][preTransferCounts[_nftAddress][_tokenId]] = preTransfers[_nftAddress][_tokenId];
-    }
+    // function addPreTransfer(address _nftAddress, uint256 _tokenId, bytes32 preImage) public nonReentrant {
+    //     require(!_duplicatePretransfer(_nftAddress, _tokenId), 'Duplicate PreTransfer');
+    //     preTransferCounts[_nftAddress][_tokenId] = preTransferCounts[_nftAddress][_tokenId].add(1);
+    //     preTransfers[_nftAddress][_tokenId] = PreTransfer("payload", preImage, msg.sender);
+    //     preTransfersByIndex[_nftAddress][_tokenId][preTransferCounts[_nftAddress][_tokenId]] = preTransfers[_nftAddress][_tokenId];
+    // }
     
-    function _duplicatePretransfer(address _nftAddress, uint256 _tokenId) internal view returns (bool) {
-        string memory data = preTransfers[_nftAddress][_tokenId].payload;
-        bytes32 NULL = keccak256(bytes(''));
-        return keccak256(bytes(data)) != NULL;
-    }
+    // function _duplicatePretransfer(address _nftAddress, uint256 _tokenId) internal view returns (bool) {
+    //     string memory data = preTransfers[_nftAddress][_tokenId].payload;
+    //     bytes32 NULL = keccak256(bytes(''));
+    //     return keccak256(bytes(data)) != NULL;
+    // }
     
-    function deletePreTransfer(address _nftAddress, uint256 _tokenId) public nonReentrant {
-        require(preTransfers[_nftAddress][_tokenId]._from == msg.sender, 'PreTransfer does not belong to sender');
-        delete preTransfersByIndex[_nftAddress][_tokenId][preTransferCounts[_nftAddress][_tokenId]];
-        preTransferCounts[_nftAddress][_tokenId] = preTransferCounts[_nftAddress][_tokenId].sub(1);
-        delete preTransfers[_nftAddress][_tokenId];
-    }
+    // function deletePreTransfer(address _nftAddress, uint256 _tokenId) public nonReentrant {
+    //     require(preTransfers[_nftAddress][_tokenId]._from == msg.sender, 'PreTransfer does not belong to sender');
+    //     delete preTransfersByIndex[_nftAddress][_tokenId][preTransferCounts[_nftAddress][_tokenId]];
+    //     preTransferCounts[_nftAddress][_tokenId] = preTransferCounts[_nftAddress][_tokenId].sub(1);
+    //     delete preTransfers[_nftAddress][_tokenId];
+    // }
     
-    function getPreTransfer(address _nftAddress, uint256 _tokenId) public view returns (PreTransfer memory) {
-        return preTransfers[_nftAddress][_tokenId];
-    }
+    // function getPreTransfer(address _nftAddress, uint256 _tokenId) public view returns (PreTransfer memory) {
+    //     return preTransfers[_nftAddress][_tokenId];
+    // }
     
-    function checkPreTransferImage(string memory image, bytes32 preImage) public pure returns (bytes32, bytes32, bool) {
-        bytes32 calculated = sha256(abi.encodePacked(image));
-        bytes32 preBytes = preImage;
-        return (calculated, preBytes, calculated == preBytes);
-    }
+    // function checkPreTransferImage(string memory image, bytes32 preImage) public pure returns (bytes32, bytes32, bool) {
+    //     bytes32 calculated = sha256(abi.encodePacked(image));
+    //     bytes32 preBytes = preImage;
+    //     return (calculated, preBytes, calculated == preBytes);
+    // }
     
-    function getPreTransferCount(address _nftAddress, uint256 _tokenId) public view returns (uint length) {
-        return preTransferCounts[_nftAddress][_tokenId];
-    }
+    // function getPreTransferCount(address _nftAddress, uint256 _tokenId) public view returns (uint length) {
+    //     return preTransferCounts[_nftAddress][_tokenId];
+    // }
     
-    function getPreTransferByIndex(address _nftAddress, uint256 _tokenId, uint index) public view returns (PreTransfer memory) {
-        return preTransfersByIndex[_nftAddress][_tokenId][index];
-    }
+    // function getPreTransferByIndex(address _nftAddress, uint256 _tokenId, uint index) public view returns (PreTransfer memory) {
+    //     return preTransfersByIndex[_nftAddress][_tokenId][index];
+    // }
     
     function changeMetadataBaseUri(string calldata _uri) public onlyOwner {
         metadataBaseUri = _uri;
     }
     
-    function transferPaymentOwnership(address newOwner) external onlyOwner {
-        Ownable paymentToken = Ownable(paymentAddress);
-        paymentToken.transferOwnership(newOwner);
-    }
+    // function transferPaymentOwnership(address newOwner) external onlyOwner {
+    //     Ownable paymentToken = Ownable(paymentAddress);
+    //     paymentToken.transferOwnership(newOwner);
+    // }
     
     function transferNftOwnership(address _nftAddress, address newOwner) external onlyOwner {
         Ownable nftToken = Ownable(_nftAddress);
@@ -327,27 +318,27 @@ contract VaultHandlerV8 is ReentrancyGuard, HasCallbacks, ERC165 {
         nftToken.updateTokenUri(_tokenId, _uri);
     }
     
-    function getPaymentDecimals() public view returns (uint8){
-        BasicERC20 token = BasicERC20(paymentAddress);
-        return token.decimals();
-    }
+    // function getPaymentDecimals() public view returns (uint8){
+    //     BasicERC20 token = BasicERC20(paymentAddress);
+    //     return token.decimals();
+    // }
     
-    function changePayment(address payment) public onlyOwner {
-       paymentAddress = payment;
-    }
+    // function changePayment(address payment) public onlyOwner {
+    //    paymentAddress = payment;
+    // }
 
     function changeRecipient(address _recipient) public onlyOwner {
        recipientAddress = _recipient;
     }
     
-    function changeNft(address token) public onlyOwner {
-        nftAddress = token;
-    }
+    // function changeNft(address token) public onlyOwner {
+    //     nftAddress = token;
+    // }
     
-    function changePrice(uint256 _price) public onlyOwner {
-        uint decimals = BasicERC20(paymentAddress).decimals();
-        price = _price.mul(10 ** decimals);
-    }
+    // function changePrice(uint256 _price) public onlyOwner {
+    //     uint decimals = BasicERC20(paymentAddress).decimals();
+    //     price = _price.mul(10 ** decimals);
+    // }
 
     function checkInterface(address token, bytes4 _interface) public view returns (bool) {
         IERC165 nftToken = IERC165(token);
@@ -362,15 +353,15 @@ contract VaultHandlerV8 is ReentrancyGuard, HasCallbacks, ERC165 {
         return supportsInterface;
     }
 
-    function toBytes(address a) public pure returns (bytes memory b){
-        assembly {
-            let m := mload(0x40)
-            a := and(a, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
-            mstore(add(m, 20), xor(0x140000000000000000000000000000000000000000, a))
-            mstore(0x40, add(m, 52))
-            b := m
-        }
-    }
+    // function toBytes(address a) public pure returns (bytes memory b){
+    //     assembly {
+    //         let m := mload(0x40)
+    //         a := and(a, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+    //         mstore(add(m, 20), xor(0x140000000000000000000000000000000000000000, a))
+    //         mstore(0x40, add(m, 52))
+    //         b := m
+    //     }
+    // }
     
     function concat(string memory a, string memory b) internal pure returns (string memory) {
         return string(abi.encodePacked(a, b));
@@ -406,13 +397,13 @@ contract VaultHandlerV8 is ReentrancyGuard, HasCallbacks, ERC165 {
 
         return addr;
     }
-    function bytesToUint(bytes20 b) public pure returns (uint256){
-        uint256 number;
-        for(uint i=0;i<b.length;i++){
-            number = number + uint8(b[i]);
-        }
-        return number;
-    }
+    // function bytesToUint(bytes20 b) public pure returns (uint256){
+    //     uint256 number;
+    //     for(uint i=0;i<b.length;i++){
+    //         number = number + uint8(b[i]);
+    //     }
+    //     return number;
+    // }
     function uintToStr(uint _i) internal pure returns (string memory _uintAsString) {
         if (_i == 0) {
             return "0";

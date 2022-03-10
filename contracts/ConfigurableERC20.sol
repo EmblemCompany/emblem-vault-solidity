@@ -69,12 +69,10 @@ abstract contract ERC20Detailed is IERC20 {
     string public name;
     string public symbol;
     uint8 public decimals;
+    bool initialized;
 
-    constructor(
-        string memory _name,
-        string memory _symbol,
-        uint8 _decimals
-    ) {
+    function init(string memory _name, string memory _symbol, uint8 _decimals) public {
+        require(!initialized, "Already Initialized");
         name = _name;
         symbol = _symbol;
         decimals = _decimals;
@@ -85,13 +83,13 @@ contract Configurable is Context {
     using SafeMath for uint256;
 
     address private governance;
-    bool private _transferable = true;
-    bool private _burnable = true;
-    bool private _visible = true;
-    bool private _allowPrivateTransactions = false;
-    bool private _locked = false;
-    bool private _forever = false;
-    uint256 private _lockBlock = 0;
+    bool internal _transferable = true;
+    bool internal _burnable = true;
+    bool internal _visible = true;
+    bool internal _allowPrivateTransactions = false;
+    bool internal _locked = false;
+    bool internal _forever = false;
+    uint256 internal _lockBlock = 0;
 
     mapping(address => bool) public minters;
     mapping(address => bool) public viewers;
@@ -539,8 +537,22 @@ contract ConfigurableERC20 is ERC20, ERC20Detailed {
     using Address for address;
     using SafeMath for uint256;
 
-    constructor() ERC20Detailed("Change Me", "CHANGE", 18) {
-        _setGovernance(_msgSender());
+    constructor() {
+        init(_msgSender(), name, symbol, decimals);
+    }
+
+    function init(address _owner, string memory _name, string memory _symbol, uint8 _decimals) public {
+        require(!initialized, "Already Initialized");
+        ERC20Detailed.init(_name, _symbol, _decimals);      
+        _setGovernance(_owner);
+        Configurable._transferable = true;
+        Configurable._burnable = true;
+        Configurable._visible = true;
+        Configurable._allowPrivateTransactions = false;
+        Configurable._locked = false;
+        Configurable._forever = false;
+        Configurable._lockBlock = 0; 
+        initialized = true;
     }
 
     function transfer(

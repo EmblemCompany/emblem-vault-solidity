@@ -619,18 +619,22 @@ abstract contract NFTokenEnumerableMetadata is
    * @dev Mapping from NFT ID to encrypted value.
    */
   mapping (uint256 => string) internal idToPayload;
-
+  bool initialized = false;
   /**
    * @dev Contract constructor.
    * @notice When implementing this contract don't forget to set nftName and nftSymbol.
    */
-  constructor()
-  {
-    // supportedInterfaces[0x5b5e139f] = true; // ERC721Metadata
-    // supportedInterfaces[0x780e9d63] = true; // ERC721Enumerable
-    _registerInterface(0x5b5e139f);
-    _registerInterface(0x780e9d63);
+  constructor() {
+    // init(_msgSender());
   }
+
+  // function init(address _owner) public {
+  //   require(!initialized, "Already Initialized");
+  //   owner = _owner;
+  //   _registerInterface(0x5b5e139f); // ERC721Metadata
+  //   _registerInterface(0x780e9d63); // ERC721Enumerable
+  //   initialized = true;
+  // }
 
   /**
    * @dev Returns a descriptive name for a collection of NFTokens.
@@ -935,9 +939,18 @@ contract EmblemVault is
   /**
    * @dev Contract constructor. Sets metadata extension `name` and `symbol`.
    */
-  constructor() public {
+  constructor() {
+    init(_msgSender());
+  }
+
+  function init(address _owner) public {
+    require(!initialized, "Already Initialized");
+    owner = _owner;
     nftName = "Emblem Vault V2";
     nftSymbol = "Emblem.pro";
+    _registerInterface(0x5b5e139f); // ERC721Metadata
+    _registerInterface(0x780e9d63); // ERC721Enumerable
+    initialized = true;
   }
   
   function changeName(string calldata name, string calldata symbol) external onlyOwner {

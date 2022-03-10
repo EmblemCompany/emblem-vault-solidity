@@ -1,28 +1,33 @@
-const hre = require('hardhat');
-const fs = require('fs');
-const path = require('path');
-const FACTORY_ABI = require(path.resolve(__dirname, "../abi/contracts/Factory.sol/Factory.json"));
-const FACTORY_JSON = require(path.resolve(__dirname, "../abi/Deployed.json"));
-(async () => {
-  let factoryAddress = FACTORY_JSON.address
-  console.log("verify factory", factoryAddress)
+const { ethers, upgrades} = require("hardhat");
+const spawn = require('await-spawn')
+
+let HANDLER_ADDRESS //= "0x6a042F1752EF3eaB5D7efBE25994f7c2D14E2a35"
+let ADDRESS = "0xCc4658E264024FeBff26aa19d2DBF2cdbD7576Ac"
+async function main() {
+  const [_deployer] = await hre.ethers.getSigners();
+  console.log("Verifying", ADDRESS)
+  await verify(ADDRESS)
+  console.log("done")
+}
+
+main();
+
+async function verify(address, constructor = []) {
+  console.log("sleeping a sec")
+  await new Promise(resolve => setTimeout(resolve, 1000));
   try {
-    await hre.run("verify:verify", {
-      address: factoryAddress
+    return await hre.run("verify:verify", {
+      address: address,
+      constructorArguments: constructor,
     });
   } catch (e) {
-    console.log("already verified")
+    // console.log("error",e)
+    return console.log("Reason", e.toString().split("Reason: ")[1].split(" at ")[0])
   }
+}
 
-  const [deployer] = await ethers.getSigners();
-  let contract = new ethers.Contract(factoryAddress, FACTORY_ABI, deployer)
-  let implementation = await contract.implementation()
-  console.log("verify implementation", implementation)
-  try {
-    await hre.run("verify:verify", {
-      address: implementation
-    })
-  } catch (e) {
-    console.log("already verified")
-  }
-})();
+async function getHandler(address, signer) {
+  let ABI = require("../artifacts/contracts/VaultHandlerV8.sol/VaultHandlerV8.json")
+  let contract = new hre.ethers.Contract(address, ABI.abi, signer)
+  return contract;
+}

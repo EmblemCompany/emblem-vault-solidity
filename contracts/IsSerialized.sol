@@ -16,6 +16,7 @@ contract IsSerialized is Context, Ownable {
     mapping(uint256 => uint256[]) internal tokenIdToSerials;
     mapping(uint256 => uint256) internal serialToTokenId;
     mapping(uint256 => address) internal serialToOwner;
+    mapping(address => uint256) public ownerSerialCount;
 
     function isSerialized() public view returns (bool) {
         return serialized;
@@ -27,11 +28,11 @@ contract IsSerialized is Context, Ownable {
     }
 
     function mintSerial(uint256 tokenId, address owner) public onlyOwner {
-        uint256 index = tokenIdToSerials[tokenId].length;
-        uint256 serialNumber = uint256(keccak256(abi.encode(tokenId, block.number, index)));
+        uint256 serialNumber = uint256(keccak256(abi.encode(tokenId, owner, ownerSerialCount[owner])));
         tokenIdToSerials[tokenId].push(serialNumber);
         serialToTokenId[serialNumber] = tokenId;
         serialToOwner[serialNumber] = owner;
+        ownerSerialCount[owner]++;
         if (!hasSerialized) {
             hasSerialized = true;
         }
@@ -40,6 +41,8 @@ contract IsSerialized is Context, Ownable {
     function transferSerial(uint256 serialNumber, address from, address to) internal {
         require(serialToOwner[serialNumber] == from, 'Not correct owner of serialnumber');
         serialToOwner[serialNumber] = to;
+        ownerSerialCount[to]++;
+        ownerSerialCount[from]--;
     }
 
     function getSerial(uint256 tokenId, uint256 index) public view returns (uint256) {

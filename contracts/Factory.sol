@@ -14,26 +14,26 @@ contract Factory is OwnableUpgradeable {
   event EmblemAdded(address indexed sender, address indexed receiver, address emblem);
   event TradeV2Added(address indexed sender, address indexed receiver, address trader);
   event TradeV3Added(address indexed sender, address indexed receiver, address trader);
-  address public immutable emblemImplementation;
-  address public immutable erc1155Implementation;
+  address public emblemImplementation;
+  address public erc1155Implementation;
   address public erc20Implementation;
-  address public immutable storageImplementation;
-  address public immutable stakeImplementation;
-  address public immutable balanceStorageImplementation;
+  address public storageImplementation;
+  address public stakeImplementation;
+  address public balanceStorageImplementation;
   address public claimedImplementation;
   address public balanceImplementation;
 
   constructor() {
     emblemImplementation = address(new EmblemVault());
     erc20Implementation = address(new ConfigurableERC20());
-    erc1155Implementation = address(new ERC1155("base.url"));
+    erc1155Implementation = address(new ERC1155());
     storageImplementation = address(new Storage());
     balanceStorageImplementation = address(new BalanceStorage());
     stakeImplementation = address(new NFTStake());
     __Ownable_init();
   }
-  function genesisHandler(address _receiver, address _nftAddress, address _paymentAddress, address _recipientAddress, uint256 _price) external payable returns (address) {
-    VaultHandlerV8 token = new VaultHandlerV8(_nftAddress, _paymentAddress, _recipientAddress, _price);
+  function genesisHandler(address _receiver) external payable returns (address) {
+    VaultHandlerV8 token = new VaultHandlerV8();
     
     token.transferOwnership(payable(_receiver));
     if (msg.value > 0) {
@@ -78,7 +78,6 @@ contract Factory is OwnableUpgradeable {
     emit TradeV3Added(_msgSender(), _receiver, address(token));
     return address(token);
   }
-
   function genesisClaimed(address _receiver) external payable returns (address) {
     Claimed token = new Claimed(storageImplementation);
     token.transferOwnership(payable(_receiver));
@@ -92,7 +91,6 @@ contract Factory is OwnableUpgradeable {
     emit ClaimerAdded(_msgSender(), _receiver, address(token));
     return address(token);
   }
-
   function genesisEmblem(address _receiver) external payable returns (address) {
     EmblemVault token = new EmblemVault();
     token.transferOwnership(payable(_receiver));
@@ -103,7 +101,6 @@ contract Factory is OwnableUpgradeable {
     emit EmblemAdded(_msgSender(), _receiver, address(token));
     return address(token);
   }
-
   function genesisBalance(address _receiver) external payable returns (address) {
     Balance balance = new Balance(balanceStorageImplementation);
     balance.transferOwnership(payable(_receiver));

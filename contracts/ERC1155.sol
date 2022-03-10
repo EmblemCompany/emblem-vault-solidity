@@ -30,41 +30,21 @@ contract ERC1155 is ERC165, IERC1155, IERC1155MetadataURI, HasRegistration, IsSe
     // Mapping from account to operator approvals
     mapping (address => mapping(address => bool)) private _operatorApprovals;
 
-    // Used as the URI for all token types by relying on ID substitution, e.g. https://token-cdn-domain/{id}.json
+    bool initialized = false;
     string private _uri;
+    
+    constructor () {
+        init(_msgSender());
+    }
 
-    /*
-     *     bytes4(keccak256('balanceOf(address,uint256)')) == 0x00fdd58e
-     *     bytes4(keccak256('balanceOfBatch(address[],uint256[])')) == 0x4e1273f4
-     *     bytes4(keccak256('setApprovalForAll(address,bool)')) == 0xa22cb465
-     *     bytes4(keccak256('isApprovedForAll(address,address)')) == 0xe985e9c5
-     *     bytes4(keccak256('safeTransferFrom(address,address,uint256,uint256,bytes)')) == 0xf242432a
-     *     bytes4(keccak256('safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)')) == 0x2eb2c2d6
-     *
-     *     => 0x00fdd58e ^ 0x4e1273f4 ^ 0xa22cb465 ^
-     *        0xe985e9c5 ^ 0xf242432a ^ 0x2eb2c2d6 == 0xd9b67a26
-     */
-    bytes4 private constant _INTERFACE_ID_ERC1155 = 0xd9b67a26;
-
-    /*
-     *     bytes4(keccak256('uri(uint256)')) == 0x0e89341c
-     */
-    bytes4 private constant _INTERFACE_ID_ERC1155_METADATA_URI = 0x0e89341c;
-
-    /**
-     * @dev See {_setURI}.
-     */
-    constructor (string memory uri_) {
-        _setURI(uri_);
-
-        // register the supported interfaces to conform to ERC1155 via ERC165
-        _registerInterface(_INTERFACE_ID_ERC1155);
-
-        // register the supported interfaces to conform to ERC1155MetadataURI via ERC165
-        _registerInterface(_INTERFACE_ID_ERC1155_METADATA_URI);
-        // _mint(msg.sender,789, 2, "");
-        // _mint(msg.sender,1337, 1, "");
+    function init(address _owner) public {
+        require(!initialized, "Already Initialized");
+        owner = _owner;
+        _registerInterface(0xd9b67a26); //_INTERFACE_ID_ERC1155
+        _registerInterface(0x0e89341c); //_INTERFACE_ID_ERC1155_METADATA_URI
+        _uri = "https://api.emblemvault.io/s:evmetadata/meta/";
         serialized = true;
+        initialized = true;
     }
 
     function mint(address _to, uint256 _tokenId, uint256 _amount) public override onlyOwner {
@@ -85,6 +65,10 @@ contract ERC1155 is ERC165, IERC1155, IERC1155MetadataURI, HasRegistration, IsSe
         _burnBatch(account, ids, amounts);
     }
 
+    function setURI(string memory newuri) public onlyOwner {
+        _setURI(newuri);
+    }
+
     /**
      * @dev See {IERC1155MetadataURI-uri}.
      *
@@ -95,8 +79,8 @@ contract ERC1155 is ERC165, IERC1155, IERC1155MetadataURI, HasRegistration, IsSe
      * Clients calling this function must replace the `\{id\}` substring with the
      * actual token type ID.
      */
-    function uri(uint256) external view override returns (string memory) {
-        return _uri;
+    function uri(uint256 _tokenId) external view override returns (string memory) {
+        return string(abi.encodePacked(_uri,_tokenId));
     }
 
     /**

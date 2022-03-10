@@ -42,9 +42,10 @@ contract Balance is ReentrancyGuard, HasRegistration {
     
     constructor(address storageContract) {
         StorageAddress = storageContract;
+        initialize();
     }
     
-    function initialize() public {
+    function initialize() internal {
         require(!initialized, 'already initialized');
         IBalanceStorage _storage = IBalanceStorage(StorageAddress);
         _storage.upgradeVersion(address(this));

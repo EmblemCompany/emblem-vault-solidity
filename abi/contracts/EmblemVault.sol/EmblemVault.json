@@ -504,6 +504,19 @@
         "internalType": "address",
         "name": "_owner",
         "type": "address"
+      }
+    ],
+    "name": "init",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
       },
       {
         "internalType": "address",
