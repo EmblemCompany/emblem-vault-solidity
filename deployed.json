@@ -1,0 +1,96 @@
+{
+    "handler": {
+      "address": "0x404d4FfB1887aA8Ca5973B4F1C5257DE4d887D59",
+      "delegation": null,
+      "verified": false
+    },
+    "balanceStorage": {
+      "address": "0x23419FF7Ae793485a5b4DB9fcBe10a9d6075C0DC",
+      "delegation": null,
+      "verified": false
+    },
+    "balances": {
+      "address": "0xbB7326d0c875828a99207eFA9f87CA0Db00346b5",
+      "delegation": null,
+      "verified": false
+    },
+    "claimStorage": {
+      "address": "0xa66B34912C5B1235974D347e5A5371981B9bBa0b",
+      "delegation": null,
+      "verified": false
+    },
+    "claimed": {
+      "address": "0x45173A00750A36020b9df3B1281D7C6BE781EDa9",
+      "delegation": null,
+      "verified": false
+    },
+    "erc1155Factory": {
+      "address": "0xF8EFCC355e59eB5Ef0a43BA05F62fA0d6252052E",
+      "delegation": "0xb5661298b62e743bfd7ea1b51830d7024722ccb3",
+      "verified": true
+    },
+    "erc1155Base": {
+      "address": "0x30b6B44c41eFd26374334916F1D4433581DFdD7b",
+      "delegation": null,
+      "verified": false
+    },
+    "erc1155Clones":[
+        {
+            "address": "0x9022fb4487EBa36D5BBb0a1459247E0A6072430E"
+        }
+    ],
+    "erc721Factory": {
+      "address": "0x2B6Fea074824b41b540C0eC6D09415362e841edA",
+      "delegation": "0xdaf80a7fd8af0331f74a97099fc1d6d6952d4ca9",
+      "verified": true
+    },
+    "erc721Base": {
+      "address": "0x94afBe636b75A70F3Ee75C63315DF409C6A9d256",
+      "delegation": null,
+      "verified": false
+    },
+    "erc721Clones": [
+        {
+            "address": "0x67f3d3b7eF0359D92605F48E46F069d06805751f"
+        }
+    ],
+    "erc20Factory": {
+      "address": [
+          "0xe0342dD1bd6F796971572CBca4990EdD7421aEB5",
+          "0xdc39Abb4cd4CAE885A35A2a56eb2699701E58eAE"
+        ],
+      "delegation": [
+          "0xa57415c4e55de9b0215cce1cf567865686f27332",
+          "0xa43efe9e2651b3377d455c825797615d1b1262a7"
+      ],
+      "verified": true
+    },
+    "erc20Base": {
+      "address": "0xff756F198808AE21120a84FbD78558Ff46890577",
+      "delegation": null,
+      "verified": false
+    },
+    "stakingFactory": {
+      "address": "0x9952b75F0dCAAa80cDe1303D6eB2AB315681beA9",
+      "delegation": "0x7f60070b7278f1b96d2053d0336116e8024b09f6",
+      "verified": false
+    },
+    "stakingBase": {
+      "address": "0x9A4056Caf5A4c9178eDCCE57A41527Ec459243dF",
+      "delegation": null,
+      "verified": false
+    },
+    "catcher": [
+        {
+            "address": "0xdB4ceb5449db885C40552BeF64C84DD446a4aCB7",
+            "delegation": "0xe88a1634188cf7a5a5bfd08905bc17f42202fe4a",
+            "verified": true
+        },
+        {
+            "version": 2,
+            "address": "0xfDDa0514ec98E3e5bCEDADbB31FE49F680d1Fbe7",
+            "delegation": "0x2b87e61c07e14474549d471f6c8c497e93330461",
+            "verified": true
+          }
+    ]
+  }

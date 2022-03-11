@@ -1,3 +1,4 @@
+const { ethers, upgrades} = require("hardhat");
 const REGISTRATION_TYPE = {"EMPTY": 0, "ERC1155": 1, "ERC721":2, "HANDLER":3, "ERC20":4, "BALANCE":5, "CLAIM":6, "UNKNOWN":7, "FACTORY":8, "STAKING":9}
 
 async function deploy(name, ContractClass, constructorArgs = null) {
@@ -10,9 +11,17 @@ async function deploy(name, ContractClass, constructorArgs = null) {
 
 async function deployProxy(name, ContractClass, constructorArgs = []) {
     console.log("Deploying", name)
-    let contract = await hre.upgrades.deployProxy(ContractClass, constructorArgs)
+    let contract = await upgrades.deployProxy(ContractClass, constructorArgs)
     await contract.deployed()
     console.log(name, "deployed to", contract.address)
+    const implementationAddress = await getImplementationAddress(contract.address);
+    return {address: contract.address, delegation: implementationAddress, contract: contract, verified: true}
+}
+
+async function upgradeProxy(PROXY, name, ContractClass, constructorArgs = []) {
+    console.log("Upgrading", name)
+    let contract = await upgrades.upgradeProxy(PROXY, ContractClass, constructorArgs);
+    console.log(name, "upgraded to", contract.address)
     const implementationAddress = await getImplementationAddress(contract.address);
     return {address: contract.address, delegation: implementationAddress, contract: contract, verified: true}
 }
@@ -39,7 +48,7 @@ async function verifyAddress(address, constructor = []) {
         } catch(err) {
             reason = "Unknown " + e + " " +err
         }
-        if (reason.includes("does not have bytecode") || reason.includes("has no bytecode")) {
+        if (reason.includes("does not have bytecode") || reason.includes("has no bytecode") || reason.includes("but its bytecode doesn't")) {
             console.log("Trying again : etherscan is slow")
             return await(verifyAddress(address, constructor))
         } else {
@@ -78,5 +87,6 @@ module.exports = {
     getImplementationAddress,
     registerWithContract,
     formatResults,
+    upgradeProxy,
     REGISTRATION_TYPE
 }

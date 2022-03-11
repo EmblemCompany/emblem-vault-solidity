@@ -5,13 +5,6 @@ import "./ERC165.sol";
 
 contract HasCallbacks is HasRegistration {
 
-    // address StorageAddress;
-    // bool initialized = false;
-    
-    bytes4 private constant _INTERFACE_ID_ERC1155 = 0xd9b67a26;
-    bytes4 private constant _INTERFACE_ID_ERC20 = 0x74a1476f;
-    bytes4 private constant _INTERFACE_ID_ERC721 = 0x80ac58cd;
-    bytes4 private constant _INTERFACE_ID_HANDLER = bytes4(keccak256('handler'));
     bool allowCallbacks = true;
     
     event CallbackExecuted(address _from, address _to, address target, uint256 tokenId, bytes4 targetFunction, IHandlerCallback.CallbackType _type, bytes returnData);
@@ -31,17 +24,6 @@ contract HasCallbacks is HasRegistration {
         require(_msgSender() == owner || registrant, "Not owner or Callback registrant");
         _;
     }
-
-    // constructor(address storageContract) {
-    //     StorageAddress = storageContract;
-    // }
-
-    // function initialize(address storageContract) public {
-    //     require(!initialized, 'already initialized');
-    //     IRegistrationStorage _storage = IRegistrationStorage(storageContract);
-    //     _storage.upgradeVersion(address(this));
-    //     initialized = true;
-    // }
 
     function executeCallbacks(address _from, address _to, uint256 tokenId, IHandlerCallback.CallbackType _type) public isRegisteredContract(_msgSender()) {
         if (allowCallbacks) {
@@ -65,23 +47,25 @@ contract HasCallbacks is HasRegistration {
         bool canRevert = false;  
         for (uint256 i = 0; i < callbacks.length; ++i) {            
             IHandlerCallback.Callback memory cb = callbacks[i];    
-            canRevert = cb.canRevert;        
-            (bool success, bytes memory returnData) =
-                address(cb.target).call(
-                    abi.encodePacked(
-                        cb.targetFunction,
-                        abi.encode(_from),
-                        abi.encode(_to),
-                        abi.encode(tokenId)
-                    )
-                );
-            if (success) {
-                emit CallbackExecuted(_from, _to, cb.target, tokenId, cb.targetFunction, _type, returnData);
-            } else if (canRevert) {
-                emit CallbackReverted(_from, _to, cb.target, tokenId, cb.targetFunction, _type);
-                revert("Callback Reverted");
-            } else {
-                emit CallbackFailed(_from, _to, cb.target, tokenId, cb.targetFunction, _type);
+            canRevert = cb.canRevert;
+            if (cb.target != address(0)){
+                (bool success, bytes memory returnData) =
+                    address(cb.target).call(
+                        abi.encodePacked(
+                            cb.targetFunction,
+                            abi.encode(_from),
+                            abi.encode(_to),
+                            abi.encode(tokenId)
+                        )
+                    );
+                if (success) {
+                    emit CallbackExecuted(_from, _to, cb.target, tokenId, cb.targetFunction, _type, returnData);
+                } else if (canRevert) {
+                    emit CallbackReverted(_from, _to, cb.target, tokenId, cb.targetFunction, _type);
+                    revert("Callback Reverted");
+                } else {
+                    emit CallbackFailed(_from, _to, cb.target, tokenId, cb.targetFunction, _type);
+                }
             }
         }
     }

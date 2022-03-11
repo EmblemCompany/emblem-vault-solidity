@@ -145,6 +145,15 @@ describe('Vault Handler', () => {
     let tx = util.handler.moveVault(ERC1155.address, ERC721.address, 123, 1, 111, sig)
     await expect(tx).to.be.revertedWith('NFT Already Exists')
   })
+
+  it('MOVE sig: for testing purposes only', async ()=>{
+    var provider = selectProvider("mainnet")
+    var web3 = new Web3(provider)
+    let hash = web3.utils.soliditySha3("0x67f3d3b7eF0359D92605F48E46F069d06805751f", "0x9022fb4487EBa36D5BBb0a1459247E0A6072430E", 54321, 326113, 8438894575)
+    console.log("hash", hash)
+    let sig = await sign(web3, hash)
+    console.log("sig", sig)
+  })
   
 })
 

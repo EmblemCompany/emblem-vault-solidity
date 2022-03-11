@@ -1,0 +1,162 @@
+<html lang="en">
+
+<head>
+  <title class="contractName">ConfigurableERC20</title>
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"
+    integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+  <!-- // <script src="https://s3.amazonaws.com/browser-solc.dappbench.com/browser-solc.js"></script> -->
+  <script id="testscript" type="module" src="./app.js" type="text/javascript"></script>
+  <!-- <script type="module" src="./dist/web3.js"></script> -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.3.0/web3.min.js" integrity="sha512-ppuvbiAokEJLjOUQ24YmpP7tTaLRgzliuldPRZ01ul6MhRC+B8LzcVkXmUsDee7ne9chUfApa9/pWrIZ3rwTFQ==" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.6/handlebars.min.js" integrity="sha512-zT3zHcFYbQwjHdKjCu6OMmETx8fJA9S7E6W7kBeFxultf75OPTYUJigEKX58qgyQMi1m1EgenfjMXlRZG8BXaw==" crossorigin="anonymous"></script>
+  
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha512-n6dYFOG599s4/mGlA6E+YLgtg9uPTOMDUb0IprSMDYVLr0ctiRryPEQ8gpM4DCMlx7M2G3CK+ZcaoOoJolzdCg==" crossorigin="anonymous"></script> -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.bundle.min.js" integrity="sha512-U85Jq47KunKegjv6gVMAnQwtQjovdXz/DQOvQoxrD6j3aGfDDbp5AAJuOdnQx1sefM90D9KBKSQkZGR5hrLbtg==" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap-reboot.css" integrity="sha512-yTz3sX5upIqKvjXkcA0v1VOY24MXgdc836KR0CaL+yKXpybgJSiWHDg8h0qXGvBL4Hq4ZXO3Bx9oXteIASNmTA==" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css" integrity="sha512-57lHfvbE5GLWA20qDTCTRUpKntBnFlG0V+x8f3q3DqZK6XlHGVsbpCCI/kadtaFBMEYmq5IeVZnsWjWx2QoQtw==" crossorigin="anonymous" />
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha/js/bootstrap.min.js" integrity="sha512-0z9zJIjxQaDVzlysxlaqkZ8L9jh8jZ2d54F3Dn36Y0a8C6eI/RFOME/tLCFJ42hfOxdclfa29lPSNCmX5ekxnw==" crossorigin="anonymous"></script> -->
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha/js/umd/util.js" integrity="sha512-LsEwFGlbBmTbjVTzd3kwfwZhaAXHxbiJ8k2Q8IrEgPxAUaAtZ2L8ro1JF4PNqaXGenGZKgaKjk+iW/Mdecl4ig==" crossorigin="anonymous"></script> -->
+  <!-- <script type="module" src="./node_modules/web3-utils/dist/web3-utils.cjs.js"></script> -->
+  <script src="./utils.js"></script>
+  <script src="./helpers.js"></script>
+
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha/js/umd/tab.js" integrity="sha512-olN/Kb/q74zVFrKwQ1z5lynf81vJGJKExsIV1Jc1OIdkvUdHwpnp5ODWxcEKafYztflLBPqU4ocGfIi3SArtlQ==" crossorigin="anonymous"></script> -->
+
+  <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous"> -->
+    <style>
+      .rule {
+        height: 2px;
+        background-color: black;
+      }
+      .rule.sub-rule {
+        opacity: 0.2;
+      }
+      .rule.sub-rule.detail {
+        opacity: 0.05;
+      }
+    </style>
+
+</head>
+
+<body>
+  
+  <div class="container">
+    <div class="container">
+      <div class="row" style="margin-bottom: 10px">
+        <div class="col-6">
+          <h1 class="contractName">Configurable ERC20 Token</h1>
+        </div>
+        <div class="col-6" style="margin-top: 10px;">
+          <div class="input-group mb-3">
+            <input type="text" class="form-control" id="contract-address" placeholder="Contract Address" aria-label="Contract Address" aria-describedby="load-button">
+            <div class="input-group-append">
+              <button class="btn btn-outline-secondary" type="button" id="load-button">Load</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+       
+    <div class="container">
+      <div class="row rule" style="margin-bottom: 10px">            
+      </div>
+    </div>
+
+    <template id="function-list-template">
+      {{#each functions}}
+      <div class="container">
+        <div class="row rule sub-rule detail" style="margin-bottom: 10px">            
+        </div>
+      </div>
+  
+      <div class="container">
+        <div class="row" style="margin-bottom: 10px">
+          <div class="col-12">
+            <h4>{{capitalizeAll formattedName}}</h4>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="container">
+        <div class="row" style="margin-bottom: 10px" id="{{name}}{{#if index includeZero=true}}[{{index}}]{{/if}}">
+          <div class="col-{{formattedNameWidth}}">
+          <button id="btn-{{name}}" class="btn btn-outline-primary fun-btn" type="button">
+              {{capitalizeAll formattedName}}</button>
+          </div>
+          {{#if this.inputs}}
+            {{#each this.inputs}}
+              <div class="col-{{width}}">
+                <input type="text" class="form-control" placeholder="{{name}} ({{type}})" id="{{../name}}{{#if ../index includeZero=true}}[{{../index}}]{{/if}}-{{name}}"
+                  aria-label="{{../name}}_{{name}}" >
+              </div>
+            {{/each}}
+          {{else}}
+            <div class="col-{{minus 12 formattedNameWidth}}"></div>
+          {{/if}}
+        </div>
+        <div class="row" style="margin-bottom: 10px" id="{{name}}{{#if index includeZero=true}}[{{index}}]{{/if}}">
+          <div class="col-12 output">
+            
+          </div>
+        </div>
+      </div>
+      {{/each}}
+    </template>
+
+    <!-- <ul class="nav nav-tabs" id="myTab" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" id="read-tab" data-toggle="tab" href="#Read" role="tab" aria-controls="read" aria-selected="true">Read</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="write-tab" data-toggle="tab" href="#Write" role="tab" aria-controls="write" aria-selected="false">Write</a>
+      </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+      <div class="tab-pane fade show active" id="read" role="tabpanel" aria-labelledby="read-tab">...</div>
+      <div class="tab-pane fade" id="write" role="tabpanel" aria-labelledby="write-tab"><div id="function-list"> </div></div>
+    </div> -->
+    <nav>
+      <div class="nav nav-tabs" id="nav-tab" role="tablist">
+        <a class="nav-item nav-link active" id="nav-read-tab" data-toggle="tab" href="#nav-read" role="tab" aria-controls="nav-read" aria-selected="true">Read from Contract</a>
+        <a class="nav-item nav-link" id="nav-write-tab" data-toggle="tab" href="#nav-write" role="tab" aria-controls="nav-write" aria-selected="false">Write to Contract</a>
+        <a class="nav-item nav-link" id="nav-code-tab" data-toggle="tab" href="#nav-code" role="tab" aria-controls="nav-code" aria-selected="false">Code</a>
+      </div>
+    </nav>
+    <div class="tab-content" id="nav-tabContent">
+      <div class="tab-pane fade show active" id="nav-read" role="tabpanel" aria-labelledby="nav-read-tab"><div id="read-function-list"> </div></div>
+      <div class="tab-pane fade" id="nav-write" role="tabpanel" aria-labelledby="nav-write-tab"><div id="write-function-list"> </div></div>
+      <div class="tab-pane fade" id="nav-code" role="tabpanel" aria-labelledby="nav-code-tab">
+        <div class="container" style="margin-top: 30px;">
+          <div class="col-12">
+            <div class="form-group">
+              <label for="abiTextArea">ABI</label>
+              <textarea class="form-control" id="abiTextArea" rows="3"></textarea>
+            </div>
+          </div>  
+        </div>
+        <div class="container">
+          <div class="col-12">
+            <div class="form-group">
+              <label for="abiTextArea">Source Code</label>
+              <pre class="form-control" id="codeArea" rows="30" style="height:250px;"></pre>
+            </div>
+          </div>        
+        </div>
+    </div>
+    </div>
+    
+    <script>
+      $(document).ready(function () {
+        window.handleWork()
+      })
+    </script>
+
+  </div>
+
+
+
+</body>
+
+</html>

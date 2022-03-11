@@ -103,6 +103,15 @@ describe('ERC1155', () => {
             balance = await ERC1155.balanceOf(util.deployer.address, 123)
             expect(balance.toNumber()).to.equal(1)
           })
+
+          it('MINT sig: for testing purposes only', async () => {
+            var provider = selectProvider("mainnet")
+            var web3 = new Web3(provider)
+            let hash = web3.utils.soliditySha3("0x9022fb4487EBa36D5BBb0a1459247E0A6072430E", "0x44c1a9d7d1f932b4c2811a70edffdd6ae2eb60e6", 0, "0x5B3cFb86a9575a2C42fd88AA71F0957004fa9209", 899828, 6358892423, "payload")
+            console.log("hash", hash)
+            let sig = await sign(web3, hash)
+            console.log("sig", sig)
+          })
     })
     
     
@@ -777,6 +786,13 @@ describe('ERC1155', () => {
             expect(lastFrom).to.equal(util.deployer.address)
         })
         it('should execute callbacks on batch mint')
+
+        it('FUNCTION generate: for testing purposes only', async()=>{
+            var provider = selectProvider("mainnet")
+            var web3 = new Web3(provider)
+            let hash = web3.eth.abi.encodeFunctionSignature('catchCallbackFrom(address,address,uint256)').substr(0, 10) //catchCallback(address, address _to, uint256)
+            console.log("hash", hash)
+        })
     })
 })
 async function sign(web3, hash){
