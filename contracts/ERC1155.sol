@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.4;
+import "@openzeppelin/contracts/utils/Strings.sol";
 import "./SafeMath.sol";
 import "./Address.sol";
 import "./IERC1155.sol";
@@ -80,7 +81,7 @@ contract ERC1155 is ERC165, IERC1155, IERC1155MetadataURI, HasRegistration, IsSe
      * actual token type ID.
      */
     function uri(uint256 _tokenId) external view override returns (string memory) {
-        return string(abi.encodePacked(_uri,_tokenId));
+        return string(abi.encodePacked(_uri, Strings.toString(_tokenId)));
     }
 
     /**

@@ -32,6 +32,7 @@ import "./NFTrade_v3.sol";
 import "./ReentrancyGuard.sol";
 import "./Ownable.sol";
 import "./HasCallbacks.sol";
+import "./TokenStaking.sol";
 
 contract VaultHandlerV8 is ReentrancyGuard, HasCallbacks, ERC165 {
     

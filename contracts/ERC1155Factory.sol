@@ -29,7 +29,13 @@ contract ERC1155Factory is OwnableUpgradeable {
 
   function createERC1155(address _newOwner) public onlyOwner returns (address clone){
     address _clone = ClonesUpgradeable.clone(erc1155Implementation);
-    ERC1155(_clone).init(_newOwner);
+    VaultHandlerV8 handler = VaultHandlerV8(handlerAddress);
+    if (handler.isRegistered(address(this), 8)) { // if factory registered with handler
+      handler.registerContract(_clone, 1);
+    }
+    ERC1155(_clone).init(address(this)); // owned by this contract
+    ERC1155(_clone).registerContract(handlerAddress, 3); // register handler on erc1155
+    ERC1155(_clone).transferOwnership(_newOwner); // transfer to newOwner
     ERC1155Clones.push(_clone);
     emit ERC1155Created(_clone, erc1155Implementation);
     return _clone;

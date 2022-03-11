@@ -34,42 +34,28 @@
         "type": "address"
       }
     ],
-    "name": "ThingCreated",
+    "name": "StakingCreated",
     "type": "event"
   },
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "clones",
-    "outputs": [
-      {
         "internalType": "address",
-        "name": "",
+        "name": "_newOwner",
         "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
+      },
       {
-        "internalType": "string",
-        "name": "_name",
-        "type": "string"
+        "internalType": "contract IERC20",
+        "name": "_tokenContract",
+        "type": "address"
       },
       {
         "internalType": "uint256",
-        "name": "_value",
+        "name": "_startBlock",
         "type": "uint256"
       }
     ],
-    "name": "createThing",
+    "name": "createStaking",
     "outputs": [
       {
         "internalType": "address",
@@ -94,40 +80,8 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address[]",
-        "name": "things",
-        "type": "address[]"
-      }
-    ],
-    "name": "incrementThings",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_libraryAddress",
-        "type": "address"
-      }
-    ],
-    "name": "initialize",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "inputs": [],
-    "name": "libraryAddress",
+    "name": "handlerAddress",
     "outputs": [
       {
         "internalType": "address",
@@ -136,6 +90,19 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_handlerAddress",
+        "type": "address"
+      }
+    ],
+    "name": "initialize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -161,6 +128,38 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "stakingClones",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "stakingImplementation",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "newOwner",
         "type": "address"
@@ -175,11 +174,11 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "_libraryAddress",
+        "name": "_handlerAddress",
         "type": "address"
       }
     ],
-    "name": "updateLibrary",
+    "name": "updateHandler",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -190,7 +189,7 @@
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "version",
+        "name": "_version",
         "type": "uint256"
       }
     ],

@@ -29,7 +29,13 @@ contract ERC20Factory is OwnableUpgradeable {
 
   function createERC20(address _newOwner, string memory _name, string memory _symbol, uint8 _decimals) public onlyOwner returns (address clone){
     address _clone = ClonesUpgradeable.clone(erc20Implementation);
-    ConfigurableERC20(_clone).init(_newOwner, _name, _symbol, _decimals);
+    VaultHandlerV8 handler = VaultHandlerV8(handlerAddress);
+    if (handler.isRegistered(address(this), 8)) { // if factory registered with handler
+      handler.registerContract(_clone, 4);
+    }
+    ConfigurableERC20(_clone).init(address(this), _name, _symbol, _decimals); // owned by this contract
+    ConfigurableERC20(_clone).registerContract(handlerAddress, 3); // register handler on erc20
+    ConfigurableERC20(_clone).transferOwnership(_newOwner); // transfer to newOwner
     ERC20Clones.push(_clone);
     emit ERC20Created(_clone, erc20Implementation);
     return _clone;

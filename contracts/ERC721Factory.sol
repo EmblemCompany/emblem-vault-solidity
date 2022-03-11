@@ -28,7 +28,13 @@ contract ERC721Factory is OwnableUpgradeable {
 
   function createERC721(address _newOwner) public onlyOwner returns (address clone){
     address _clone = ClonesUpgradeable.clone(erc721Implementation);
-    EmblemVault(_clone).init(_newOwner);
+    VaultHandlerV8 handler = VaultHandlerV8(handlerAddress);
+    if (handler.isRegistered(address(this), 8)) { // if factory registered with handler
+      handler.registerContract(_clone, 2);
+    }
+    EmblemVault(_clone).init(address(this)); // owned by this contract
+    EmblemVault(_clone).registerContract(handlerAddress, 3); // register handler on erc721
+    EmblemVault(_clone).transferOwnership(_newOwner); // transfer to newOwner
     ERC721Clones.push(_clone);
     emit ERC721Created(_clone, erc721Implementation);
     return _clone;

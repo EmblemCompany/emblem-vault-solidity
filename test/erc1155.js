@@ -39,7 +39,7 @@ let selectProvider = function(network) {
 // var web3 = new Web3(provider)
 
 const CALLBACK_TYPE = {"MINT": 0,"TRANSFER": 1,"CLAIM":2}
-const REGISTRATION_TYPE = {"EMPTY": 0, "ERC1155": 1, "ERC721":2, "HANDLER":3, "ERC20":4, "BALANCE":5, "CLAIM":6, "UNKNOWN":7}// 0 EMPTY, 1 ERC1155, 2 ERC721, 3 HANDLER, 4 ERC20, 5 BALANCE, 6 CLAIM 7 UNKNOWN
+const REGISTRATION_TYPE = {"EMPTY": 0, "ERC1155": 1, "ERC721":2, "HANDLER":3, "ERC20":4, "BALANCE":5, "CLAIM":6, "UNKNOWN":7, "FACTORY":8}// 0 EMPTY, 1 ERC1155, 2 ERC721, 3 HANDLER, 4 ERC20, 5 BALANCE, 6 CLAIM 7 UNKNOWN
 
 const util = new Util()
 let ERC1155
@@ -52,6 +52,10 @@ beforeEach(async ()=>{
 describe('ERC1155', () => {
     it('should deploy ERC1155 Vaults', async ()=>{
         expect(ERC1155.address).to.exist
+    })
+    it('should return proper uri', async ()=>{
+        let uri = await ERC1155.uri(1337)
+        expect(uri).to.equal("https://api.emblemvault.io/s:evmetadata/meta/1337")
     })
     describe('Mint', ()=>{
         it('should mint', async()=>{
@@ -405,7 +409,7 @@ describe('ERC1155', () => {
         it('can execute single claim callback', async()=>{
             await util.cloneClaimed(util.deployer.address)
             let claimedContract = util.getClaimed(util.claimer.address, util.deployer)
-            await claimedContract.initialize()
+            // await claimedContract.initialize()
             await util.handler.registerContract(util.claimer.address, 6)
             await claimedContract.registerContract(util.handler.address, 3)
             await ERC1155.mint(util.deployer.address, 789, 1)

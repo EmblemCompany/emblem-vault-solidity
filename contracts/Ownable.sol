@@ -1,10 +1,10 @@
+pragma solidity 0.8.4;
 /**
  * @dev The contract has an owner address, and provides basic authorization control whitch
  * simplifies the implementation of user permissions. This contract is based on the source code at:
  * https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/ownership/Ownable.sol
  */
-contract Ownable
-{
+contract Ownable {
 
   /**
    * @dev Error constants.
@@ -31,7 +31,6 @@ contract Ownable
    * @dev The constructor sets the original `owner` of the contract to the sender account.
    */
   constructor()
-    public
   {
     owner = msg.sender;
   }
@@ -39,7 +38,7 @@ contract Ownable
   /**
    * @dev Throws if called by any account other than the owner.
    */
-  modifier onlyOwner()
+  modifier onlyOwner() virtual
   {
     require(msg.sender == owner, NOT_CURRENT_OWNER);
     _;
@@ -52,6 +51,7 @@ contract Ownable
   function transferOwnership(
     address _newOwner
   )
+    virtual
     public
     onlyOwner
   {

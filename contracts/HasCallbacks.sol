@@ -150,6 +150,9 @@ contract HasCallbacks is HasRegistration {
     }
 
     function testRevertCallback(address _from, address _to, uint256 tokenId) public pure {
+        _from = address(0);
+        _to = address(0);
+        tokenId = 0;
         revert("reverted by design");
     }
 

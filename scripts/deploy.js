@@ -1,91 +1,74 @@
 const { ethers, upgrades} = require("hardhat");
 const spawn = require('await-spawn')
 
+const utils = require("./utils")
 let HANDLER_ADDRESS //= "0x6a042F1752EF3eaB5D7efBE25994f7c2D14E2a35"
-
+let VERIFY = true
+let results = {}
 async function main() {
   const [_deployer] = await hre.ethers.getSigners();
   const VaultHandlerV8 = await hre.ethers.getContractFactory("VaultHandlerV8");
   const ERC1155Factory = await ethers.getContractFactory("ERC1155Factory");
   const ERC721Factory = await ethers.getContractFactory("ERC721Factory");
   const ERC20Factory = await ethers.getContractFactory("ERC20Factory");
-  const Storage = await ethers.getContractFactory("Storage");
+  const StakingFactory = await ethers.getContractFactory("StakingFactory");
+  const ClaimStorage = await ethers.getContractFactory("Storage");
   const Claimed = await ethers.getContractFactory("Claimed");
   const BalanceStorage = await ethers.getContractFactory("BalanceStorage");
   const Balance = await ethers.getContractFactory("Balance");
 
-  console.log("Deploying balance storage")
-  let balanceStorage =  await BalanceStorage.deploy()
-  await balanceStorage.deployed()  
-  console.log("Balance storage deployed to", balanceStorage.address)
+  /* HANDLER */
+  results.handler = await utils.deploy("Vault handler", VaultHandlerV8)
+  results.handler = VERIFY? await utils.verify(results.handler): results.handler
   
-  await verify(balanceStorage.address)
-  process.exit(1)
+  // /* BALANCE */
+  // results.balanceStorage = await utils.deploy("Balance storage", BalanceStorage)
+  // results.balanceStorage = VERIFY? await utils.verify(results.balanceStorage): results.balanceStorage
+  // results.balances = await utils.deploy("Balance", Balance, results.balanceStorage.address)
+  // results.balances = VERIFY? await utils.verify(results.balances, [results.balanceStorage.address]): results.balances
+  // await utils.registerWithContract(utils.REGISTRATION_TYPE.BALANCE, results.handler, results.balances)
+  // await utils.registerWithContract(utils.REGISTRATION_TYPE.HANDLER, results.balances, results.handler)
+
+  // /* CLAIM */
+  // results.claimStorage = await utils.deploy("Claim storage", ClaimStorage)
+  // results.claimStorage = VERIFY? await utils.verify(results.claimStorage): results.claimStorage
+  // results.claimed = await utils.deploy("Claim", Claimed, results.claimStorage.address)
+  // results.claimed = VERIFY? await utils.verify(results.claimed, [results.claimStorage.address]): results.claimed
+  // await utils.registerWithContract(utils.REGISTRATION_TYPE.CLAIM, results.handler, results.claimed)
+  // await utils.registerWithContract(utils.REGISTRATION_TYPE.HANDLER, results.claimed, results.handler)
+
+  // /* ERC1155 Factory */
+  // results.erc1155Factory = await utils.deployProxy("ERC1155Factory", ERC1155Factory, [results.handler.address])
+  // results.erc1155Factory = VERIFY? await utils.verify(results.erc1155Factory, [results.handler.address]): results.erc1155Factory
+  // await utils.registerWithContract(utils.REGISTRATION_TYPE.FACTORY, results.handler, results.erc1155Factory)
+  // results.erc1155Base = {address: await results.erc1155Factory.contract.erc1155Implementation()}
+  // results.erc1155Base = VERIFY? await utils.verifyAddress(results.erc1155Base.address): results.erc1155Base
   
-  let balances = await Balance.deploy(balanceStorage.address)
-  await balances.deployed()
-  console.log("Balance deployed to", balances.address)
+  // /* ERC721 Factory */
+  // results.erc721Factory = await utils.deployProxy("ERC721Factory", ERC721Factory, [results.handler.address])
+  // results.erc721Factory = VERIFY? await utils.verify(results.erc721Factory, [results.handler.address]): results.erc721Factory
+  // await utils.registerWithContract(utils.REGISTRATION_TYPE.FACTORY, results.handler, results.erc721Factory)
+  // results.erc721Base = {address: await results.erc721Factory.contract.erc721Implementation()}
+  // results.erc721Base = VERIFY? await utils.verifyAddress(results.erc721Base.address): results.erc721Base
 
-  console.log("Deploying claim storage")
-  let claimStorage =  await Storage.deploy()
-  await claimStorage.deployed()
-  console.log("Claim storage deployed to", claimStorage.address)
-  let claimed = await Claimed.deploy(claimStorage.address)
-  await claimed.deployed()
-  console.log("Claim deployed to", claimed.address)
+  // /* ERC20 Factory */
+  // results.erc20Factory = await utils.deployProxy("ERC20Factory", ERC20Factory, [results.handler.address])
+  // results.erc20Factory = VERIFY? await utils.verify(results.erc20Factory, [results.handler.address]): results.erc20Factory
+  // await utils.registerWithContract(utils.REGISTRATION_TYPE.FACTORY, results.handler, results.erc20Factory)
+  // results.erc20Base = {address: await results.erc20Factory.contract.erc20Implementation()}
+  // results.erc20Base = VERIFY? await utils.verifyAddress(results.erc20Base.address): results.erc20Base
+
+   /* Staking Factory */
+   results.stakingFactory = await utils.deployProxy("StakingFactory", StakingFactory, [results.handler.address])
+   results.stakingFactory = VERIFY? await utils.verify(results.stakingFactory, [results.handler.address]): results.stakingFactory
+   await utils.registerWithContract(utils.REGISTRATION_TYPE.FACTORY, results.handler, results.stakingFactory)
+   results.stakingBase = {address: await results.stakingFactory.contract.stakingImplementation()}
+   results.stakingBase = VERIFY? await utils.verifyAddress(results.stakingBase.address): results.stakingBase
   
-  let master
-  if (!HANDLER_ADDRESS) {
-    console.log("Deploying Handler...");
-    master = await VaultHandlerV8.deploy()
-    // master = await hre.upgrades.deployProxy(VaultHandlerV8);
-    await master.deployed()
-    console.log("Handler deployed to", master.address)
-    
-  } else {
-    console.log("Getting Handler at address", HANDLER_ADDRESS);
-    master = await getHandler(HANDLER_ADDRESS, _deployer)
-  }
-  // process.exit(1)
-  console.log("Deploying ERC1155Factory...")
-  factory = await hre.upgrades.deployProxy(ERC1155Factory, [master.address]);
-  await factory.deployed()
-  console.log("ERC1155Factory deployed to:", factory.address);
-
-  let erc1155 = await factory.erc1155Implementation();
-  console.log('erc1155', erc1155);
-
-
-  console.log("Deploying ERC721Factory...")
-  factory = await hre.upgrades.deployProxy(ERC721Factory, [master.address]);
-  await factory.deployed()
-  console.log("ERC721Factory deployed to:", factory.address);
-  let erc721 = await factory.erc721Implementation();
-  console.log('erc721', erc721);
-
-  console.log("Deploying ERC20Factory...")
-  factory = await hre.upgrades.deployProxy(ERC20Factory, [master.address]);
-  await factory.deployed()
-  console.log("ERC20Factory deployed to:", factory.address);
-  let erc20 = await factory.erc20Implementation();
-  console.log('erc20', erc20);
+  utils.formatResults(results)
 }
 
 main();
-
-async function verify(address, constructor = []) {
-  console.log("sleeping a sec")
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  try {
-    return await hre.run("verify:verify", {
-      address: address,
-      constructorArguments: constructor,
-    });
-  } catch (e) {
-    // console.log("error",e)
-    return console.log("Reason", e.toString().split("Reason: ")[1].split(" at ")[0])
-  }
-}
 
 async function getHandler(address, signer) {
   let ABI = require("../artifacts/contracts/VaultHandlerV8.sol/VaultHandlerV8.json")

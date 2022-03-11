@@ -7,7 +7,6 @@ async function main() {
   const [_deployer] = await hre.ethers.getSigners();
   console.log("Verifying", ADDRESS)
   await verify(ADDRESS)
-  console.log("done")
 }
 
 main();

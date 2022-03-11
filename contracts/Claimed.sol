@@ -30,7 +30,7 @@ contract Claimed is ReentrancyGuard, HasRegistration {
         initialize();
     }
     
-    function initialize() internal {
+    function initialize() public {
         require(!initialized, 'already initialized');
         IStorage _storage = IStorage(StorageAddress);
         _storage.upgradeVersion(address(this));
