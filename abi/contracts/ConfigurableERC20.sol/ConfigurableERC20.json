@@ -1,6 +1,12 @@
 [
   {
-    "inputs": [],
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "constructor"
   },
@@ -383,6 +389,25 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "_type",
+        "type": "uint256"
+      }
+    ],
+    "name": "getAllRegisteredContractsOfType",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "spender",
         "type": "address"
@@ -730,6 +755,13 @@
   },
   {
     "inputs": [],
+    "name": "toggleBypassability",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "togglePrivateTransferability",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -835,34 +867,6 @@
         "type": "bool"
       }
     ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "from",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bool",
-        "name": "_private",
-        "type": "bool"
-      }
-    ],
-    "name": "transferFrom",
-    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },

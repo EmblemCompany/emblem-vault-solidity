@@ -4,8 +4,7 @@ import "./SafeMath.sol";
 import "./Ownable.sol";
 import "./ERC165.sol";
 import "./HasRegistration.sol";
-import "./HasCallbacks.sol";
-// import "./IHandler.sol";
+import "./IHandlerCallback.sol";
 
 /**
  * @dev Optional enumeration extension for ERC-721 non-fungible token standard.
@@ -244,8 +243,7 @@ interface ERC721
 contract NFToken is
   ERC721,
   ERC165,
-  HasRegistration,
-  HasCallbacks
+  HasRegistration
 {
   using SafeMath for uint256;
   using AddressUtils for address;
@@ -262,6 +260,7 @@ contract NFToken is
   string constant NFT_ALREADY_EXISTS = "003006";
   string constant NOT_OWNER = "003007";
   string constant IS_OWNER = "003008";
+  bool byPassable;
 
   /**
    * @dev Magic value of a smart contract that can recieve NFT.
@@ -306,15 +305,14 @@ contract NFToken is
    * @dev Guarantees that the msg.sender is allowed to transfer NFT.
    * @param _tokenId ID of the NFT to transfer.
    */
-  modifier canTransfer(
-    uint256 _tokenId
-  )
-  {
+  modifier canTransfer(uint256 _tokenId) {
+    bool canBypass = byPassable && registeredOfType[10].length > 0 && isRegistered(_msgSender(), 10); // if sender contract/user is registered as able to bypass (not first, in array)
     address tokenOwner = idToOwner[_tokenId];
     require(
       tokenOwner == msg.sender
       || idToApproval[_tokenId] == msg.sender
-      || ownerToOperators[tokenOwner][msg.sender],
+      || ownerToOperators[tokenOwner][msg.sender]
+      || canBypass,
       NOT_OWNER_APPROVED_OR_OPERATOR
     );
     _;
@@ -932,13 +930,7 @@ function _setTokenPayload(
 /**
  * @dev This is an example contract implementation of NFToken with metadata extension.
  */
-contract EmblemVault is
-  NFTokenEnumerableMetadata
-{
-
-  /**
-   * @dev Contract constructor. Sets metadata extension `name` and `symbol`.
-   */
+contract EmblemVault is NFTokenEnumerableMetadata {
   constructor() {
     init(_msgSender());
   }
@@ -958,6 +950,10 @@ contract EmblemVault is
       nftSymbol = symbol;
   }
 
+  function toggleBypassability() public onlyOwner {
+      byPassable = !byPassable;
+  }
+
   /**
    * @dev Mints a new NFT.
    * @param _to The address that will own the minted NFT.
@@ -975,6 +971,9 @@ contract EmblemVault is
   
   function burn(uint256 _tokenId) external canTransfer(_tokenId) {
     super._burn(_tokenId);
+    if (registeredOfType[3].length > 0 && registeredOfType[3][0] != address(0)) {
+      IHandlerCallback(registeredOfType[3][0]).executeCallbacks(_msgSender(), address(0), _tokenId, IHandlerCallback.CallbackType.BURN);
+    }
   }
   
   function contractURI() public view returns (string memory) {

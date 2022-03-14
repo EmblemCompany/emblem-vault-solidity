@@ -10,8 +10,7 @@ const TEST_CALLBACK_FUNCTION = "0x684ee7de" //web3.eth.abi.encodeFunctionSignatu
 const TEST_REVERT_CALLBACK_FUNCTION = "0x5d1c03dd"
 const TEST_FAKE_CALLBACK_FUNCTION = "0x4e1c03dd"
 const CALLBACK_TYPE = {"MINT": 0,"TRANSFER": 1,"CLAIM":2}
-const REGISTRATION_TYPE = {"EMPTY": 0, "ERC1155": 1, "ERC721":2, "HANDLER":3, "ERC20":4, "BALANCE":5, "CLAIM":6, "UNKNOWN":7}// 0 EMPTY, 1 ERC1155, 2 ERC721, 3 HANDLER, 4 ERC20, 5 BALANCE, 6 CLAIM 7 UNKNOWN
-
+const REGISTRATION_TYPE = {"EMPTY": 0, "ERC1155": 1, "ERC721":2, "HANDLER":3, "ERC20":4, "BALANCE":5, "CLAIM":6, "UNKNOWN":7, "FACTORY":8, "STAKING": 9, "BYPASS": 10}// 0 EMPTY, 1 ERC1155, 2 ERC721, 3 HANDLER, 4 ERC20, 5 BALANCE, 6 CLAIM 7 UNKNOWN
 beforeEach(async ()=>{
   await util.deploy();
 })
@@ -138,6 +137,44 @@ describe('ERC721', () => {
       await util.handler.buyWithSignedPrice(emblemAddress, covalAddress, 0, util.deployer.address, 123, "payload", 111, sig)
       balance = await emblemContract.balanceOf(util.deployer.address)
       expect(balance.toNumber()).to.equal(1)
+    })
+  })
+  describe('Bypass', ()=>{
+    beforeEach(async ()=>{
+      await util.cloneHandler(util.deployer.address)
+      await util.cloneEmblem(util.deployer.address)
+    })
+
+    it('not allow bypass if bypass not allowed', async()=>{
+        await util.emblem.mint(util.deployer.address, 789, "uri", "payload")
+        ERC721 = await util.getEmblemVault(util.emblem.address, util.bob)
+        let tx = ERC721.transferFrom(util.deployer.address, util.bob.address, 789)
+        await expect(tx).to.be.revertedWith("003004")
+    })
+    it('not allow bypass if bypass allowed and not registered as bypasser', async()=>{
+      await util.emblem.mint(util.deployer.address, 789, "uri", "payload")
+      await util.emblem.toggleBypassability()
+      ERC721 = await util.getEmblemVault(util.emblem.address, util.bob)
+      let tx = ERC721.transferFrom(util.deployer.address, util.bob.address, 789)
+      await expect(tx).to.be.revertedWith("003004")
+    })
+    it('only admin can add bypasser', async()=>{
+        await util.emblem.mint(util.deployer.address, 789, "uri", "payload")
+        await util.emblem.toggleBypassability()
+        ERC721 = await util.getEmblemVault(util.emblem.address, util.bob)
+        let tx = ERC721.registerContract(util.bob.address, REGISTRATION_TYPE.BYPASS)
+        await expect(tx).to.be.revertedWith("Contract is not registered nor Owner")
+    })
+    it('allow bypass if bypass allowed and registered as bypasser', async()=>{       
+        await util.emblem.mint(util.deployer.address, 789, "uri", "payload")
+        let balanceERC721 = await util.emblem.balanceOf(util.bob.address)
+        expect(balanceERC721).to.equal(0)
+        await util.emblem.toggleBypassability()
+        await util.emblem.registerContract(util.bob.address, REGISTRATION_TYPE.BYPASS)
+        ERC721 = await util.getEmblemVault(util.emblem.address, util.bob)
+        await ERC721.transferFrom(util.deployer.address, util.bob.address, 789)
+        balanceERC721 = await ERC721.balanceOf(util.bob.address)
+        expect(balanceERC721).to.equal(1)
     })
   })
   describe('Claim', ()=>{

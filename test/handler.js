@@ -39,7 +39,7 @@ describe('Vault Handler', () => {
   it('non admin can not add vaultContract', async ()=>{
     let handler = util.getHandler(util.handler.address, util.alice)
     let tx = handler.registerContract(ERC721.address, 0)
-    await expect(tx).to.be.revertedWith('018001')
+    await expect(tx).to.be.revertedWith('Contract is not registered nor Owner')
   })
   
   it('admin can add vaultContract', async ()=>{

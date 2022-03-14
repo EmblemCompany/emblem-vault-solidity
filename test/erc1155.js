@@ -39,7 +39,7 @@ let selectProvider = function(network) {
 // var web3 = new Web3(provider)
 
 const CALLBACK_TYPE = {"MINT": 0,"TRANSFER": 1,"CLAIM":2}
-const REGISTRATION_TYPE = {"EMPTY": 0, "ERC1155": 1, "ERC721":2, "HANDLER":3, "ERC20":4, "BALANCE":5, "CLAIM":6, "UNKNOWN":7, "FACTORY":8}// 0 EMPTY, 1 ERC1155, 2 ERC721, 3 HANDLER, 4 ERC20, 5 BALANCE, 6 CLAIM 7 UNKNOWN
+const REGISTRATION_TYPE = {"EMPTY": 0, "ERC1155": 1, "ERC721":2, "HANDLER":3, "ERC20":4, "BALANCE":5, "CLAIM":6, "UNKNOWN":7, "FACTORY":8, "STAKING": 9, "BYPASS": 10}// 0 EMPTY, 1 ERC1155, 2 ERC721, 3 HANDLER, 4 ERC20, 5 BALANCE, 6 CLAIM 7 UNKNOWN
 
 const util = new Util()
 let ERC1155
@@ -112,6 +112,40 @@ describe('ERC1155', () => {
             let sig = await sign(web3, hash)
             console.log("sig", sig)
           })
+    })
+
+    describe('Bypass', ()=>{
+        it('not allow bypass if bypass not allowed', async()=>{
+            await ERC1155.mint(util.deployer.address, 789, 1)
+            ERC1155 = await util.getERC1155(ERC1155.address, util.bob)
+            let tx = ERC1155.safeTransferFrom(util.deployer.address, util.bob.address, 789, 1, 0x0)
+            await expect(tx).to.be.revertedWith("ERC1155: caller is not owner nor approved")
+        })
+        it('not allow bypass if bypass allowed and not registered as bypasser', async()=>{
+            await ERC1155.mint(util.deployer.address, 789, 1)
+            await ERC1155.toggleBypassability()
+            ERC1155 = await util.getERC1155(ERC1155.address, util.bob)
+            let tx = ERC1155.safeTransferFrom(util.deployer.address, util.bob.address, 789, 1, 0x0)
+            await expect(tx).to.be.revertedWith("ERC1155: caller is not owner nor approved")
+        })
+        it('only admin can add bypasser', async()=>{
+            await ERC1155.mint(util.deployer.address, 789, 1)
+            await ERC1155.toggleBypassability()
+            ERC1155 = await util.getERC1155(ERC1155.address, util.bob)
+            let tx = ERC1155.registerContract(util.bob.address, REGISTRATION_TYPE.BYPASS)
+            await expect(tx).to.be.revertedWith("Contract is not registered nor Owner")
+        })
+        it('allow bypass if bypass allowed and registered as bypasser', async()=>{
+            await ERC1155.mint(util.deployer.address, 789, 1)
+            let balanceERC1155 = await ERC1155.balanceOf(util.bob.address, 789)
+            expect(balanceERC1155).to.equal(0)
+            await ERC1155.toggleBypassability()
+            await ERC1155.registerContract(util.bob.address, REGISTRATION_TYPE.BYPASS)
+            ERC1155 = await util.getERC1155(ERC1155.address, util.bob)
+            await ERC1155.safeTransferFrom(util.deployer.address, util.bob.address, 789, 1, 0x0)
+            balanceERC1155 = await ERC1155.balanceOf(util.bob.address, 789)
+            expect(balanceERC1155).to.equal(1)
+        })
     })
     
     
@@ -221,7 +255,6 @@ describe('ERC1155', () => {
         it('should claim erc1155 via handler with permission', async()=>{
             await util.cloneClaimed(util.deployer.address)
             let claimedContract = util.getClaimed(util.claimer.address, util.deployer)
-            await claimedContract.initialize()
             await util.handler.registerContract(util.claimer.address, 6)
             await claimedContract.registerContract(util.handler.address, 3)
             await util.handler.registerContract(ERC1155.address, 1)
@@ -248,7 +281,6 @@ describe('ERC1155', () => {
         it('should get correct serialNumber for owner and tokenId after claims', async()=>{
             await util.cloneClaimed(util.deployer.address)
             let claimedContract = util.getClaimed(util.claimer.address, util.deployer)
-            await claimedContract.initialize()
             await util.handler.registerContract(util.claimer.address, 6)
             await claimedContract.registerContract(util.handler.address, 3)
             await util.handler.registerContract(ERC1155.address, 1)
@@ -302,6 +334,12 @@ describe('ERC1155', () => {
             await util.handler.registerCallback(ERC1155.address, util.emblem.address, 1, CALLBACK_TYPE.MINT, TEST_CALLBACK_FUNCTION, true)
             hasCallback = await util.handler.hasCallback(ERC1155.address, util.emblem.address, 1, CALLBACK_TYPE.MINT)
             expect(hasCallback).to.equal(true)
+        })
+        it('should allow grabbing all registered contracts of type', async ()=>{
+            await util.handler.registerContract(ERC1155.address, REGISTRATION_TYPE.ERC1155)
+            let registered = await util.handler.getAllRegisteredContractsOfType(REGISTRATION_TYPE.ERC1155)
+            expect(registered.length).to.equal(1)
+            expect(registered[0]).to.equal(ERC1155.address)
         })
         it('should not have callback of different trigger', async ()=>{            
             await util.handler.registerContract(ERC1155.address, REGISTRATION_TYPE.ERC1155)            
@@ -402,7 +440,6 @@ describe('ERC1155', () => {
             await ERC1155.registerContract(util.handler.address, REGISTRATION_TYPE.HANDLER)
             await util.handler.registerContract(ERC1155.address, REGISTRATION_TYPE.ERC1155)
             await util.handler.registerCallback(ERC1155.address, util.handler.address, 789, CALLBACK_TYPE.TRANSFER, TEST_CALLBACK_FUNCTION, true)
-            // await ERC1155.transferOwnership(util.handler.address)
             let ticks = await util.handler.ticks()
             expect(ticks).to.equal(0)
             await ERC1155.safeTransferFrom(util.deployer.address, util.bob.address, 789, 1, 0)
@@ -772,6 +809,7 @@ describe('ERC1155', () => {
             await ERC1155.mint(util.deployer.address, 789, 2)
             await ERC1155.registerContract(util.handler.address, REGISTRATION_TYPE.HANDLER)
             await util.handler.registerContract(ERC1155.address, REGISTRATION_TYPE.ERC1155)
+            await util.handler.registerContract(util.handler.address, REGISTRATION_TYPE.HANDLER)
             await util.handler.registerCallback(ERC1155.address, util.handler.address, 789, CALLBACK_TYPE.TRANSFER, TEST_CALLBACK_FUNCTION, true)
             let ticks = await util.handler.ticks()
             expect(ticks).to.equal(0)

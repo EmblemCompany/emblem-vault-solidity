@@ -21,11 +21,11 @@ contract ERC20Factory is OwnableUpgradeable {
   function initialize(address _handlerAddress) public initializer {
     __Ownable_init();
     handlerAddress = _handlerAddress;
-    erc20Implementation = address(new ConfigurableERC20());
+    erc20Implementation = address(new ConfigurableERC20(address(this)));
   }
 
   function updateImplementation() public onlyOwner {
-    erc20Implementation = address(new ConfigurableERC20());
+    erc20Implementation = address(new ConfigurableERC20(address(this)));
   }
 
   function updateHandler(address _handlerAddress) public onlyOwner {

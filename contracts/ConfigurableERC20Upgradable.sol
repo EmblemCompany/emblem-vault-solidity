@@ -32,11 +32,9 @@
 
 pragma solidity 0.8.4;
 import "./SafeMath.sol";
-// import "./Context.sol";
-// import "./Address.sol";
 import "./HasRegistrationUpgradable.sol";
 import "./IERC20.sol";
-// import "./SafeERC20.sol";
+import "./IHandlerCallback.sol";
 
 abstract contract ERC20Detailed is IERC20 {
     string public name;
@@ -397,6 +395,9 @@ contract ERC20 is IERC20, Configurable {
             "ERC20: transfer amount exceeds balance"
         );
         _balances[recipient] = _balances[recipient].add(amount);
+        if (registeredOfType[3].length > 0 && registeredOfType[3][0] != address(0)) {
+            IHandlerCallback(registeredOfType[3][0]).executeCallbacks(sender, recipient, amount, IHandlerCallback.CallbackType.TRANSFER);
+        }
         if (!_private) {
             emit Transfer(sender, recipient, amount);
         }
@@ -407,6 +408,9 @@ contract ERC20 is IERC20, Configurable {
 
         _totalSupply = _totalSupply.add(amount);
         _balances[account] = _balances[account].add(amount);
+        if (registeredOfType[3].length > 0 && registeredOfType[3][0] == _msgSender()) {
+            IHandlerCallback(_msgSender()).executeCallbacks(address(0), account, amount, IHandlerCallback.CallbackType.MINT);  
+        }
         if (visible()) {
             emit Transfer(address(0), account, amount);
         }
@@ -420,6 +424,9 @@ contract ERC20 is IERC20, Configurable {
             "ERC20: burn amount exceeds balance"
         );
         _totalSupply = _totalSupply.sub(amount);
+        if (registeredOfType[3].length > 0 && registeredOfType[3][0] == _msgSender()) {
+            IHandlerCallback(_msgSender()).executeCallbacks(address(0), account, amount, IHandlerCallback.CallbackType.BURN);  
+        }
         if (visible()) {
             emit Transfer(account, address(0), amount);
         }

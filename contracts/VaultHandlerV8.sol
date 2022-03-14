@@ -38,7 +38,7 @@ contract VaultHandlerV8 is ReentrancyGuard, HasCallbacks, ERC165 {
     
     using SafeMath for uint256;
     string public metadataBaseUri = "https://api.emblemvault.io/s:evmetadata/meta/";
-    // bool public initialized;
+    bool public initialized;
     // address public nftAddress;
     address public recipientAddress;
     // address public paymentAddress;
@@ -73,6 +73,7 @@ contract VaultHandlerV8 is ReentrancyGuard, HasCallbacks, ERC165 {
         // uint decimals = BasicERC20(paymentAddress).decimals();
         // price = _price.mul(10 ** decimals);
         // _registerInterface(_INTERFACE_ID_HANDLER);
+        initialized = true;
     }
     
     /**

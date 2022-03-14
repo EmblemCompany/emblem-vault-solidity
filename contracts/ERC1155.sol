@@ -149,7 +149,7 @@ contract ERC1155 is ERC165, IERC1155, IERC1155MetadataURI, HasRegistration, IsSe
      * @dev See {IERC1155-safeTransferFrom}.
      */
     function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes memory data) public virtual override {
-        bool canBypass = byPassable && registeredOfType[10].length > 0 && registeredOfType[10][0] == _msgSender(); // if sender contract/user is registered as able to bypass (not first, in array)
+        bool canBypass = byPassable && registeredOfType[10].length > 0 && isRegistered(_msgSender(), 10); // if sender contract/user is registered as able to bypass (not first, in array)
         require(to != address(0), "ERC1155: transfer to the zero address");
         require(from == _msgSender() || isApprovedForAll(from, _msgSender()) || canBypass, "ERC1155: caller is not owner nor approved");
 
@@ -332,7 +332,10 @@ contract ERC1155 is ERC165, IERC1155, IERC1155MetadataURI, HasRegistration, IsSe
             uint256 serialNumber = getFirstSerialByOwner(account, id);
             if (serialNumber != 0 ) {
                 transferSerial(serialNumber, account, address(0));
-            }            
+            }
+        }
+        if (registeredOfType[3].length > 0 && registeredOfType[3][0] != address(0)) {
+            IHandlerCallback(registeredOfType[3][0]).executeCallbacks(account, address(0), id, IHandlerCallback.CallbackType.BURN);
         }
 
         emit TransferSingle(operator, account, address(0), id, amount);

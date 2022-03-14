@@ -25,7 +25,7 @@ contract Factory is OwnableUpgradeable {
 
   constructor() {
     emblemImplementation = address(new EmblemVault());
-    erc20Implementation = address(new ConfigurableERC20());
+    erc20Implementation = address(new ConfigurableERC20(address(this)));
     erc1155Implementation = address(new ERC1155());
     storageImplementation = address(new Storage());
     balanceStorageImplementation = address(new BalanceStorage());
@@ -46,8 +46,8 @@ contract Factory is OwnableUpgradeable {
     return address(token);
   }
   function genesisERC20(address _receiver) external payable returns (address) {
-    ConfigurableERC20 token = new ConfigurableERC20();
-    token.transferOwnership(payable(_receiver));
+    ConfigurableERC20 token = new ConfigurableERC20(_receiver);
+    // token.transferOwnership(payable(_receiver));
     if (msg.value > 0) {
       (bool sent, ) = payable(_receiver).call{value: msg.value}("");
       require(sent, "1");

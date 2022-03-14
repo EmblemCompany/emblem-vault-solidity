@@ -53,4 +53,8 @@ contract HasRegistration is Context, Ownable {
     function isRegistered(address _contract, uint256 _type) public view returns (bool) {
         return registeredContracts[_contract] == _type;
     }
+
+    function getAllRegisteredContractsOfType(uint256 _type) public view returns (address[] memory) {
+        return registeredOfType[_type];
+    }
 }

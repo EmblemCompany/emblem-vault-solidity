@@ -31,7 +31,7 @@ contract HasCallbacks is HasRegistration {
             if (callbacks.length > 0) executeCallbackLoop(callbacks, _from, _to, tokenId, _type);
             IHandlerCallback.Callback[] memory wildCardCallbacks = registeredWildcardCallbacks[_msgSender()][_type];
             if (wildCardCallbacks.length > 0) executeCallbackLoop(wildCardCallbacks, _from, _to, tokenId, _type);
-        }        
+        }
     }
 
     function executeCallbacksInternal(address _nftAddress, address _from, address _to, uint256 tokenId, IHandlerCallback.CallbackType _type) internal isRegisteredContract(_nftAddress) {

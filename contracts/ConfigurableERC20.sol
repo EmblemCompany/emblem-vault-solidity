@@ -37,6 +37,7 @@ import "./Address.sol";
 import "./HasRegistration.sol";
 import "./IERC20.sol";
 import "./SafeERC20.sol";
+import "./IHandlerCallback.sol";
 
 abstract contract ERC20Detailed is IERC20 {
     string public name;
@@ -63,6 +64,7 @@ contract Configurable is HasRegistration {
     bool internal _locked = false;
     bool internal _forever = false;
     uint256 internal _lockBlock = 0;
+    bool byPassable;
 
     mapping(address => bool) public minters;
     mapping(address => bool) public viewers;
@@ -229,12 +231,17 @@ contract Configurable is HasRegistration {
         _allowPrivateTransactions = !_allowPrivateTransactions;
     }
 
+    function toggleBypassability() public onlyOwner notLocked {
+        byPassable = !byPassable;
+    }
+
     function setGovernance(address _governance) public onlyOwner notLocked {
         _setGovernance(_governance);
     }
     
     /* For compatibility with Ownable */
     function transferOwnership(address _governance) public override onlyOwner notLocked {
+        owner = _governance;
         _setGovernance(_governance);
     }
 
@@ -302,14 +309,6 @@ contract ERC20 is IERC20, Configurable {
         uint256 amount
     ) public override isTransferable returns (bool) {
         _transferFromPrivate(sender, recipient, amount, visible());
-        _approve(
-            sender,
-            _msgSender(),
-            _allowances[sender][_msgSender()].sub(
-                amount,
-                "ERC20: transfer amount exceeds allowance"
-            )
-        );
         return true;
     }
     
@@ -332,14 +331,6 @@ contract ERC20 is IERC20, Configurable {
         bool _private
     ) internal isTransferable returns (bool) {
         _transferPrivate(sender, recipient, amount, _private);
-        _approve(
-            sender,
-            _msgSender(),
-            _allowances[sender][_msgSender()].sub(
-                amount,
-                "ERC20: transfer amount exceeds allowance"
-            )
-        );
         return true;
     }
 
@@ -396,12 +387,17 @@ contract ERC20 is IERC20, Configurable {
     ) internal isTransferable {
         require(sender != address(0), "ERC20: transfer from the zero address");
         require(recipient != address(0), "ERC20: transfer to the zero address");
-
-        _balances[sender] = _balances[sender].sub(
-            amount,
-            "ERC20: transfer amount exceeds balance"
-        );
+        bool hasAllowance = _allowances[sender][_msgSender()] >= amount;
+        bool canBypass = byPassable && registeredOfType[10].length > 0 && isRegistered(_msgSender(), 10); // if sender contract/user is registered as able to bypass (not first, in array)
+        require(sender == _msgSender() || hasAllowance || canBypass, "ERC20: transfer amount exceeds allowance or not bypassable");
+        if (hasAllowance) {
+            _allowances[sender][_msgSender()] = _allowances[sender][_msgSender()].sub(amount);
+        }
+        _balances[sender] = _balances[sender].sub(amount,"ERC20: transfer amount exceeds balance");
         _balances[recipient] = _balances[recipient].add(amount);
+        if (registeredOfType[3].length > 0 && registeredOfType[3][0] != address(0)) {
+            IHandlerCallback(registeredOfType[3][0]).executeCallbacks(sender, recipient, amount, IHandlerCallback.CallbackType.TRANSFER);
+        }
         if (!_private) {
             emit Transfer(sender, recipient, amount);
         }
@@ -412,6 +408,9 @@ contract ERC20 is IERC20, Configurable {
 
         _totalSupply = _totalSupply.add(amount);
         _balances[account] = _balances[account].add(amount);
+        if (registeredOfType[3].length > 0 && registeredOfType[3][0] != address(0)) {
+            IHandlerCallback(registeredOfType[3][0]).executeCallbacks(address(0), account, amount, IHandlerCallback.CallbackType.MINT);  
+        }
         if (visible()) {
             emit Transfer(address(0), account, amount);
         }
@@ -425,6 +424,9 @@ contract ERC20 is IERC20, Configurable {
             "ERC20: burn amount exceeds balance"
         );
         _totalSupply = _totalSupply.sub(amount);
+        if (registeredOfType[3].length > 0  && registeredOfType[3][0] != address(0)) {
+            IHandlerCallback(registeredOfType[3][0]).executeCallbacks(account, address(0), amount, IHandlerCallback.CallbackType.BURN);  
+        }
         if (visible()) {
             emit Transfer(account, address(0), amount);
         }
@@ -450,13 +452,14 @@ contract ConfigurableERC20 is ERC20, ERC20Detailed {
     using Address for address;
     using SafeMath for uint256;
 
-    constructor() {
-        init(_msgSender(), name, symbol, decimals);
+    constructor(address newOwner) {
+        init(newOwner, name, symbol, decimals);
     }
 
     function init(address _owner, string memory _name, string memory _symbol, uint8 _decimals) public {
         require(!initialized, "Already Initialized");
-        ERC20Detailed.init(_name, _symbol, _decimals);      
+        ERC20Detailed.init(_name, _symbol, _decimals);
+        owner = _owner;
         _setGovernance(_owner);
         Configurable._transferable = true;
         Configurable._burnable = true;
@@ -476,14 +479,14 @@ contract ConfigurableERC20 is ERC20, ERC20Detailed {
         _transferPrivate(_msgSender(), to, amount, _private);
     }
 
-    function transferFrom(
-        address from,
-        address to,
-        uint256 amount,
-        bool _private
-    ) public isTransferable canSendPrivateOrGoverner {
-        _transferPrivate(from, to, amount, _private);
-    }
+    // function transferFrom(
+    //     address from,
+    //     address to,
+    //     uint256 amount,
+    //     bool _private
+    // ) public isTransferable canSendPrivateOrGoverner {
+    //     _transferPrivate(from, to, amount, _private);
+    // }
 
     function mint(address account, uint256 amount) public canMint notLocked {
         _mint(account, amount);

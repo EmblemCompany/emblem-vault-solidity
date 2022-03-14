@@ -58,141 +58,6 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
-        "internalType": "address",
-        "name": "_from",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "_to",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "target",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes4",
-        "name": "targetFunction",
-        "type": "bytes4"
-      },
-      {
-        "indexed": false,
-        "internalType": "enum IHandlerCallback.CallbackType",
-        "name": "_type",
-        "type": "uint8"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes",
-        "name": "returnData",
-        "type": "bytes"
-      }
-    ],
-    "name": "CallbackExecuted",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "_from",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "_to",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "target",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes4",
-        "name": "targetFunction",
-        "type": "bytes4"
-      },
-      {
-        "indexed": false,
-        "internalType": "enum IHandlerCallback.CallbackType",
-        "name": "_type",
-        "type": "uint8"
-      }
-    ],
-    "name": "CallbackFailed",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "_from",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "_to",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "target",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes4",
-        "name": "targetFunction",
-        "type": "bytes4"
-      },
-      {
-        "indexed": false,
-        "internalType": "enum IHandlerCallback.CallbackType",
-        "name": "_type",
-        "type": "uint8"
-      }
-    ],
-    "name": "CallbackReverted",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
         "indexed": true,
         "internalType": "address",
         "name": "previousOwner",
@@ -375,29 +240,20 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "_from",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_to",
-        "type": "address"
-      },
-      {
         "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "enum IHandlerCallback.CallbackType",
         "name": "_type",
-        "type": "uint8"
+        "type": "uint256"
       }
     ],
-    "name": "executeCallbacks",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "name": "getAllRegisteredContractsOfType",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -433,66 +289,6 @@
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getTestRevertSelector",
-    "outputs": [
-      {
-        "internalType": "bytes4",
-        "name": "",
-        "type": "bytes4"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getTestSelector",
-    "outputs": [
-      {
-        "internalType": "bytes4",
-        "name": "",
-        "type": "bytes4"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_contract",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "target",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "enum IHandlerCallback.CallbackType",
-        "name": "_type",
-        "type": "uint8"
-      }
-    ],
-    "name": "hasCallback",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -554,58 +350,6 @@
         "internalType": "bool",
         "name": "",
         "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "lastContract",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "lastFrom",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "lastTo",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "lastTokenId",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -692,44 +436,6 @@
         "type": "address"
       },
       {
-        "internalType": "address",
-        "name": "target",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "enum IHandlerCallback.CallbackType",
-        "name": "_type",
-        "type": "uint8"
-      },
-      {
-        "internalType": "bytes4",
-        "name": "_function",
-        "type": "bytes4"
-      },
-      {
-        "internalType": "bool",
-        "name": "allowRevert",
-        "type": "bool"
-      }
-    ],
-    "name": "registerCallback",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_contract",
-        "type": "address"
-      },
-      {
         "internalType": "uint256",
         "name": "_type",
         "type": "uint256"
@@ -738,93 +444,6 @@
     "name": "registerContract",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_contract",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "target",
-        "type": "address"
-      },
-      {
-        "internalType": "enum IHandlerCallback.CallbackType",
-        "name": "_type",
-        "type": "uint8"
-      },
-      {
-        "internalType": "bytes4",
-        "name": "_function",
-        "type": "bytes4"
-      },
-      {
-        "internalType": "bool",
-        "name": "allowRevert",
-        "type": "bool"
-      }
-    ],
-    "name": "registerWildcardCallback",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      },
-      {
-        "internalType": "enum IHandlerCallback.CallbackType",
-        "name": "",
-        "type": "uint8"
-      },
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "registeredCallbacks",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "vault",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "registrant",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "target",
-        "type": "address"
-      },
-      {
-        "internalType": "bytes4",
-        "name": "targetFunction",
-        "type": "bytes4"
-      },
-      {
-        "internalType": "bool",
-        "name": "canRevert",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -865,55 +484,6 @@
         "internalType": "address",
         "name": "",
         "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
-      {
-        "internalType": "enum IHandlerCallback.CallbackType",
-        "name": "",
-        "type": "uint8"
-      },
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "registeredWildcardCallbacks",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "vault",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "registrant",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "target",
-        "type": "address"
-      },
-      {
-        "internalType": "bytes4",
-        "name": "targetFunction",
-        "type": "bytes4"
-      },
-      {
-        "internalType": "bool",
-        "name": "canRevert",
-        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -1021,67 +591,8 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_from",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_to",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      }
-    ],
-    "name": "testCallback",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_from",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_to",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      }
-    ],
-    "name": "testRevertCallback",
-    "outputs": [],
-    "stateMutability": "pure",
-    "type": "function"
-  },
-  {
     "inputs": [],
-    "name": "ticks",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "toggleAllowCallbacks",
+    "name": "toggleBypassability",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1212,39 +723,6 @@
       }
     ],
     "name": "transferOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_contract",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "target",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "enum IHandlerCallback.CallbackType",
-        "name": "_type",
-        "type": "uint8"
-      },
-      {
-        "internalType": "uint256",
-        "name": "index",
-        "type": "uint256"
-      }
-    ],
-    "name": "unregisterCallback",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
