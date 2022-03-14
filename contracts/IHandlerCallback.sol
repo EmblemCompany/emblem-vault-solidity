@@ -14,4 +14,6 @@ interface IHandlerCallback {
     }
     function executeCallbacksInternal(address _from, address _to, uint256 tokenId, CallbackType _type) external;
     function executeCallbacks(address _from, address _to, uint256 tokenId, CallbackType _type) external;
+    function executeStoredCallbacksInternal(address _nftAddress, address _from, address _to, uint256 tokenId, IHandlerCallback.CallbackType _type) external;
+    
 }

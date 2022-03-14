@@ -310,7 +310,7 @@ describe('ERC1155', () => {
             expect(hasCallback).to.equal(false)
         })
         it('should allow multiple callbacks to be registered', async()=>{
-            await util.handler.registerContract(ERC1155.address, REGISTRATION_TYPE.ERC1155)            
+            await util.handler.registerContract(ERC1155.address, REGISTRATION_TYPE.ERC1155)
             await util.handler.registerCallback(ERC1155.address, util.emblem.address, 1, CALLBACK_TYPE.MINT, TEST_CALLBACK_FUNCTION, true)
             await util.handler.registerCallback(ERC1155.address, util.emblem.address, 1, CALLBACK_TYPE.TRANSFER, TEST_CALLBACK_FUNCTION, true)
             let hasCallback = await util.handler.hasCallback(ERC1155.address, util.emblem.address, 1, CALLBACK_TYPE.MINT)

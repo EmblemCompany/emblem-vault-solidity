@@ -32,11 +32,11 @@
 
 pragma solidity 0.8.4;
 import "./SafeMath.sol";
-import "./Context.sol";
-import "./Address.sol";
-import "./HasRegistration.sol";
+// import "./Context.sol";
+// import "./Address.sol";
+import "./HasRegistrationUpgradable.sol";
 import "./IERC20.sol";
-import "./SafeERC20.sol";
+// import "./SafeERC20.sol";
 
 abstract contract ERC20Detailed is IERC20 {
     string public name;
@@ -52,17 +52,17 @@ abstract contract ERC20Detailed is IERC20 {
     }
 }
 
-contract Configurable is HasRegistration {
+contract Configurable is HasRegistrationUpgradable {
     using SafeMath for uint256;
 
     address private governance;
-    bool internal _transferable = true;
-    bool internal _burnable = true;
-    bool internal _visible = true;
-    bool internal _allowPrivateTransactions = false;
-    bool internal _locked = false;
-    bool internal _forever = false;
-    uint256 internal _lockBlock = 0;
+    bool internal _transferable;
+    bool internal _burnable;
+    bool internal _visible;
+    bool internal _allowPrivateTransactions;
+    bool internal _locked;
+    bool internal _forever;
+    uint256 internal _lockBlock;
 
     mapping(address => bool) public minters;
     mapping(address => bool) public viewers;
@@ -83,7 +83,6 @@ contract Configurable is HasRegistration {
     function _isDepositer() internal view returns (bool) {
         return depositers[_msgSender()];
     }
-
 
     function transferable() public view returns (bool) {
         return _transferable;
@@ -151,7 +150,7 @@ contract Configurable is HasRegistration {
         _;
     }
 
-    modifier onlyOwner() override {
+    modifier onlyGoverner() {
         require(_isGoverner(), "Sender is not Governer");
         _;
     }
@@ -171,7 +170,7 @@ contract Configurable is HasRegistration {
         _;
     }
 
-    function unLock() public onlyOwner {
+    function unLock() public onlyGoverner {
         require(
             !lockedPermenantly(),
             "Contract locked forever to governance changes"
@@ -184,7 +183,7 @@ contract Configurable is HasRegistration {
         _locked = false;
     }
 
-    function lockForever() public onlyOwner {
+    function lockForever() public onlyGoverner {
         require(
             !lockedPermenantly(),
             "Contract locked forever to governance changes"
@@ -197,15 +196,11 @@ contract Configurable is HasRegistration {
         _forever = true;
     }
 
-    function lockTemporarily() public onlyOwner notLocked {
+    function lockTemporarily() public onlyGoverner notLocked {
         _locked = true;
     }
 
-    function lockTemporarilyTillBlock(uint256 blockNumber)
-        public
-        onlyOwner
-        notLocked
-    {
+    function lockTemporarilyTillBlock(uint256 blockNumber) public onlyGoverner notLocked {
         require(
             block.number < blockNumber,
             "Provided Block numbner is in the past"
@@ -213,28 +208,28 @@ contract Configurable is HasRegistration {
         _lockBlock = blockNumber;
     }
 
-    function toggleBurnable() public onlyOwner notLocked {
+    function toggleBurnable() public onlyGoverner notLocked {
         _burnable = !_burnable;
     }
 
-    function toggleTransferable() public onlyOwner notLocked {
+    function toggleTransferable() public onlyGoverner notLocked {
         _transferable = !_transferable;
     }
 
-    function toggleVisibility() public onlyOwner notLocked {
+    function toggleVisibility() public onlyGoverner notLocked {
         _visible = !_visible;
     }
 
-    function togglePrivateTransferability() public onlyOwner notLocked {
+    function togglePrivateTransferability() public onlyGoverner notLocked {
         _allowPrivateTransactions = !_allowPrivateTransactions;
     }
 
-    function setGovernance(address _governance) public onlyOwner notLocked {
+    function setGovernance(address _governance) public onlyGoverner notLocked {
         _setGovernance(_governance);
     }
     
     /* For compatibility with Ownable */
-    function transferOwnership(address _governance) public override onlyOwner notLocked {
+    function transferOwnership(address _governance) public override onlyGoverner notLocked {
         _setGovernance(_governance);
     }
 
@@ -445,17 +440,17 @@ contract ERC20 is IERC20, Configurable {
     }
 }
 
-contract ConfigurableERC20 is ERC20, ERC20Detailed {
-    using SafeERC20 for IERC20;
-    using Address for address;
+contract ConfigurableERC20Upgradable is ERC20, ERC20Detailed {
+    // using SafeERC20 for IERC20;
+    // using Address for address;
     using SafeMath for uint256;
 
-    constructor() {
-        init(_msgSender(), name, symbol, decimals);
-    }
+    // constructor() {
+    //     init(_msgSender(), name, symbol, decimals);
+    // }
 
-    function init(address _owner, string memory _name, string memory _symbol, uint8 _decimals) public {
-        require(!initialized, "Already Initialized");
+    function initialize(address _owner, string memory _name, string memory _symbol, uint8 _decimals) public initializer {
+        __Ownable_init();
         ERC20Detailed.init(_name, _symbol, _decimals);      
         _setGovernance(_owner);
         Configurable._transferable = true;
@@ -468,20 +463,11 @@ contract ConfigurableERC20 is ERC20, ERC20Detailed {
         initialized = true;
     }
 
-    function transfer(
-        address to,
-        uint256 amount,
-        bool _private
-    ) public isTransferable canSendPrivateOrGoverner {
+    function transfer(address to, uint256 amount, bool _private ) public isTransferable canSendPrivateOrGoverner {
         _transferPrivate(_msgSender(), to, amount, _private);
     }
 
-    function transferFrom(
-        address from,
-        address to,
-        uint256 amount,
-        bool _private
-    ) public isTransferable canSendPrivateOrGoverner {
+    function transferFrom(address from, address to, uint256 amount, bool _private) public isTransferable canSendPrivateOrGoverner {
         _transferPrivate(from, to, amount, _private);
     }
 
@@ -493,41 +479,37 @@ contract ConfigurableERC20 is ERC20, ERC20Detailed {
         _burn(_msgSender(), amount);
     }
 
-    function changeContractDetails(
-        string memory _name,
-        string memory _symbol,
-        uint8 _decimals
-    ) public onlyOwner notLocked {
+    function changeContractDetails( string memory _name, string memory _symbol, uint8 _decimals) public onlyGoverner notLocked {
         name = _name;
         symbol = _symbol;
         decimals = _decimals;
     }
 
-    function addMinter(address _minter) public onlyOwner notLocked {
+    function addMinter(address _minter) public onlyGoverner notLocked {
         minters[_minter] = true;
     }
 
-    function removeMinter(address _minter) public onlyOwner notLocked {
+    function removeMinter(address _minter) public onlyGoverner notLocked {
         minters[_minter] = false;
     }
 
-    function addViewer(address _viewer) public onlyOwner notLocked {
+    function addViewer(address _viewer) public onlyGoverner notLocked {
         viewers[_viewer] = true;
     }
 
-    function removeViewer(address _viewer) public onlyOwner notLocked {
+    function removeViewer(address _viewer) public onlyGoverner notLocked {
         viewers[_viewer] = false;
     }
     
-    function addDepositer(address _depositer) public onlyOwner notLocked {
+    function addDepositer(address _depositer) public onlyGoverner notLocked {
         depositers[_depositer] = true;
     }
 
-    function removeDepositer(address _depositer) public onlyOwner notLocked {
+    function removeDepositer(address _depositer) public onlyGoverner notLocked {
         depositers[_depositer] = false;
     }
 
-    function version() public pure returns (uint256) {
-        return 2;
+    function version() public pure returns (uint256) { 
+        return 3;
     }
 }

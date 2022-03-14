@@ -210,5 +210,13 @@
             "registrations": [],
             "clones": []
         }
+    },
+    {
+        "callbackV4": {
+            "address": "0x366bc7c094a9b61A6e98C07754257133cec978a7",
+            "delegation": "0xbecee09e57d82178224c337de70dc595c983ae82",
+            "verified": false,
+            "registrations": []
+        }
     }
 ]

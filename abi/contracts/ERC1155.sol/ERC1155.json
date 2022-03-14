@@ -714,6 +714,13 @@
   },
   {
     "inputs": [],
+    "name": "toggleBypassability",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "toggleSerialization",
     "outputs": [],
     "stateMutability": "nonpayable",

@@ -6,30 +6,30 @@ async function deploy(name, ContractClass, constructorArgs = null) {
     let contract = await ContractClass.deploy(constructorArgs)
     await contract.deployed()
     console.log(name, "deployed to", contract.address)
-    return {address: contract.address, contract: contract, verified: false}
+    return {address: contract.address, contract: contract, verified: false, registrations: []}
 }
 
 async function deployProxy(name, ContractClass, constructorArgs = []) {
-    console.log("Deploying", name)
+    console.log("Deploying Proxy", name)
     let contract = await upgrades.deployProxy(ContractClass, constructorArgs)
     await contract.deployed()
     console.log(name, "deployed to", contract.address)
     const implementationAddress = await getImplementationAddress(contract.address);
-    return {address: contract.address, delegation: implementationAddress, contract: contract, verified: true}
+    return {address: contract.address, delegation: implementationAddress, contract: contract, verified: true, registrations: []}
 }
 
 async function upgradeProxy(PROXY, name, ContractClass, constructorArgs = []) {
     console.log("Upgrading", name)
     let contract = await upgrades.upgradeProxy(PROXY, ContractClass, constructorArgs);
-    console.log(name, "upgraded to", contract.address)
     const implementationAddress = await getImplementationAddress(contract.address);
-    return {address: contract.address, delegation: implementationAddress, contract: contract, verified: true}
+    console.log(name, "upgraded to", implementationAddress)
+    return {address: contract.address, delegation: implementationAddress, contract: contract, verified: true, registrations: []}
 }
 
 async function verify(contractResult, constructor = []) {
     let address = contractResult.delegation ? contractResult.delegation : contractResult.address
     let results = await verifyAddress(address, constructor)
-    return { contract: contractResult.contract, delegation: contractResult.delegation? contractResult.delegation : null, address: contractResult.address, verified: results.verified }
+    return { contract: contractResult.contract, delegation: contractResult.delegation? contractResult.delegation : null, address: contractResult.address, verified: results.verified, registrations: contractResult.registrations}
 }
 
 async function verifyAddress(address, constructor = []) {
@@ -59,9 +59,10 @@ async function verifyAddress(address, constructor = []) {
 }
 
 async function registerWithContract(registrationType, registerWhere, contractResult) {
+    let results = {registered: contractResult.address, asType: registrationType}
     await registerWhere.contract.registerContract(contractResult.address, registrationType)
-    // contractResult.registeredWith = []
-    return contractResult
+    registerWhere.registrations.push(results)
+    return results
 }
 
 async function getImplementationAddress(proxyAddress) {
@@ -73,12 +74,51 @@ async function getImplementationAddress(proxyAddress) {
 }
 
 function formatResults(results) {
-    let formatted = {}
+    let formatted = {time: results.time}
     Object.keys(results).forEach((key, index)=>{
-        formatted[key] = {address: results[key]?.address? results[key].address: null , delegation: results[key]?.delegation? results[key]?.delegation: null, verified: results[key]?.verified? results[key]?.verified: false  }
+        key!= "time"? formatted[key] = {
+            address: results[key]?.address? results[key].address: null,
+            delegation: results[key]?.delegation? results[key]?.delegation: null, 
+            verified: results[key]?.verified? results[key]?.verified: false,
+            registrations: results[key]?.registrations? results[key]?.registrations: []} : null
     })
+    Object.keys(formatted).forEach((key, index)=>{
+        if (key.includes("Factory") && !formatted[key].clones) {
+            formatted[key].clones = []
+        }
+    })
+
     console.log(formatted)
+    return formatted
 }
+
+function saveFile(content, fileName) {
+    const fs = require('fs')
+    try {
+        fs.writeFileSync(fileName, JSON.stringify(content, null, 4))
+    } catch (err) {
+        console.error(err)
+    }
+}
+
+async function getOrDeploy(proxyAddress, className, contractClass, args = null) {
+    let [_deployer] = await hre.ethers.getSigners();
+    proxyAddress? console.log("Looking up contract from deployment") : null
+    return proxyAddress ? { verified: true, address: proxyAddress, contract: await getContract(proxyAddress, className, _deployer) } : await deploy(className, contractClass, args);
+}
+  
+async function getOrDeployProxy(proxyAddress, className, contractClass, args = []) {
+    let [_deployer] = await hre.ethers.getSigners();
+    proxyAddress? console.log("Looking up contract from deployment") : null
+    return proxyAddress? { verified: true, address: proxyAddress, contract: await getContract(proxyAddress, className, _deployer)}: await deployProxy(className, contractClass, args);
+}
+
+async function getContract(address, _class, signer) {
+    let ABI = require("../artifacts/contracts/"+_class+".sol/"+_class+".json")
+    let contract = new hre.ethers.Contract(address, ABI.abi, signer)
+    return contract;
+}
+
 module.exports = {
     deploy,
     verify,
@@ -88,5 +128,9 @@ module.exports = {
     registerWithContract,
     formatResults,
     upgradeProxy,
+    saveFile,
+    getContract,
+    getOrDeploy,
+    getOrDeployProxy,
     REGISTRATION_TYPE
 }

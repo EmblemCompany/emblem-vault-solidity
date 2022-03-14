@@ -2,7 +2,12 @@ pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "./VaultHandlerV8.sol";
+import "./ERC1155.sol";
+
+interface IHasRegistration {
+  function isRegistered(address _contract, uint256 _type) external returns (bool);
+  function registerContract(address _contract, uint _type) external;
+}
 
 contract ERC1155Factory is OwnableUpgradeable {
 
@@ -19,17 +24,21 @@ contract ERC1155Factory is OwnableUpgradeable {
     erc1155Implementation = address(new ERC1155());
   }
 
+  function updateImplementation() public onlyOwner {
+    erc1155Implementation = address(new ERC1155());
+  }
+
   function updateHandler(address _handlerAddress) public onlyOwner {
     handlerAddress = _handlerAddress;
   }
 
-  function getOwner() public view returns (address _owner) {
-    return owner();
+  function getClones() public view returns (address[] memory) {
+    return ERC1155Clones;
   }
 
-  function createERC1155(address _newOwner) public onlyOwner returns (address clone){
+  function createClone(address _newOwner) public onlyOwner returns (address clone){
     address _clone = ClonesUpgradeable.clone(erc1155Implementation);
-    VaultHandlerV8 handler = VaultHandlerV8(handlerAddress);
+    IHasRegistration handler = IHasRegistration(handlerAddress);
     if (handler.isRegistered(address(this), 8)) { // if factory registered with handler
       handler.registerContract(_clone, 1);
     }
@@ -42,6 +51,6 @@ contract ERC1155Factory is OwnableUpgradeable {
   }
 
   function version() virtual public view returns (uint256 _version) {
-    return 1;
+    return 3;
   }
 }

@@ -1,10 +1,5 @@
 [
   {
-    "inputs": [],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
     "anonymous": false,
     "inputs": [
       {
@@ -72,32 +67,6 @@
     ],
     "name": "Transfer",
     "type": "event"
-  },
-  {
-    "inputs": [],
-    "name": "CANNOT_TRANSFER_TO_ZERO_ADDRESS",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "NOT_CURRENT_OWNER",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
   },
   {
     "inputs": [
@@ -407,11 +376,6 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "_owner",
-        "type": "address"
-      },
-      {
         "internalType": "string",
         "name": "_name",
         "type": "string"
@@ -435,6 +399,11 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
+      },
+      {
         "internalType": "string",
         "name": "_name",
         "type": "string"
@@ -450,7 +419,7 @@
         "type": "uint8"
       }
     ],
-    "name": "init",
+    "name": "initialize",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -691,6 +660,13 @@
       }
     ],
     "name": "removeViewer",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

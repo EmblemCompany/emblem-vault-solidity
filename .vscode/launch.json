@@ -6,7 +6,13 @@
     "configurations": [
         {
             "command": "npm run deploy:rinkeby",
-            "name": "Debug Rinkeby Deploy script",
+            "name": "Rinkeby Deploy script",
+            "request": "launch",
+            "type": "node-terminal"
+        },
+        {
+            "command": "npm run demos:rinkeby",
+            "name": "Rinkeby Demos script",
             "request": "launch",
             "type": "node-terminal"
         },

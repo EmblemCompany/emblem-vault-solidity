@@ -79,7 +79,7 @@
         "type": "uint8"
       }
     ],
-    "name": "createERC20",
+    "name": "createClone",
     "outputs": [
       {
         "internalType": "address",
@@ -105,12 +105,12 @@
   },
   {
     "inputs": [],
-    "name": "getOwner",
+    "name": "getClones",
     "outputs": [
       {
-        "internalType": "address",
-        "name": "_owner",
-        "type": "address"
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
       }
     ],
     "stateMutability": "view",
@@ -184,6 +184,13 @@
       }
     ],
     "name": "updateHandler",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "updateImplementation",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

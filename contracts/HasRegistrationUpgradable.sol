@@ -1,20 +1,19 @@
 pragma solidity 0.8.4;
-import "./Context.sol";
-import "./Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 interface IRegistrationStorage {
     function upgradeVersion(address _newVersion) external;
 }
 
-contract HasRegistration is Context, Ownable {
+contract HasRegistrationUpgradable is OwnableUpgradeable {
 
     // address StorageAddress;
     // bool initialized = false;
 
-    mapping(address => uint256) public registeredContracts; // 0 EMPTY, 1 ERC1155, 2 ERC721, 3 HANDLER, 4 ERC20, 5 BALANCE, 6 CLAIM, 7 UNKNOWN, 8 FACTORY, 9 STAKING, 10 BYPASS
+    mapping(address => uint256) public registeredContracts; // 0 EMPTY, 1 ERC1155, 2 ERC721, 3 HANDLER, 4 ERC20, 5 BALANCE, 6 CLAIM, 7 UNKNOWN, 8 FACTORY, 9 STAKING
     mapping(uint256 => address[]) public registeredOfType;
     
-    uint256 public contractCount = 0;
+    uint256 public contractCount;
 
     modifier isRegisteredContract(address _contract) {
         require(registeredContracts[_contract] > 0, "Contract is not registered");
@@ -22,7 +21,7 @@ contract HasRegistration is Context, Ownable {
     }
 
     modifier isRegisteredContractOrOwner(address _contract) {
-        require(registeredContracts[_contract] > 0 || owner == _msgSender(), "Contract is not registered nor Owner");
+        require(registeredContracts[_contract] > 0 || owner() == _msgSender(), "Contract is not registered nor Owner");
         _;
     }
 
