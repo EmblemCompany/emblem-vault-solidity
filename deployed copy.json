@@ -90,14 +90,6 @@
                 {
                     "address": "0xa6fFA04C147b899B94A9b57Da550188809C40810",
                     "type": "ERC1155"
-                },
-                {
-                    "address": "0x38e38aD121B2659f435F3B44aA588C3496C2D514",
-                    "type": "ERC1155"
-                },
-                {
-                    "address": "0xAe7A49Cb296d26529e63B98860d44ACadaF94320",
-                    "type": "ERC1155"
                 }
             ]
         },
@@ -166,14 +158,6 @@
                 {
                     "address": "0x09Ab52F71Dd0Aa0540F143619b36B18cC4F28B28",
                     "type": "erc20"
-                },
-                {
-                    "address": "0x435212FfDC1FDa66d7CDA4c8e943f4593cb72357",
-                    "type": "erc20"
-                },
-                {
-                    "address": "0x4674024819A9F1F53189CcFFCf5Caee3884EFc1a",
-                    "type": "erc20"
                 }
             ]
         },
@@ -196,6 +180,23 @@
             "verified": false,
             "registrations": []
         },
+        "demos": {
+            "catcher": {
+                "address": "0x366bc7c094a9b61A6e98C07754257133cec978a7",
+                "delegation": "0xbecee09e57d82178224c337de70dc595c983ae82",
+                "verified": true,
+                "registrations": [
+                    {
+                        "address": "0x09Ab52F71Dd0Aa0540F143619b36B18cC4F28B28",
+                        "type": "erc20"
+                    },
+                    {
+                        "address": "0xa6fFA04C147b899B94A9b57Da550188809C40810",
+                        "type": "ERC1155"
+                    }
+                ]
+            }
+        },
         "configurableERC20Upgradable": {
             "address": "0x4ADa870dFaFc866D3c1f626D61b871a259150086",
             "delegation": "0xf0851fca85aa3d2cf5025d754f1955ff8994658e",
@@ -208,23 +209,6 @@
             "verified": true,
             "registrations": [],
             "clones": []
-        },
-        "demos": {
-            "catcher": {
-                "address": "0x63b9B90cf0d43d91d11bae05a3A7dE0703a88c0E",
-                "delegation": "0x84ef9ea39b552461d9c921041bf1c90d0ec1275a",
-                "verified": true,
-                "registrations": [
-                    {
-                        "address": "0x4674024819A9F1F53189CcFFCf5Caee3884EFc1a",
-                        "type": "erc20"
-                    },
-                    {
-                        "address": "0xAe7A49Cb296d26529e63B98860d44ACadaF94320",
-                        "type": "ERC1155"
-                    }
-                ]
-            }            
         }
     }
 ]

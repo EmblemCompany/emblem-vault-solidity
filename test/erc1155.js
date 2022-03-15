@@ -119,14 +119,14 @@ describe('ERC1155', () => {
             await ERC1155.mint(util.deployer.address, 789, 1)
             ERC1155 = await util.getERC1155(ERC1155.address, util.bob)
             let tx = ERC1155.safeTransferFrom(util.deployer.address, util.bob.address, 789, 1, 0x0)
-            await expect(tx).to.be.revertedWith("ERC1155: caller is not owner nor approved")
+            await expect(tx).to.be.revertedWith("ERC1155: caller is not owner nor approved nor bypasser")
         })
         it('not allow bypass if bypass allowed and not registered as bypasser', async()=>{
             await ERC1155.mint(util.deployer.address, 789, 1)
             await ERC1155.toggleBypassability()
             ERC1155 = await util.getERC1155(ERC1155.address, util.bob)
             let tx = ERC1155.safeTransferFrom(util.deployer.address, util.bob.address, 789, 1, 0x0)
-            await expect(tx).to.be.revertedWith("ERC1155: caller is not owner nor approved")
+            await expect(tx).to.be.revertedWith("ERC1155: caller is not owner nor approved nor bypasser")
         })
         it('only admin can add bypasser', async()=>{
             await ERC1155.mint(util.deployer.address, 789, 1)
@@ -135,16 +135,45 @@ describe('ERC1155', () => {
             let tx = ERC1155.registerContract(util.bob.address, REGISTRATION_TYPE.BYPASS)
             await expect(tx).to.be.revertedWith("Contract is not registered nor Owner")
         })
-        it('allow bypass if bypass allowed and registered as bypasser', async()=>{
+        it('not allow bypass if bypass allowed and registered as bypasser but wrong id', async()=>{
+            await ERC1155.mint(util.deployer.address, 321, 1)
+            let balanceERC1155 = await ERC1155.balanceOf(util.bob.address, 321)
+            expect(balanceERC1155).to.equal(0)
+            await ERC1155.toggleBypassability()
+            await ERC1155.addBypassRule(util.bob.address, "0xf242432a", 789);
+            ERC1155 = await util.getERC1155(ERC1155.address, util.bob)
+            let tx = ERC1155.safeTransferFrom(util.deployer.address, util.bob.address, 321, 1, 0x0)
+            await expect(tx).to.be.revertedWith("ERC1155: caller is not owner nor approved nor bypasser")
+        })
+        it('allow bypass if bypass for tokenid allowed and registered as bypasser', async()=>{
             await ERC1155.mint(util.deployer.address, 789, 1)
             let balanceERC1155 = await ERC1155.balanceOf(util.bob.address, 789)
             expect(balanceERC1155).to.equal(0)
             await ERC1155.toggleBypassability()
-            await ERC1155.registerContract(util.bob.address, REGISTRATION_TYPE.BYPASS)
+            await ERC1155.addBypassRule(util.bob.address, "0xf242432a", 789);
             ERC1155 = await util.getERC1155(ERC1155.address, util.bob)
             await ERC1155.safeTransferFrom(util.deployer.address, util.bob.address, 789, 1, 0x0)
             balanceERC1155 = await ERC1155.balanceOf(util.bob.address, 789)
             expect(balanceERC1155).to.equal(1)
+        })
+        it('not allow bypass of ownerOnly if no valid rule', async()=>{
+            let currentUri = await ERC1155.uri(789);
+            expect(currentUri).to.equal("https://api.emblemvault.io/s:evmetadata/meta/789")
+            await ERC1155.toggleBypassability()
+            ERC1155 = await util.getERC1155(ERC1155.address, util.bob)
+            let tx = ERC1155.setURI("foo.bar")
+            await expect(tx).to.be.revertedWith("Not owner or able to bypass")
+            
+        })
+        it('allow bypass of ownerOnly if valid rule', async()=>{
+            let currentUri = await ERC1155.uri(789);
+            expect(currentUri).to.equal("https://api.emblemvault.io/s:evmetadata/meta/789")
+            await ERC1155.toggleBypassability()
+            await ERC1155.addBypassRule(util.bob.address, "0x02fe5305", 0)
+            ERC1155 = await util.getERC1155(ERC1155.address, util.bob)
+            await ERC1155.setURI("foo.bar/")
+            currentUri = await ERC1155.uri(789);
+            expect(currentUri).to.equal("foo.bar/789")
         })
     })
     
@@ -828,7 +857,8 @@ describe('ERC1155', () => {
         it('FUNCTION generate: for testing purposes only', async()=>{
             var provider = selectProvider("mainnet")
             var web3 = new Web3(provider)
-            let hash = web3.eth.abi.encodeFunctionSignature('catchCallbackFrom(address,address,uint256)').substr(0, 10) //catchCallback(address, address _to, uint256)
+            // let hash = web3.eth.abi.encodeFunctionSignature('catchCallbackFrom(address,address,uint256)').substr(0, 10) //catchCallback(address, address _to, uint256)
+            let hash = web3.eth.abi.encodeFunctionSignature('changeName(string,string)').substr(0, 10) //getFunctions()
             console.log("hash", hash)
         })
     })

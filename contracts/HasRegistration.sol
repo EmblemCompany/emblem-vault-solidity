@@ -1,15 +1,13 @@
 pragma solidity 0.8.4;
 import "./Context.sol";
 import "./Ownable.sol";
+import "./IsOverridable.sol";
 
 interface IRegistrationStorage {
     function upgradeVersion(address _newVersion) external;
 }
 
-contract HasRegistration is Context, Ownable {
-
-    // address StorageAddress;
-    // bool initialized = false;
+contract HasRegistration is IsOverridable {
 
     mapping(address => uint256) public registeredContracts; // 0 EMPTY, 1 ERC1155, 2 ERC721, 3 HANDLER, 4 ERC20, 5 BALANCE, 6 CLAIM, 7 UNKNOWN, 8 FACTORY, 9 STAKING, 10 BYPASS
     mapping(uint256 => address[]) public registeredOfType;
@@ -25,17 +23,6 @@ contract HasRegistration is Context, Ownable {
         require(registeredContracts[_contract] > 0 || owner == _msgSender(), "Contract is not registered nor Owner");
         _;
     }
-
-    // constructor(address storageContract) {
-    //     StorageAddress = storageContract;
-    // }
-
-    // function initialize() public {
-    //     require(!initialized, 'already initialized');
-    //     IRegistrationStorage _storage = IRegistrationStorage(StorageAddress);
-    //     _storage.upgradeVersion(address(this));
-    //     initialized = true;
-    // }
 
     function registerContract(address _contract, uint _type) public isRegisteredContractOrOwner(_msgSender()) {
         contractCount++;

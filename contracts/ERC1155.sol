@@ -20,7 +20,7 @@ import "./IsSerialized.sol";
  * _Available since v3.1._
  */
 
-contract ERC1155 is ERC165, IERC1155, IERC1155MetadataURI, HasRegistration, IsSerialized {
+contract ERC1155 is ERC165, IERC1155, IERC1155MetadataURI, IsSerialized {
     using SafeMath for uint256;
     using Address for address;
 
@@ -31,7 +31,6 @@ contract ERC1155 is ERC165, IERC1155, IERC1155MetadataURI, HasRegistration, IsSe
     mapping (address => mapping(address => bool)) private _operatorApprovals;
 
     bool initialized;
-    bool byPassable;
     string private _uri;
     
     constructor () {
@@ -68,10 +67,6 @@ contract ERC1155 is ERC165, IERC1155, IERC1155MetadataURI, HasRegistration, IsSe
 
     function setURI(string memory newuri) public onlyOwner {
         _setURI(newuri);
-    }
-
-    function toggleBypassability() public onlyOwner {
-        byPassable = !byPassable;
     }
 
     /**
@@ -149,9 +144,9 @@ contract ERC1155 is ERC165, IERC1155, IERC1155MetadataURI, HasRegistration, IsSe
      * @dev See {IERC1155-safeTransferFrom}.
      */
     function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes memory data) public virtual override {
-        bool canBypass = byPassable && registeredOfType[10].length > 0 && isRegistered(_msgSender(), 10); // if sender contract/user is registered as able to bypass (not first, in array)
+        bool canBypass = canBypassForTokenId(id);
         require(to != address(0), "ERC1155: transfer to the zero address");
-        require(from == _msgSender() || isApprovedForAll(from, _msgSender()) || canBypass, "ERC1155: caller is not owner nor approved");
+        require(from == _msgSender() || isApprovedForAll(from, _msgSender()) || canBypass, "ERC1155: caller is not owner nor approved nor bypasser");
 
         address operator = _msgSender();
 

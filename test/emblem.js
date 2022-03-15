@@ -170,11 +170,40 @@ describe('ERC721', () => {
         let balanceERC721 = await util.emblem.balanceOf(util.bob.address)
         expect(balanceERC721).to.equal(0)
         await util.emblem.toggleBypassability()
-        await util.emblem.registerContract(util.bob.address, REGISTRATION_TYPE.BYPASS)
+        await util.emblem.addBypassRule(util.bob.address, "0x23b872dd", 789);
         ERC721 = await util.getEmblemVault(util.emblem.address, util.bob)
         await ERC721.transferFrom(util.deployer.address, util.bob.address, 789)
         balanceERC721 = await ERC721.balanceOf(util.bob.address)
         expect(balanceERC721).to.equal(1)
+    })
+    it('not allow bypass of ownerOnly if no valid rule', async()=>{
+      await util.emblem.toggleBypassability()
+      ERC721 = await util.getEmblemVault(util.emblem.address, util.bob)
+      let tx = ERC721.changeName("New Name", "smbl")
+      await expect(tx).to.be.revertedWith("Not owner or able to bypass")
+    })
+    it('allow bypass of ownerOnly if valid rule', async()=>{
+      await util.emblem.toggleBypassability()
+      let currentName = await util.emblem.name()
+      expect(currentName).to.equal("Emblem Vault V2")
+      await util.emblem.addBypassRule(util.bob.address, "0x86575e40", 0);
+      ERC721 = await util.getEmblemVault(util.emblem.address, util.bob)
+      await ERC721.changeName("New Name", "smbl")
+      currentName = await util.emblem.name()
+      expect(currentName).to.equal("New Name")
+    })
+    it('removal of rule prevents bypass of ownerOnly', async()=>{
+      await util.emblem.toggleBypassability()
+      await util.emblem.addBypassRule(util.bob.address, "0x86575e40", 0);
+      ERC721 = await util.getEmblemVault(util.emblem.address, util.bob)
+      await ERC721.changeName("New Name", "smbl")
+      let currentName = await util.emblem.name()
+      expect(currentName).to.equal("New Name")
+      ERC721 = await util.getEmblemVault(util.emblem.address, util.deployer)
+      await ERC721.removeBypassRule(util.bob.address, "0x86575e40", 0)
+      ERC721 = await util.getEmblemVault(util.emblem.address, util.bob)
+      let tx = ERC721.changeName("Another Name", "smbl")
+      await expect(tx).to.be.revertedWith("Not owner or able to bypass")
     })
   })
   describe('Claim', ()=>{

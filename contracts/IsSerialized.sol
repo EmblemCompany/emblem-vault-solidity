@@ -1,6 +1,7 @@
 pragma solidity 0.8.4;
 import "./Context.sol";
 import "./Ownable.sol";
+import "./HasRegistration.sol";
 
 interface IIsSerialized {
     function isSerialized() external view returns (bool);
@@ -10,7 +11,7 @@ interface IIsSerialized {
     function getTokenIdForSerialNumber(uint256 serialNumber) external view returns (uint256);
 }
 
-contract IsSerialized is Context, Ownable {
+contract IsSerialized is HasRegistration {
     bool internal serialized;
     bool internal hasSerialized = false;
     mapping(uint256 => uint256[]) internal tokenIdToSerials;

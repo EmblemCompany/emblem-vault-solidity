@@ -5,10 +5,10 @@ import "hardhat/console.sol";
 import "./SafeMath.sol";
 import "./IERC20.sol";
 import "./SafeERC20.sol";
-import "./Ownable.sol";
+// import "./Ownable.sol";
 import "./HasRegistration.sol";
 
-contract TokenStaking is Ownable, HasRegistration {
+contract TokenStaking is HasRegistration {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 

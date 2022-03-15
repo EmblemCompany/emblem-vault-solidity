@@ -3,7 +3,7 @@ let Deployments = require('../deployed.json')
 const utils = require("./utils")
 let STORAGE //= "0x92119b2d0bbDAEd799ea88B4b3c45437b6e8D0B5"
 let PROXY //= "0x5228A5Bcf65c64B7e40db530FEaFb83F6f260779"
-let VERIFY = true
+let VERIFY = false
 let results = {}
 async function main() {
   const [_deployer] = await hre.ethers.getSigners();

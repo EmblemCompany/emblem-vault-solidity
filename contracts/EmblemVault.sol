@@ -1,17 +1,17 @@
 pragma solidity 0.8.4;
 pragma experimental ABIEncoderV2;
 import "./SafeMath.sol";
-import "./Ownable.sol";
+// import "./Ownable.sol";
 import "./ERC165.sol";
 import "./HasRegistration.sol";
 import "./IHandlerCallback.sol";
+import "./IsOverridable.sol";
 
 /**
  * @dev Optional enumeration extension for ERC-721 non-fungible token standard.
  * See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md.
  */
-interface ERC721Enumerable
-{
+interface ERC721Enumerable {
 
   /**
    * @dev Returns a count of valid NFTs tracked by this contract, where each one of them has an
@@ -57,8 +57,7 @@ interface ERC721Enumerable
  * @dev Optional metadata extension for ERC-721 non-fungible token standard.
  * See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md.
  */
-interface ERC721Metadata
-{
+interface ERC721Metadata {
 
   /**
    * @dev Returns a descriptive name for a collection of NFTs in this contract.
@@ -97,8 +96,7 @@ interface ERC721Metadata
  * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Address.sol
  * Requires EIP-1052.
  */
-library AddressUtils
-{
+library AddressUtils {
 
   /**
    * @dev Returns whether the target address is a contract.
@@ -131,8 +129,7 @@ library AddressUtils
  * @dev ERC-721 interface for accepting safe transfers.
  * See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md.
  */
-interface ERC721TokenReceiver
-{
+interface ERC721TokenReceiver {
   
   function onERC721Received(
     address _operator,
@@ -149,8 +146,7 @@ interface ERC721TokenReceiver
  * @dev ERC-721 non-fungible token standard.
  * See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md.
  */
-interface ERC721
-{
+interface ERC721 {
 
  
   event Transfer(
@@ -240,11 +236,7 @@ interface ERC721
 /**
  * @dev Implementation of ERC-721 non-fungible token standard.
  */
-contract NFToken is
-  ERC721,
-  ERC165,
-  HasRegistration
-{
+contract NFToken is  ERC721,  ERC165, HasRegistration {
   using SafeMath for uint256;
   using AddressUtils for address;
 
@@ -260,7 +252,6 @@ contract NFToken is
   string constant NFT_ALREADY_EXISTS = "003006";
   string constant NOT_OWNER = "003007";
   string constant IS_OWNER = "003008";
-  bool byPassable;
 
   /**
    * @dev Magic value of a smart contract that can recieve NFT.
@@ -306,7 +297,7 @@ contract NFToken is
    * @param _tokenId ID of the NFT to transfer.
    */
   modifier canTransfer(uint256 _tokenId) {
-    bool canBypass = byPassable && registeredOfType[10].length > 0 && isRegistered(_msgSender(), 10); // if sender contract/user is registered as able to bypass (not first, in array)
+    bool canBypass = canBypassForTokenId(_tokenId);
     address tokenOwner = idToOwner[_tokenId];
     require(
       tokenOwner == msg.sender
@@ -356,16 +347,7 @@ contract NFToken is
     _safeTransferFrom(_from, _to, _tokenId, "");
   }
 
-  function transferFrom(
-    address _from,
-    address _to,
-    uint256 _tokenId
-  )
-    external
-    override
-    canTransfer(_tokenId)
-    validNFToken(_tokenId)
-  {
+  function transferFrom(address _from, address _to, uint256 _tokenId) external override canTransfer(_tokenId) validNFToken(_tokenId) {
     address tokenOwner = idToOwner[_tokenId];
     require(tokenOwner == _from, NOT_OWNER);
     require(_to != address(0), ZERO_ADDRESS);
@@ -948,10 +930,6 @@ contract EmblemVault is NFTokenEnumerableMetadata {
   function changeName(string calldata name, string calldata symbol) external onlyOwner {
       nftName = name;
       nftSymbol = symbol;
-  }
-
-  function toggleBypassability() public onlyOwner {
-      byPassable = !byPassable;
   }
 
   /**

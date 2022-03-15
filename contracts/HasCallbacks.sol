@@ -112,10 +112,16 @@ contract HasCallbacks is HasRegistration {
 
     function unregisterCallback(address _contract, address target, uint256 tokenId, IHandlerCallback.CallbackType _type, uint256 index) public isOwnerOrCallbackRegistrant(_contract, target, tokenId, _type, index){
         if (hasTokenIdCallback(_contract, target, tokenId, _type)) {
-            delete registeredCallbacks[_contract][tokenId][_type][index];
+            IHandlerCallback.Callback[] storage arr = registeredCallbacks[_contract][tokenId][_type];
+            arr[index] = arr[arr.length - 1];
+            arr.pop();
+            // delete registeredCallbacks[_contract][tokenId][_type][index];
         }
         else if(hasWildcardCallback(_contract, target, _type)) {
-            delete registeredWildcardCallbacks[_contract][_type][index];
+            IHandlerCallback.Callback[] storage arr = registeredWildcardCallbacks[_contract][_type];
+            arr[index] = arr[arr.length - 1];
+            arr.pop();
+            // delete registeredWildcardCallbacks[_contract][_type][index];
         }
     }
 

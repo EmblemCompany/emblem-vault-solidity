@@ -1,13 +1,13 @@
 pragma solidity 0.8.4;
 
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./BasicERC20.sol";
+import "./IsOverridableUpgradable.sol";
 
 interface Transferable {
   function transferOwnership(address _governance) external;
 }
 
-contract DemoCallbackCatchV4 is OwnableUpgradeable {
+contract DemoCallbackCatchV4 is IsOverridableUpgradable {
 
   mapping(address => bool) public validSenders;
   address public tokenContract;
@@ -30,10 +30,6 @@ contract DemoCallbackCatchV4 is OwnableUpgradeable {
     BasicERC20(tokenContract).mint(_to, 41900000000);
     return true;
   }
-  
-  function getSignature() public view returns(bytes4) {
-    return DemoCallbackCatchV4(address(this)).catchCallback.selector;
-  }
 
   function updateTokenPerEvent(uint256 amount) public onlyOwner {
     tokensPerEvent = amount;
@@ -50,6 +46,6 @@ contract DemoCallbackCatchV4 is OwnableUpgradeable {
   }
 
   function version() virtual public pure returns (uint256 _version) {
-    return 4000002;
+    return 8;
   }
 }
