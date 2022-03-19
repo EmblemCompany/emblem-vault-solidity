@@ -718,8 +718,7 @@ describe('ERC1155', () => {
                 expect(lastFrom).to.equal(util.deployer.address)
             })
             it.only('should execute multiple callbacks on transfer of multiple amount', async()=>{
-                await ERC1155.mintWithSerial(util.deployer.address, 789, 2, util.serializeUintToBytes(123))
-                await util.handler.registerContract(util.handler.address, REGISTRATION_TYPE.HANDLER)
+                await ERC1155.mintWithSerial(util.deployer.address, 789, 2, util.serializeUintArrayToBytes([123, 786]))
                 await util.handler.registerCallback(ERC1155.address, util.handler.address, 789, CALLBACK_TYPE.TRANSFER, TEST_CALLBACK_FUNCTION, true)
                 let ticks = await util.handler.ticks()
                 expect(ticks).to.equal(0)
