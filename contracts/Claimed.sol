@@ -1,12 +1,9 @@
 pragma solidity 0.8.4;
 import "./IERC721.sol";
-import "./Ownable.sol";
-import "./Context.sol";
 import "./ReentrancyGuard.sol";
 import "./HasRegistration.sol";
 
 interface IStorage {
-    function getDead() external view returns(address);
     function addToLegacy(address nftAddress, bytes32 root) external;
     function addToLegacyClaimedBy(address nftAddress, bytes32 root) external;
     function getLegacyClaims(address nftAddress) external view returns (bytes32);
@@ -26,6 +23,7 @@ contract Claimed is ReentrancyGuard, HasRegistration {
     bool canClaim = true;
     
     constructor(address storageContract) {
+        __Ownable_init();
         StorageAddress = storageContract;
         initialize();
     }

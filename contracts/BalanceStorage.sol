@@ -1,7 +1,7 @@
 pragma solidity 0.8.4;
-import "./Ownable.sol";
+import "./OwnableUpgradeable.sol";
 
-contract BalanceStorage is Ownable {
+contract BalanceStorage is OwnableUpgradeable {
     
     address public latestVersion = address(0x0);
     mapping(uint256 => bool) public usedNonces;
@@ -24,13 +24,9 @@ contract BalanceStorage is Ownable {
     mapping(address => uint256[]) contractTokenIds;
     mapping(address=> mapping(address => bool)) public witnesses;
     mapping(bytes32 => mapping(address => uint256[])) public tokensToContractMap;
-
-    constructor() {
-        
-    }
     
     modifier onlyLatestVersion() {
-       require(msg.sender == latestVersion || msg.sender == owner, 'Not Owner or Latest version');
+       require(_msgSender() == latestVersion || _msgSender() == owner(), 'Not Owner or Latest version');
         _;
     }
 
@@ -47,7 +43,7 @@ contract BalanceStorage is Ownable {
     }
 
     function upgradeVersion(address _newVersion) public {
-        require(msg.sender == owner || (msg.sender == _newVersion && latestVersion == address(0x0) || msg.sender == latestVersion), 'Only owner can upgrade');
+        require(_msgSender() == owner() || (_msgSender() == _newVersion && latestVersion == address(0x0) || _msgSender() == latestVersion), 'Only owner can upgrade');
         latestVersion = _newVersion;
     }
 

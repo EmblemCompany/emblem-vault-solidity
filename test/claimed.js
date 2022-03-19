@@ -10,218 +10,149 @@ const Merklescript = require('merklescript')
 //const keccak256 = require('keccak256')
 const util = new Util()
 beforeEach(async ()=>{
-  await util.deploy();
+  await util.deployHandler()
+  await util.deployBalanceUpgradable()
+  await util.deployClaimedUpgradable()
+  await util.deployERC721Factory()
+  await util.deployERC20Factory() 
 })
-describe('Claimed', () => {    
-  it('should deploy storage', async ()=>{    
-    let storage = await util.factory.storageImplementation()
-    // console.log(storage)
-    expect(storage).to.exist
-  })
-  it('storage should be owned by deployer', async ()=>{    
-    let storage = await util.factory.storageImplementation()
-    let storageContract = util.getStorage(storage, util.deployer)
-    let owner = await storageContract.owner()
-    expect(owner).to.equal(util.factory.address)
-  })
-  it('should deploy claimed', async ()=>{
-    expect(util.claimer).to.not.exist
-    await util.cloneClaimed(util.deployer.address)
-    expect(util.claimer.address).to.exist
-  })
-  it('should transfer ownership to deployer', async ()=>{
-    await util.cloneClaimed(util.deployer.address)
-    let storage = await util.factory.storageImplementation()
-    let storageContract = util.getStorage(storage, util.deployer)
-    let owner = await storageContract.owner()
-    expect(owner).to.equal(util.deployer.address)
-  })
-  it('uninitialized storage should reflect current version of zero', async ()=>{
-    await util.cloneClaimed(util.deployer.address)
-    let storage = await util.factory.storageImplementation()
-    let storageContract = util.getStorage(storage, util.deployer)
-    let version = await storageContract.latestVersion()
-    expect(version).to.equal("0x0000000000000000000000000000000000000000")
-  })
+describe('Claimed', () => {     
+  describe('V2 Upgradable', ()=>{
+    beforeEach(async ()=>{ })
+    it.only('should be owned by deployer', async ()=>{
+      let owner = await util.claimedUpgradable.owner()
+      expect(owner).to.equal(util.deployer.address)
+    })
+    it.only('initialized storage can add legacy claim', async ()=>{
+      let claimedContract = util.claimedUpgradable
+      let emblemAddress = await util.emblem.address
+      
+      let values = [[1], [2], [3]]
+      const script = new Merklescript({
+        types: ["uint256"],
+        values
+      })
+      const root = script.root()
 
-  it('uninitialized claimed can not add to legacy claim', async ()=>{    
-    await util.cloneClaimed(util.deployer.address)
-    await util.cloneHandler(util.deployer.address)
-    let emblemAddress = await util.factory.emblemImplementation()
-    let claimedContract = util.getClaimed(util.claimer.address, util.deployer)
-    let values = [[1], [2], [3]]
-    const script = new Merklescript({
-      types: ["uint256"],
-      values
+      await claimedContract.addLegacy(emblemAddress, root)
+      let contractRoot = await claimedContract.getLegacyClaims(emblemAddress)
+      expect(contractRoot).to.equal(root)
     })
-    const root = script.root()
-    let tx = claimedContract.addLegacy(emblemAddress, root)
-    await expect(tx).to.be.revertedWith('Not latest version')
-  })
+    it.only('should not be legacy claimed when legacy claimed root not stored', async()=>{
+      let claimedContract = util.claimedUpgradable
+      let emblemAddress = util.emblem.address
+      
+      let values = [[1], [2], [3]]
+      const script = new Merklescript({
+        types: ["uint256"],
+        values
+      })
+      
+      let proof = script.proof(values[0])
 
-  it('initialized storage should reflect current version', async ()=>{
-    await util.cloneClaimed(util.deployer.address)
-    let claimedContract = util.getClaimed(util.claimer.address, util.deployer)
-    let storage = await util.factory.storageImplementation()
-    let storageContract = util.getStorage(storage, util.deployer)
-    let version = await storageContract.latestVersion()
-    expect(version).to.equal("0x0000000000000000000000000000000000000000")
-    let tx = await claimedContract.initialize()
-    version = await storageContract.latestVersion()
-    expect(version).to.equal(util.claimer.address)
-  })
+      let isClaimed = await claimedContract.isClaimed(emblemAddress, 1, proof)
+      expect(isClaimed).to.equal(false)
+    })
+    it.only('should be claimed by ZERO ADDRESS when not minted', async()=>{
+      let claimedContract = util.claimedUpgradable
+      let emblemAddress = util.emblem.address
+      let isClaimed = await claimedContract.claimedBy(emblemAddress, 1)
+      expect(isClaimed._owner).to.equal("0x0000000000000000000000000000000000000000")
+    })
+    it.only('should be claimed by type of "unknown" when not minted', async()=>{
+      let claimedContract = util.claimedUpgradable
+      let emblemAddress = util.emblem.address
+      let isClaimed = await claimedContract.claimedBy(emblemAddress, 1)
+      expect(isClaimed._type).to.equal("unknown")
+    })
+    it.only('should be claimed when legacy', async ()=>{
+      let claimedContract = util.claimedUpgradable
+      let emblemAddress = util.emblem.address
+      
+      let values = [[1], [2], [3]]
+      const script = new Merklescript({
+        types: ["uint256"],
+        values
+      })
+      const root = script.root()
+      let proof = script.proof(values[0])
+      
+      await claimedContract.addLegacy(emblemAddress, root)    
+      let isClaimed = await claimedContract.isClaimed(emblemAddress, 1, proof)
+      expect(isClaimed).to.equal(true)
+    })
+    it.only('should verify valid merklescript', async()=>{
+      let values = [[util.deployer.address, 1], [util.claimedUpgradable.address, 2], [util.deployer.address, 3]]
+      const script = new Merklescript({
+        types: ["address", "uint256"],
+        values
+      })
+      const root = script.root()
+      let proof = script.proof([ util.deployer.address, values[0][1] ])
+      
+      let claimedContract = util.claimedUpgradable
+      let emblemAddress = util.emblem.address
+      await claimedContract.addLegacyClaimedBy(emblemAddress, root)
+      let isClaimed = await claimedContract.legacyClaimedBy(emblemAddress, util.deployer.address, 1, proof)
+      expect(isClaimed[0]).to.equal(util.deployer.address)
+      expect(isClaimed[1]).to.equal('legacy')
+    })
+    it.only('should verify valid merkle proof', async()=>{
+      var provider = selectProvider("mainnet")
+      var web3 = new Web3(provider)
+      let claimedContract = util.claimedUpgradable
+      
+      let values = [[util.deployer.address], [util.claimedUpgradable.address], [util.deployer.address]]
+      const script = new Merklescript({
+        types: ["address"],
+        values
+      })
+      const root = script.root()
+      let proof = script.proof([ util.deployer.address ])
+      let hash = web3.utils.soliditySha3(util.deployer.address)
+      let isValid = await claimedContract.verifyScript(root, hash, proof)
+      expect(isValid).to.equal(true)
+    })
+    it.only('should not verify invalid merkle proof', async()=>{
+      let claimedContract = util.claimedUpgradable
+      var provider = selectProvider("mainnet")
+      var web3 = new Web3(provider)
+      
+      let values = [[util.deployer.address, 1], [util.claimedUpgradable.address, 2], [util.deployer.address, 3]]
+      let script = new Merklescript({
+        types: ["address", "uint256"],
+        values
+      })
+      let badValues = [[util.deployer.address, 10], [util.claimedUpgradable.address, 20], [util.deployer.address, 30]]
+      let badScript = new Merklescript({
+        types: ["address", "uint256"],
+        values: badValues
+      })
+      const root = script.root()
+      
+      let badProof = badScript.proof([ util.deployer.address, badValues[0][1] ])
+      let hash = web3.utils.soliditySha3(util.deployer.address, values[0][1])
+      
+      let isValid = await claimedContract.verifyScript(root, hash, badProof)
+      expect(isValid).to.equal(false)
+    })
+    it.only('should verify valid complex merkle proof', async()=>{
+      let claimedContract = util.claimedUpgradable
 
-  it('initialized storage can add legacy claim', async ()=>{
-    await util.cloneClaimed(util.deployer.address)
-    let claimedContract = util.getClaimed(util.claimer.address, util.deployer)
-    await claimedContract.initialize()
-    let emblemAddress = await util.factory.emblemImplementation()
-    
-    let values = [[1], [2], [3]]
-    const script = new Merklescript({
-      types: ["uint256"],
-      values
-    })
-    const root = script.root()
+      var provider = selectProvider("mainnet")
+      var web3 = new Web3(provider)
 
-    await claimedContract.addLegacy(emblemAddress, root)
-    let contractRoot = await claimedContract.getLegacyClaims(emblemAddress)
-    expect(contractRoot).to.equal(root)
-  })
-  it('should not be legacy claimed when legacy claimed root not stored', async()=>{
-    await util.cloneClaimed(util.deployer.address)
-    let claimedContract = util.getClaimed(util.claimer.address, util.deployer)
-    await claimedContract.initialize()
-    let emblemAddress = await util.factory.emblemImplementation()
-    
-    let values = [[1], [2], [3]]
-    const script = new Merklescript({
-      types: ["uint256"],
-      values
+      let values = [[util.deployer.address, 1], [util.claimedUpgradable.address, 2], [util.deployer.address, 3]]
+      let script = new Merklescript({
+        types: ["address", "uint256"],
+        values
+      })
+      const root = script.root()
+      let proof = script.proof([ util.deployer.address, values[0][1] ])
+      let hash = web3.utils.soliditySha3(util.deployer.address, values[0][1])
+      let isValid = await claimedContract.verifyScript(root, hash, proof)
+      expect(isValid).to.equal(true)
     })
-    
-    let proof = script.proof(values[0])
-
-    let isClaimed = await claimedContract.isClaimed(emblemAddress, 1, proof)
-    expect(isClaimed).to.equal(false)
-  })
-  it('should be claimed by ZERO ADDRESS when not minted', async()=>{
-    await util.cloneClaimed(util.deployer.address)
-    let claimedContract = util.getClaimed(util.claimer.address, util.deployer)
-    await claimedContract.initialize()
-    let emblemAddress = await util.factory.emblemImplementation()
-    let isClaimed = await claimedContract.claimedBy(emblemAddress, 1)
-    // console.log(isClaimed)
-    expect(isClaimed._owner).to.equal("0x0000000000000000000000000000000000000000")
-  })
-  it('should be claimed by type of "unknown" when not minted', async()=>{
-    await util.cloneClaimed(util.deployer.address)
-    let claimedContract = util.getClaimed(util.claimer.address, util.deployer)
-    await claimedContract.initialize()
-    let emblemAddress = await util.factory.emblemImplementation()
-    let isClaimed = await claimedContract.claimedBy(emblemAddress, 1)
-    // console.log(isClaimed)
-    expect(isClaimed._type).to.equal("unknown")
-  })
-  it('should be claimed when legacy', async ()=>{
-    await util.cloneClaimed(util.deployer.address)
-    let claimedContract = util.getClaimed(util.claimer.address, util.deployer)
-    await claimedContract.initialize()
-    let emblemAddress = await util.factory.emblemImplementation()
-    
-    let values = [[1], [2], [3]]
-    const script = new Merklescript({
-      types: ["uint256"],
-      values
-    })
-    const root = script.root()
-    let proof = script.proof(values[0])
-    
-    await claimedContract.addLegacy(emblemAddress, root)    
-    let isClaimed = await claimedContract.isClaimed(emblemAddress, 1, proof)
-    expect(isClaimed).to.equal(true)
-  })
-  it('should verify valid merklescript', async()=>{
-    await util.cloneClaimed(util.deployer.address)
-    
-    let values = [[util.deployer.address, 1], [util.claimer.address, 2], [util.deployer.address, 3]]
-    const script = new Merklescript({
-      types: ["address", "uint256"],
-      values
-    })
-    const root = script.root()
-    let proof = script.proof([ util.deployer.address, values[0][1] ])
-    
-    let claimedContract = util.getClaimed(util.claimer.address, util.deployer)
-    await claimedContract.initialize()
-    let emblemAddress = await util.factory.emblemImplementation()
-    await claimedContract.addLegacyClaimedBy(emblemAddress, root)
-    let isClaimed = await claimedContract.legacyClaimedBy(emblemAddress, util.deployer.address, 1, proof)
-    expect(isClaimed[0]).to.equal(util.deployer.address)
-    expect(isClaimed[1]).to.equal('legacy')
-  })
-  it('should verify valid merkle proof', async()=>{
-    await util.cloneClaimed(util.deployer.address)
-    await util.cloneHandler(util.deployer.address)
-    var provider = selectProvider("mainnet")
-    var web3 = new Web3(provider)
-    let claimedContract = util.getClaimed(util.claimer.address, util.deployer)
-    
-    let values = [[util.deployer.address], [util.claimer.address], [util.deployer.address]]
-    const script = new Merklescript({
-      types: ["address"],
-      values
-    })
-    const root = script.root()
-    let proof = script.proof([ util.deployer.address ])
-    let hash = web3.utils.soliditySha3(util.deployer.address)
-    let isValid = await claimedContract.verifyScript(root, hash, proof)
-    expect(isValid).to.equal(true)
-  })
-  it('should not verify invalid merkle proof', async()=>{
-    await util.cloneClaimed(util.deployer.address)
-    await util.cloneHandler(util.deployer.address)
-    
-    let claimedContract = util.getClaimed(util.claimer.address, util.deployer)
-    var provider = selectProvider("mainnet")
-    var web3 = new Web3(provider)
-    
-    let values = [[util.deployer.address, 1], [util.claimer.address, 2], [util.deployer.address, 3]]
-    let script = new Merklescript({
-      types: ["address", "uint256"],
-      values
-    })
-    let badValues = [[util.deployer.address, 10], [util.claimer.address, 20], [util.deployer.address, 30]]
-    let badScript = new Merklescript({
-      types: ["address", "uint256"],
-      values: badValues
-    })
-    const root = script.root()
-    
-    let badProof = badScript.proof([ util.deployer.address, badValues[0][1] ])
-    let hash = web3.utils.soliditySha3(util.deployer.address, values[0][1])
-    
-    let isValid = await claimedContract.verifyScript(root, hash, badProof)
-    expect(isValid).to.equal(false)
-  })
-  it('should verify valid complex merkle proof', async()=>{
-    await util.cloneClaimed(util.deployer.address)
-    await util.cloneHandler(util.deployer.address)
-    let claimedContract = util.getClaimed(util.claimer.address, util.deployer)
-
-    var provider = selectProvider("mainnet")
-    var web3 = new Web3(provider)
-
-    let values = [[util.deployer.address, 1], [util.claimer.address, 2], [util.deployer.address, 3]]
-    let script = new Merklescript({
-      types: ["address", "uint256"],
-      values
-    })
-    const root = script.root()
-    let proof = script.proof([ util.deployer.address, values[0][1] ])
-    let hash = web3.utils.soliditySha3(util.deployer.address, values[0][1])
-    let isValid = await claimedContract.verifyScript(root, hash, proof)
-    expect(isValid).to.equal(true)
   })
 })
 
@@ -239,7 +170,7 @@ function getWitnessSignature(web3, hash, cb) {
   })
 }
 function selectProvider(network) {
-  return new HDWalletProvider(process.env.ETHKEY || "c1fc1fe3db1e71bb457c5f8f10de8ff349d24f30f56a1e6a92e55ef90d961328", selectProviderEndpoint(network), 0, 1)
+  return new HDWalletProvider(process.env.ETHKEY || "a819fcd7afa2c39a7f9baf70273a128875b6c9f03001b218824559ccad6ef11c", selectProviderEndpoint(network), 0, 1)
 }
 function selectProviderEndpoint(network) {
   return infuraEndpoints.filter(item => { return item.network == network })[0].address

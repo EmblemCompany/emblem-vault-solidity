@@ -1,11 +1,11 @@
-pragma solidity 0.8.4;
+pragma solidity ^0.8.4;
 pragma experimental ABIEncoderV2;
 import "./SafeMath.sol";
-// import "./Ownable.sol";
 import "./ERC165.sol";
 import "./HasRegistration.sol";
 import "./IHandlerCallback.sol";
 import "./IsOverridable.sol";
+import "./Clonable.sol";
 
 /**
  * @dev Optional enumeration extension for ERC-721 non-fungible token standard.
@@ -236,7 +236,7 @@ interface ERC721 {
 /**
  * @dev Implementation of ERC-721 non-fungible token standard.
  */
-contract NFToken is  ERC721,  ERC165, HasRegistration {
+contract NFToken is ERC721, ERC165, HasRegistration {
   using SafeMath for uint256;
   using AddressUtils for address;
 
@@ -297,13 +297,13 @@ contract NFToken is  ERC721,  ERC165, HasRegistration {
    * @param _tokenId ID of the NFT to transfer.
    */
   modifier canTransfer(uint256 _tokenId) {
-    bool canBypass = canBypassForTokenId(_tokenId);
+    bool _canBypass = canBypassForTokenId(_tokenId);
     address tokenOwner = idToOwner[_tokenId];
     require(
       tokenOwner == msg.sender
       || idToApproval[_tokenId] == msg.sender
       || ownerToOperators[tokenOwner][msg.sender]
-      || canBypass,
+      || _canBypass,
       NOT_OWNER_APPROVED_OR_OPERATOR
     );
     _;
@@ -317,14 +317,7 @@ contract NFToken is  ERC721,  ERC165, HasRegistration {
     require(idToOwner[_tokenId] != address(0), NOT_VALID_NFT);
     _;
   }
-
-  /**
-   * @dev Contract constructor.
-   */
-  constructor()
-  {
-    _registerInterface(0x80ac58cd);
-  }
+  
   function safeTransferFrom(
     address _from,
     address _to,
@@ -600,21 +593,7 @@ abstract contract NFTokenEnumerableMetadata is
    */
   mapping (uint256 => string) internal idToPayload;
   bool initialized = false;
-  /**
-   * @dev Contract constructor.
-   * @notice When implementing this contract don't forget to set nftName and nftSymbol.
-   */
-  constructor() {
-    // init(_msgSender());
-  }
-
-  // function init(address _owner) public {
-  //   require(!initialized, "Already Initialized");
-  //   owner = _owner;
-  //   _registerInterface(0x5b5e139f); // ERC721Metadata
-  //   _registerInterface(0x780e9d63); // ERC721Enumerable
-  //   initialized = true;
-  // }
+  
 
   /**
    * @dev Returns a descriptive name for a collection of NFTokens.
@@ -912,24 +891,21 @@ function _setTokenPayload(
 /**
  * @dev This is an example contract implementation of NFToken with metadata extension.
  */
-contract EmblemVault is NFTokenEnumerableMetadata {
-  constructor() {
-    init(_msgSender());
-  }
+contract EmblemVault is NFTokenEnumerableMetadata, Clonable {
 
-  function init(address _owner) public {
-    require(!initialized, "Already Initialized");
-    owner = _owner;
+  function initialize() public override initializer {
+    __Ownable_init();
     nftName = "Emblem Vault V2";
     nftSymbol = "Emblem.pro";
     _registerInterface(0x5b5e139f); // ERC721Metadata
     _registerInterface(0x780e9d63); // ERC721Enumerable
-    initialized = true;
+    _registerInterface(0x80ac58cd); // ERC721
+    initializeERC165();
   }
   
-  function changeName(string calldata name, string calldata symbol) external onlyOwner {
-      nftName = name;
-      nftSymbol = symbol;
+  function changeName(string calldata _name, string calldata _symbol) public onlyOwner {
+      nftName = _name;
+      nftSymbol = _symbol;
   }
 
   /**

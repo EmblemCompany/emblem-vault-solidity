@@ -25,13 +25,12 @@ abstract contract OwnableUpgradeable is Initializable, ContextUpgradeable {
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.
      */
-    function __Ownable_init() internal initializer {
-        __Context_init_unchained();
+    function __Ownable_init() internal onlyInitializing {
         __Ownable_init_unchained();
     }
 
-    function __Ownable_init_unchained() internal initializer {
-        _setOwner(_msgSender());
+    function __Ownable_init_unchained() internal onlyInitializing {
+        _transferOwnership(_msgSender());
     }
 
     /**
@@ -57,7 +56,7 @@ abstract contract OwnableUpgradeable is Initializable, ContextUpgradeable {
      * thereby removing any functionality that is only available to the owner.
      */
     function renounceOwnership() public virtual onlyOwner {
-        _setOwner(address(0));
+        _transferOwnership(address(0));
     }
 
     /**
@@ -66,13 +65,23 @@ abstract contract OwnableUpgradeable is Initializable, ContextUpgradeable {
      */
     function transferOwnership(address newOwner) public virtual onlyOwner {
         require(newOwner != address(0), "Ownable: new owner is the zero address");
-        _setOwner(newOwner);
+        _transferOwnership(newOwner);
     }
 
-    function _setOwner(address newOwner) private {
+    /**
+     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+     * Internal function without access restriction.
+     */
+    function _transferOwnership(address newOwner) internal virtual {
         address oldOwner = _owner;
         _owner = newOwner;
         emit OwnershipTransferred(oldOwner, newOwner);
     }
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
     uint256[49] private __gap;
 }

@@ -1,19 +1,11 @@
 pragma solidity 0.8.4;
-import "./Context.sol";
-import "./Ownable.sol";
 import "./HasRegistration.sol";
-
-interface IIsSerialized {
-    function isSerialized() external view returns (bool);
-    function getSerial(uint256 tokenId, uint256 index) external view returns (uint256);
-    function getFirstSerialByOwner(address owner, uint256 tokenId) external view returns (uint256);
-    function getOwnerOfSerial(uint256 serialNumber) external view returns (address);
-    function getTokenIdForSerialNumber(uint256 serialNumber) external view returns (uint256);
-}
 
 contract IsSerialized is HasRegistration {
     bool internal serialized;
-    bool internal hasSerialized = false;
+    bool internal hasSerialized;
+    bool internal overloadSerial;
+    uint256 serialCount;
     mapping(uint256 => uint256[]) internal tokenIdToSerials;
     mapping(uint256 => uint256) internal serialToTokenId;
     mapping(uint256 => address) internal serialToOwner;
@@ -23,13 +15,30 @@ contract IsSerialized is HasRegistration {
         return serialized;
     }
 
+    function isOverloadSerial() public view returns (bool) {
+        return overloadSerial;
+    }
+
     function toggleSerialization() public onlyOwner {
         require(!hasSerialized, "Already has serialized items");
         serialized = !serialized;
     }
 
+    function toggleOverloadSerial() public onlyOwner {
+        overloadSerial = !overloadSerial;
+    }
+
     function mintSerial(uint256 tokenId, address owner) public onlyOwner {
-        uint256 serialNumber = uint256(keccak256(abi.encode(tokenId, owner, ownerSerialCount[owner])));
+        uint256 serialNumber = uint256(keccak256(abi.encode(tokenId, owner, serialCount)));
+        _mintSerial(serialNumber, owner, tokenId);
+    }
+
+    function mintSerial(uint256 serialNumber, address owner, uint256 tokenId) public onlyOwner {
+        _mintSerial(serialNumber, owner, tokenId);
+    }
+
+    function _mintSerial(uint256 serialNumber, address owner, uint256 tokenId)internal onlyOwner {
+        require(serialToTokenId[serialNumber] == 0, "Serial number already used");
         tokenIdToSerials[tokenId].push(serialNumber);
         serialToTokenId[serialNumber] = tokenId;
         serialToOwner[serialNumber] = owner;
@@ -37,6 +46,7 @@ contract IsSerialized is HasRegistration {
         if (!hasSerialized) {
             hasSerialized = true;
         }
+        serialCount++;
     }
 
     function transferSerial(uint256 serialNumber, address from, address to) internal {
@@ -71,5 +81,12 @@ contract IsSerialized is HasRegistration {
     function getTokenIdForSerialNumber(uint256 serialNumber) public view returns (uint256) {
         return serialToTokenId[serialNumber];
     }
-    
+
+    function decodeUintArray(bytes memory encoded) internal pure returns(uint256[] memory ids){
+        ids = abi.decode(encoded, (uint256[]));
+    }
+
+    function decodeSingle(bytes memory encoded) internal pure returns(uint256 id) {
+        id = abi.decode(encoded, (uint));
+    }
 }

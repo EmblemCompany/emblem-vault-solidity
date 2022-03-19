@@ -1,11 +1,10 @@
 pragma solidity 0.8.4;
-import "./Ownable.sol";
+import "./OwnableUpgradeable.sol";
 
-contract Storage is Ownable {
+contract Storage is OwnableUpgradeable {
 
     address public latestVersion;
     
-    address DEADADDRESS = 0x000000000000000000000000000000000000dEaD;
     address BURNADDRESS = 0x5D152dd902CC9198B97E5b6Cf5fc23a8e4330180;
     
     mapping(address => bytes32) LegacyClaims;
@@ -15,22 +14,19 @@ contract Storage is Ownable {
     address[] BurnAddresses;
     
     constructor() {
-        BurnAddresses.push(DEADADDRESS);
+        __Ownable_init();
+        BurnAddresses.push(address(0));
         BurnAddresses.push(BURNADDRESS);
     }
     
     modifier onlyLatestVersion() {
-       require(msg.sender == latestVersion, 'Not latest version');
+       require(_msgSender() == latestVersion, 'Not latest version');
         _;
     }
 
     function upgradeVersion(address _newVersion) public {
-        require(msg.sender == owner || msg.sender == _newVersion, 'Only owner can upgrade');
+        require(_msgSender() == owner() || _msgSender() == _newVersion, 'Only owner can upgrade');
         latestVersion = _newVersion;
-    }
-    
-    function getDead() external view returns(address) {
-        return DEADADDRESS;
     }
     
     function getBurnAddresses() external view returns (address[] memory){

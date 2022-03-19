@@ -4,13 +4,13 @@ pragma experimental ABIEncoderV2;
 pragma solidity 0.8.4;
 import "./IERC721.sol";
 import "./IERC1155.sol";
+import "./IERC165.sol";
 import "./SafeMath.sol";
 import "./BasicERC20.sol";
 import "./ReentrancyGuard.sol";
-import "./Context.sol";
-import "./Ownable.sol";
+import "./OwnableUpgradeable.sol";
 
-contract NFTrade_v2 is Context, Ownable, ReentrancyGuard {
+contract NFTrade_v2 is OwnableUpgradeable, ReentrancyGuard {
     
     address resolver;
     bool public initialized;
@@ -55,10 +55,8 @@ contract NFTrade_v2 is Context, Ownable, ReentrancyGuard {
     }
     
     function init(address _paymentAddress, address _recipientAddress) public {
-        require(!initialized, 'Already initialized');
+        __Ownable_init();
         initialized = true;
-        owner = payable(msg.sender); // 'msg.sender' is sender of current call, contract deployer for a constructor
-        emit OwnerSet(address(0), owner);
         paymentAddress = _paymentAddress;
         recipientAddress = _recipientAddress;
     }
@@ -67,13 +65,6 @@ contract NFTrade_v2 is Context, Ownable, ReentrancyGuard {
         return 1;
     }
     
-    /**
-     * @dev Return owner address 
-     * @return address of owner
-     */
-    function getOwner() external view returns (address) {
-        return owner;
-    }
     event OfferAccepted(address token, uint256 _tokenId, address _forNft, uint256 _for, uint256 _amount);
     function acceptOffer(address token, uint _tokenId, uint index) public notLocked nonReentrant {
         Offer memory _offer = offers[token][_tokenId][index];

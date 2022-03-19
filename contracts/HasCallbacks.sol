@@ -1,7 +1,6 @@
 pragma solidity 0.8.4;
 import "./HasRegistration.sol";
 import "./IHandlerCallback.sol";
-import "./ERC165.sol";
 
 contract HasCallbacks is HasRegistration {
 
@@ -21,7 +20,7 @@ contract HasCallbacks is HasRegistration {
         } else if(hasWildcardCallback(_contract, target, _type)) {
            registrant = registeredWildcardCallbacks[_contract][_type][index].registrant == _msgSender();
         }        
-        require(_msgSender() == owner || registrant, "Not owner or Callback registrant");
+        require(_msgSender() == owner() || registrant, "Not owner or Callback registrant");
         _;
     }
 

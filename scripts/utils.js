@@ -21,6 +21,7 @@ async function deployProxy(name, ContractClass, constructorArgs = []) {
 async function upgradeProxy(PROXY, name, ContractClass, constructorArgs = []) {
     console.log("Upgrading", name)
     let contract = await upgrades.upgradeProxy(PROXY, ContractClass, constructorArgs);
+    await contract.deployed()
     const implementationAddress = await getImplementationAddress(contract.address);
     console.log(name, "upgraded to", implementationAddress)
     return {address: contract.address, delegation: implementationAddress, contract: contract, verified: true, registrations: []}

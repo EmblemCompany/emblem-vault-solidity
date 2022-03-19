@@ -1,21 +1,17 @@
 pragma solidity 0.8.4;
-import "./Ownable.sol";
+import "./OwnableUpgradeable.sol";
 
-contract RegistrationStorage is Ownable {
+contract RegistrationStorage is OwnableUpgradeable {
 
     address public latestVersion;
-
-    constructor() {
-        
-    }
     
     modifier onlyLatestVersion() {
-       require(msg.sender == latestVersion, 'Not latest version');
+       require(_msgSender() == latestVersion, 'Not latest version');
         _;
     }
 
     function upgradeVersion(address _newVersion) public {
-        require(msg.sender == owner || msg.sender == _newVersion, 'Only owner can upgrade');
+        require(_msgSender() == owner() || _msgSender() == _newVersion, 'Only owner can upgrade');
         latestVersion = _newVersion;
     }    
     

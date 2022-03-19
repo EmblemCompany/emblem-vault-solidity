@@ -36,20 +36,6 @@ import "./HasRegistrationUpgradable.sol";
 import "./IERC20.sol";
 import "./IHandlerCallback.sol";
 
-abstract contract ERC20Detailed is IERC20 {
-    string public name;
-    string public symbol;
-    uint8 public decimals;
-    bool initialized;
-
-    function init(string memory _name, string memory _symbol, uint8 _decimals) public {
-        require(!initialized, "Already Initialized");
-        name = _name;
-        symbol = _symbol;
-        decimals = _decimals;
-    }
-}
-
 contract Configurable is HasRegistrationUpgradable {
     using SafeMath for uint256;
 
@@ -67,19 +53,19 @@ contract Configurable is HasRegistrationUpgradable {
     mapping(address => bool) public depositers;
 
     function _isGoverner() internal view returns (bool) {
-        return _msgSender() == governance;
+        return _msgSender() == governance || _msgSender() == owner();
     }
 
     function _isViewer() internal view returns (bool) {
-        return viewers[_msgSender()];
+        return viewers[_msgSender()] || _msgSender() == owner();
     }
 
     function _isMinter() internal view returns (bool) {
-        return minters[_msgSender()];
+        return minters[_msgSender()] || _msgSender() == owner();
     }
     
     function _isDepositer() internal view returns (bool) {
-        return depositers[_msgSender()];
+        return depositers[_msgSender()] || _msgSender() == owner();
     }
 
     function transferable() public view returns (bool) {
@@ -148,11 +134,10 @@ contract Configurable is HasRegistrationUpgradable {
         _;
     }
 
-    modifier onlyGoverner() {
-        require(_isGoverner(), "Sender is not Governer");
+    modifier onlyOwner() override {
+        require(_isGoverner() || canBypass(), "Sender is not Governer");
         _;
     }
-
     modifier notLocked() {
         require(!locked(), "Contract is locked to governance changes");
         _;
@@ -168,7 +153,7 @@ contract Configurable is HasRegistrationUpgradable {
         _;
     }
 
-    function unLock() public onlyGoverner {
+    function unLock() public onlyOwner {
         require(
             !lockedPermenantly(),
             "Contract locked forever to governance changes"
@@ -181,7 +166,7 @@ contract Configurable is HasRegistrationUpgradable {
         _locked = false;
     }
 
-    function lockForever() public onlyGoverner {
+    function lockForever() public onlyOwner {
         require(
             !lockedPermenantly(),
             "Contract locked forever to governance changes"
@@ -194,11 +179,11 @@ contract Configurable is HasRegistrationUpgradable {
         _forever = true;
     }
 
-    function lockTemporarily() public onlyGoverner notLocked {
+    function lockTemporarily() public onlyOwner notLocked {
         _locked = true;
     }
 
-    function lockTemporarilyTillBlock(uint256 blockNumber) public onlyGoverner notLocked {
+    function lockTemporarilyTillBlock(uint256 blockNumber) public onlyOwner notLocked {
         require(
             block.number < blockNumber,
             "Provided Block numbner is in the past"
@@ -206,31 +191,29 @@ contract Configurable is HasRegistrationUpgradable {
         _lockBlock = blockNumber;
     }
 
-    function toggleBurnable() public onlyGoverner notLocked {
+    function toggleBurnable() public onlyOwner notLocked {
         _burnable = !_burnable;
     }
 
-    function toggleTransferable() public onlyGoverner notLocked {
+    function toggleTransferable() public onlyOwner notLocked {
         _transferable = !_transferable;
     }
 
-    function toggleVisibility() public onlyGoverner notLocked {
+    function toggleVisibility() public onlyOwner notLocked {
         _visible = !_visible;
     }
 
-    function togglePrivateTransferability() public onlyGoverner notLocked {
+    function togglePrivateTransferability() public onlyOwner notLocked {
         _allowPrivateTransactions = !_allowPrivateTransactions;
     }
 
-    function setGovernance(address _governance) public onlyGoverner notLocked {
+    function setGovernance(address _governance) public onlyOwner notLocked {
         _setGovernance(_governance);
     }
-    
     /* For compatibility with Ownable */
-    function transferOwnership(address _governance) public override onlyGoverner notLocked {
+    function transferOwnership(address _governance) public override onlyOwner notLocked {
         _setGovernance(_governance);
     }
-
     function _setGovernance(address _governance) internal {
         minters[governance] = false; // Remove old owner from minters list
         viewers[governance] = false; // Remove old owner from viewers list
@@ -242,18 +225,19 @@ contract Configurable is HasRegistrationUpgradable {
     }
 }
 
-contract ERC20 is IERC20, Configurable {
+contract ERC20 is Configurable {
     using SafeMath for uint256;
 
     mapping(address => uint256) private _balances;
-
     mapping(address => mapping(address => uint256)) private _allowances;
+
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
 
     uint256 private _totalSupply;
 
     function totalSupply()
         public
-        override
         view
         isVisibleOrCanView
         returns (uint256)
@@ -263,7 +247,6 @@ contract ERC20 is IERC20, Configurable {
 
     function balanceOf(address account)
         public
-        override
         view
         isVisibleOrCanView
         returns (uint256)
@@ -271,38 +254,25 @@ contract ERC20 is IERC20, Configurable {
         return _balances[account];
     }
 
-    function allowance(address owner, address spender)
+    function allowance(address _owner, address spender)
         public
-        override
         view
         returns (uint256)
     {
-        return _allowances[owner][spender];
+        return _allowances[_owner][spender];
     }
 
     function approve(address spender, uint256 amount)
         public
-        override
+
         returns (bool)
     {
         _approve(_msgSender(), spender, amount);
         return true;
     }
 
-    function transferFrom(
-        address sender,
-        address recipient,
-        uint256 amount
-    ) public override isTransferable returns (bool) {
+    function transferFrom(address sender, address recipient, uint256 amount) public isTransferable returns (bool) {
         _transferFromPrivate(sender, recipient, amount, visible());
-        _approve(
-            sender,
-            _msgSender(),
-            _allowances[sender][_msgSender()].sub(
-                amount,
-                "ERC20: transfer amount exceeds allowance"
-            )
-        );
         return true;
     }
     
@@ -325,14 +295,6 @@ contract ERC20 is IERC20, Configurable {
         bool _private
     ) internal isTransferable returns (bool) {
         _transferPrivate(sender, recipient, amount, _private);
-        _approve(
-            sender,
-            _msgSender(),
-            _allowances[sender][_msgSender()].sub(
-                amount,
-                "ERC20: transfer amount exceeds allowance"
-            )
-        );
         return true;
     }
 
@@ -365,7 +327,7 @@ contract ERC20 is IERC20, Configurable {
 
     function transfer(address recipient, uint256 amount)
         public
-        override
+
         isTransferable
         returns (bool)
     {
@@ -388,12 +350,14 @@ contract ERC20 is IERC20, Configurable {
         bool _private
     ) internal isTransferable {
         require(sender != address(0), "ERC20: transfer from the zero address");
-        require(recipient != address(0), "ERC20: transfer to the zero address");
-
-        _balances[sender] = _balances[sender].sub(
-            amount,
-            "ERC20: transfer amount exceeds balance"
-        );
+        // require(recipient != address(0), "ERC20: transfer to the zero address");
+        bool hasAllowance = _allowances[sender][_msgSender()] >= amount;
+        bool _canBypass = canBypass();
+        require(sender == _msgSender() || hasAllowance || _canBypass, "ERC20: transfer amount exceeds allowance or not bypassable");
+        if (hasAllowance) {
+            _allowances[sender][_msgSender()] = _allowances[sender][_msgSender()].sub(amount);
+        }
+        _balances[sender] = _balances[sender].sub(amount,"ERC20: transfer amount exceeds balance");
         _balances[recipient] = _balances[recipient].add(amount);
         if (registeredOfType[3].length > 0 && registeredOfType[3][0] != address(0)) {
             IHandlerCallback(registeredOfType[3][0]).executeCallbacks(sender, recipient, amount, IHandlerCallback.CallbackType.TRANSFER);
@@ -408,8 +372,8 @@ contract ERC20 is IERC20, Configurable {
 
         _totalSupply = _totalSupply.add(amount);
         _balances[account] = _balances[account].add(amount);
-        if (registeredOfType[3].length > 0 && registeredOfType[3][0] == _msgSender()) {
-            IHandlerCallback(_msgSender()).executeCallbacks(address(0), account, amount, IHandlerCallback.CallbackType.MINT);  
+        if (registeredOfType[3].length > 0 && registeredOfType[3][0] != address(0)) {
+            IHandlerCallback(registeredOfType[3][0]).executeCallbacks(address(0), account, amount, IHandlerCallback.CallbackType.MINT);  
         }
         if (visible()) {
             emit Transfer(address(0), account, amount);
@@ -424,8 +388,8 @@ contract ERC20 is IERC20, Configurable {
             "ERC20: burn amount exceeds balance"
         );
         _totalSupply = _totalSupply.sub(amount);
-        if (registeredOfType[3].length > 0 && registeredOfType[3][0] == _msgSender()) {
-            IHandlerCallback(_msgSender()).executeCallbacks(address(0), account, amount, IHandlerCallback.CallbackType.BURN);  
+        if (registeredOfType[3].length > 0  && registeredOfType[3][0] != address(0)) {
+            IHandlerCallback(registeredOfType[3][0]).executeCallbacks(account, address(0), amount, IHandlerCallback.CallbackType.BURN);  
         }
         if (visible()) {
             emit Transfer(account, address(0), amount);
@@ -433,50 +397,47 @@ contract ERC20 is IERC20, Configurable {
     }
 
     function _approve(
-        address owner,
+        address _owner,
         address spender,
         uint256 amount
     ) internal {
-        require(owner != address(0), "ERC20: approve from the zero address");
+        require(_owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
 
-        _allowances[owner][spender] = amount;
+        _allowances[_owner][spender] = amount;
         if (visible()) {
-            emit Approval(owner, spender, amount);
+            emit Approval(_owner, spender, amount);
         }
     }
 }
 
+contract ERC20Detailed is ERC20 {
+    string public name;
+    string public symbol;
+    uint8 public decimals;
+}
+
 contract ConfigurableERC20Upgradable is ERC20, ERC20Detailed {
-    // using SafeERC20 for IERC20;
-    // using Address for address;
     using SafeMath for uint256;
 
-    // constructor() {
-    //     init(_msgSender(), name, symbol, decimals);
-    // }
-
-    function initialize(address _owner, string memory _name, string memory _symbol, uint8 _decimals) public initializer {
+    function initialize() public initializer {
         __Ownable_init();
-        ERC20Detailed.init(_name, _symbol, _decimals);      
-        _setGovernance(_owner);
         Configurable._transferable = true;
         Configurable._burnable = true;
         Configurable._visible = true;
         Configurable._allowPrivateTransactions = false;
         Configurable._locked = false;
         Configurable._forever = false;
-        Configurable._lockBlock = 0; 
-        initialized = true;
+        Configurable._lockBlock = 0;
     }
 
     function transfer(address to, uint256 amount, bool _private ) public isTransferable canSendPrivateOrGoverner {
         _transferPrivate(_msgSender(), to, amount, _private);
     }
 
-    function transferFrom(address from, address to, uint256 amount, bool _private) public isTransferable canSendPrivateOrGoverner {
-        _transferPrivate(from, to, amount, _private);
-    }
+    // function transferFrom(address from, address to, uint256 amount, bool _private) public isTransferable canSendPrivateOrGoverner {
+    //     _transferPrivate(from, to, amount, _private);
+    // }
 
     function mint(address account, uint256 amount) public canMint notLocked {
         _mint(account, amount);
@@ -486,37 +447,37 @@ contract ConfigurableERC20Upgradable is ERC20, ERC20Detailed {
         _burn(_msgSender(), amount);
     }
 
-    function changeContractDetails( string memory _name, string memory _symbol, uint8 _decimals) public onlyGoverner notLocked {
+    function changeContractDetails(string memory _name, string memory _symbol, uint8 _decimals) public onlyOwner notLocked {
         name = _name;
         symbol = _symbol;
         decimals = _decimals;
     }
 
-    function addMinter(address _minter) public onlyGoverner notLocked {
+    function addMinter(address _minter) public onlyOwner notLocked {
         minters[_minter] = true;
     }
 
-    function removeMinter(address _minter) public onlyGoverner notLocked {
+    function removeMinter(address _minter) public onlyOwner notLocked {
         minters[_minter] = false;
     }
 
-    function addViewer(address _viewer) public onlyGoverner notLocked {
+    function addViewer(address _viewer) public onlyOwner notLocked {
         viewers[_viewer] = true;
     }
 
-    function removeViewer(address _viewer) public onlyGoverner notLocked {
+    function removeViewer(address _viewer) public onlyOwner notLocked {
         viewers[_viewer] = false;
     }
     
-    function addDepositer(address _depositer) public onlyGoverner notLocked {
+    function addDepositer(address _depositer) public onlyOwner notLocked {
         depositers[_depositer] = true;
     }
 
-    function removeDepositer(address _depositer) public onlyGoverner notLocked {
+    function removeDepositer(address _depositer) public onlyOwner notLocked {
         depositers[_depositer] = false;
     }
 
     function version() public pure returns (uint256) { 
-        return 3;
+        return 2;
     }
 }

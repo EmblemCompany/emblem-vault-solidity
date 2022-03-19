@@ -1,12 +1,11 @@
 pragma solidity 0.8.4;
 import "./IERC721.sol";
-import "./Ownable.sol";
-import "./Context.sol";
+import "./OwnableUpgradeable.sol";
 import "./SafeMath.sol";
 import "./ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
-contract NFTStake is Ownable, Context, IERC721Receiver, ReentrancyGuard {
+contract NFTStake is OwnableUpgradeable, IERC721Receiver, ReentrancyGuard {
 
     using SafeMath for uint256;
 

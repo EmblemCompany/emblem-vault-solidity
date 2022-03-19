@@ -5,7 +5,6 @@ import "hardhat/console.sol";
 import "./SafeMath.sol";
 import "./IERC20.sol";
 import "./SafeERC20.sol";
-// import "./Ownable.sol";
 import "./HasRegistration.sol";
 
 contract TokenStaking is HasRegistration {
@@ -39,15 +38,13 @@ contract TokenStaking is HasRegistration {
     event ContractFunded(address indexed from, uint256 amount);
 
     constructor() {
-        init(_msgSender(), IERC20(address(0)) ,block.number);
+        init(IERC20(address(0)) ,block.number);
     }
 
-    function init(address _owner, IERC20 _tokenContract, uint256 _startBlock) public {
-        require(!initialized, "Already Initialized");
-        owner = _owner;
+    function init(IERC20 _tokenContract, uint256 _startBlock) public {
+        __Ownable_init();
         tokenContract = _tokenContract;
         startBlock = _startBlock;
-        initialized = true;
     }
 
     function poolLength() external view returns (uint256) {

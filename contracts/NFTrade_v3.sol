@@ -5,15 +5,13 @@ pragma solidity 0.8.4;
 
 import "./IERC721.sol";
 import "./IERC1155.sol";
+import "./IERC165.sol";
 import "./SafeMath.sol";
 import "./BasicERC20.sol";
 import "./ReentrancyGuard.sol";
-import "./Context.sol";
-import "./Ownable.sol";
+import "./OwnableUpgradeable.sol";
 
-
-
-contract NFTrade_v3 is Context, Ownable, ReentrancyGuard {
+contract NFTrade_v3 is OwnableUpgradeable, ReentrancyGuard {
     
     address resolver;
     bool public initialized;
@@ -73,13 +71,6 @@ contract NFTrade_v3 is Context, Ownable, ReentrancyGuard {
         return 1;
     }
     
-    /**
-     * @dev Return owner address 
-     * @return address of owner
-     */
-    function getOwner() external view returns (address) {
-        return owner;
-    }
     event OfferAccepted(address token, uint256 _tokenId, address _forNft, uint256 _for, uint256 _amount);
     function acceptOffer(address token, uint _tokenId, uint index, uint apikey) public notLocked nonReentrant {
         Config memory _config = configs[apikey];

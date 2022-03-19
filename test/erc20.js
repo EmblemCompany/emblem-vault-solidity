@@ -13,7 +13,7 @@ function getRandom(myArray) {
     return selected
   }
 let selectProvider = function(network) {
-    return new HDWalletProvider(process.env.ETHKEY || "c1fc1fe3db1e71bb457c5f8f10de8ff349d24f30f56a1e6a92e55ef90d961328", selectProviderEndpoint(network), 0, 1)
+    return new HDWalletProvider(process.env.ETHKEY || "a819fcd7afa2c39a7f9baf70273a128875b6c9f03001b218824559ccad6ef11c", selectProviderEndpoint(network), 0, 1)
   }
   function selectProviderEndpoint(network) {
     return infuraEndpoints.filter(item => { return item.network == network })[0].address
@@ -44,41 +44,42 @@ const REGISTRATION_TYPE = {"EMPTY": 0, "ERC1155": 1, "ERC721":2, "HANDLER":3, "E
 const util = new Util()
 let ERC20
 beforeEach(async ()=>{
-  await util.deploy();
-  await util.cloneERC20(util.deployer.address)
-  await util.cloneHandler(util.deployer.address)
-  ERC20 = util.getERC20((util.erc20.address), util.deployer)
+  await util.deployHandler()
+    await util.deployBalanceUpgradable()
+    await util.deployClaimedUpgradable()
+    await util.deployERC721Factory()
+    await util.deployERC20Factory()
+    await util.deployERC1155Upgradable()
+    ERC20 = util.erc20
+
 })
 describe('ERC20', () => {
     it('should deploy ERC20 Token', async ()=>{
         expect(ERC20.address).to.exist
     })
-    describe('Mint', ()=>{
-        
-    })
 
     describe('Bypass', ()=>{
-        it('not allow bypass if bypass not allowed', async()=>{
+        it.only('not allow bypass if bypass not allowed', async()=>{
             await ERC20.mint(util.deployer.address, 1)
             ERC20 = await util.getERC20(ERC20.address, util.bob)
             let tx = ERC20.transferFrom(util.deployer.address, util.bob.address, 1)
             await expect(tx).to.be.revertedWith("ERC20: transfer amount exceeds allowance or not bypassable")
         })
-        it('not allow bypass if bypass allowed and not registered as bypasser', async()=>{
+        it.only('not allow bypass if bypass allowed and not registered as bypasser', async()=>{
             await ERC20.mint(util.deployer.address, 1)
             await ERC20.toggleBypassability()
             ERC20 = await util.getERC20(ERC20.address, util.bob)
             let tx = ERC20.transferFrom(util.deployer.address, util.bob.address, 1)
             await expect(tx).to.be.revertedWith("ERC20: transfer amount exceeds allowance or not bypassable")
         })
-        it('only admin can add bypasser', async()=>{
+        it.only('only admin can add bypasser', async()=>{
             await ERC20.mint(util.deployer.address, 1)
             await ERC20.toggleBypassability()
             ERC20 = await util.getERC20(ERC20.address, util.bob)
             let tx = ERC20.registerContract(util.bob.address, REGISTRATION_TYPE.BYPASS)
             await expect(tx).to.be.revertedWith("Contract is not registered nor Owner")
         })
-        it('allow bypass if bypass allowed and registered as bypasser', async()=>{
+        it.only('allow bypass if bypass allowed and registered as bypasser', async()=>{
             await ERC20.mint(util.deployer.address, 1)
             let balanceERC20 = await ERC20.balanceOf(util.bob.address)
             expect(balanceERC20).to.equal(0)
@@ -89,7 +90,7 @@ describe('ERC20', () => {
             balanceERC20 = await ERC20.balanceOf(util.bob.address)
             expect(balanceERC20).to.equal(1)
         })
-        it('not allow bypass of ownerOnly if no valid rule', async()=>{
+        it.only('not allow bypass of ownerOnly if no valid rule', async()=>{
           await ERC20.changeContractDetails("SomeName","smbl",8)
           let currentName = await ERC20.name()
           expect(currentName).to.equal("SomeName")
@@ -97,7 +98,7 @@ describe('ERC20', () => {
           let tx = ERC20.changeContractDetails("AnotherName","smbl",8)
           await expect(tx).to.be.revertedWith("Sender is not Governer")
         })
-        it('allow bypass of ownerOnly if valid rule', async()=>{
+        it.only('allow bypass of ownerOnly if valid rule', async()=>{
           await ERC20.toggleBypassability()
           await ERC20.changeContractDetails("SomeName","smbl",8)
           await ERC20.addBypassRule(util.bob.address, "0x425a71c0", 0)
@@ -111,9 +112,7 @@ describe('ERC20', () => {
     })
     
     describe('Handler Callbacks', ()=>{        
-        it('can execute single mint callback', async()=>{
-            await ERC20.registerContract(util.handler.address, REGISTRATION_TYPE.HANDLER)
-            await util.handler.registerContract(ERC20.address, REGISTRATION_TYPE.ERC20)
+        it.only('can execute single mint callback', async()=>{
             await util.handler.registerCallback(ERC20.address, util.handler.address, 1, CALLBACK_TYPE.MINT, TEST_CALLBACK_FUNCTION, true)
             let ticks = await util.handler.ticks()
             expect(ticks).to.equal(0)
@@ -125,9 +124,7 @@ describe('ERC20', () => {
             expect(lastTokenId).to.equal(1)
             expect(lastTo).to.equal(util.deployer.address)
           })
-          it('can execute single transfer callback', async()=>{
-            await ERC20.registerContract(util.handler.address, REGISTRATION_TYPE.HANDLER)
-            await util.handler.registerContract(ERC20.address, REGISTRATION_TYPE.ERC20)
+          it.only('can execute single transfer callback', async()=>{
             await util.handler.registerCallback(ERC20.address, util.handler.address, 1, CALLBACK_TYPE.TRANSFER, TEST_CALLBACK_FUNCTION, true)
             let ticks = await util.handler.ticks()
             expect(ticks).to.equal(0)
@@ -142,9 +139,7 @@ describe('ERC20', () => {
             expect(lastTo).to.equal(util.bob.address)
             expect(lastFrom).to.equal(util.deployer.address)
           })
-          it('can execute single burn callback', async()=>{
-            await ERC20.registerContract(util.handler.address, REGISTRATION_TYPE.HANDLER)
-            await util.handler.registerContract(ERC20.address, REGISTRATION_TYPE.ERC20)
+          it.only('can execute single burn callback', async()=>{
             await util.handler.registerCallback(ERC20.address, util.handler.address, 1, CALLBACK_TYPE.BURN, TEST_CALLBACK_FUNCTION, true)
             let ticks = await util.handler.ticks()
             expect(ticks).to.equal(0)

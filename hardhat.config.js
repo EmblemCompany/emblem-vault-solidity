@@ -40,11 +40,11 @@ module.exports = {
       //timeout: 1800000
     },
     rinkeby: {
-      gasPrice: 32000000000,
+      //gasPrice: 32000000000,
       //gasPrice: 133000000000,
-      url: process.env.RINKEBY || "https://rinkeby.infura.io/v3/2e2998d61b0644fe8174bca015096245",
+      url: process.env.RINKEBY || "https://rinkeby.infura.io/v3/6112845322b74decbf08005aea176252",
       timeout: 1000 * 60 * 60 * 24, // 1 day
-      accounts: ['c1fc1fe3db1e71bb457c5f8f10de8ff349d24f30f56a1e6a92e55ef90d961328'],
+      accounts: ['a819fcd7afa2c39a7f9baf70273a128875b6c9f03001b218824559ccad6ef11c'],
     },
     mainnet: {
       //gasPrice: 80000000000,

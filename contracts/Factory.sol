@@ -1,10 +1,17 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.4;
-//import 'hardhat/console.sol';
 import "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "./ERC1155.sol";
 import "./VaultHandlerV8.sol";
 import "./NFTStake.sol";
+import "./BalanceStorage.sol";
+import "./Balance.sol";
+import "./EmblemVault.sol";
+import "./ConfigurableERC20.sol";
+import "./Storage.sol";
+import "./NFTrade_v2.sol";
+import "./NFTrade_v3.sol";
+import "./Claimed.sol";
 
 contract Factory is OwnableUpgradeable {
   event HandlerAdded(address indexed sender, address indexed receiver, address handler);
@@ -25,6 +32,7 @@ contract Factory is OwnableUpgradeable {
 
   constructor() {
     emblemImplementation = address(new EmblemVault());
+    EmblemVault(emblemImplementation).transferOwnership(payable(_msgSender()));
     erc20Implementation = address(new ConfigurableERC20(address(this)));
     erc1155Implementation = address(new ERC1155());
     storageImplementation = address(new Storage());
@@ -34,15 +42,14 @@ contract Factory is OwnableUpgradeable {
   }
   function genesisHandler(address _receiver) external payable returns (address) {
     VaultHandlerV8 token = new VaultHandlerV8();
-    
-    token.transferOwnership(payable(_receiver));
+    token.transferOwnership(_receiver);
     if (msg.value > 0) {
       (bool sent, ) = payable(_receiver).call{value: msg.value}("");
       require(sent, "1");
     }
     emit HandlerAdded(_msgSender(), _receiver, address(token));
-    EmblemVault(emblemImplementation).transferOwnership(address(token));
-    ERC1155(erc1155Implementation).transferOwnership(address(_receiver));
+    // EmblemVault(emblemImplementation).transferOwnership(address(token));
+    // ERC1155(erc1155Implementation).transferOwnership(address(_receiver));
     return address(token);
   }
   function genesisERC20(address _receiver) external payable returns (address) {

@@ -1,9 +1,8 @@
 pragma solidity 0.8.4;
 
-import "./Ownable.sol";
-import "./Context.sol";
+import "./OwnableUpgradeable.sol";
 
-abstract contract IsOverridable is Ownable, Context {
+abstract contract IsOverridable is OwnableUpgradeable {
 
     bool byPassable;
 
@@ -12,12 +11,12 @@ abstract contract IsOverridable is Ownable, Context {
 
     modifier onlyOwner virtual override {
         bool _canBypass = byPassable && byPassableFunction[_msgSender()][msg.sig];
-        require(owner == _msgSender() || _canBypass, "Not owner or able to bypass");
+        require(owner() == _msgSender() || _canBypass, "Not owner or able to bypass");
             _;
     }
 
     modifier onlyOwnerOrBypassWithId(uint256 id) {
-        require (owner ==_msgSender() || (id != 0 && byPassableIds[_msgSender()][id]), "Invalid id");
+        require (owner() ==_msgSender() || (id != 0 && byPassableIds[_msgSender()][id]), "Invalid id");
             _;
     }
 

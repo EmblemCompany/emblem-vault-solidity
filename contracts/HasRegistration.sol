@@ -1,18 +1,12 @@
 pragma solidity 0.8.4;
-import "./Context.sol";
-import "./Ownable.sol";
 import "./IsOverridable.sol";
-
-interface IRegistrationStorage {
-    function upgradeVersion(address _newVersion) external;
-}
 
 contract HasRegistration is IsOverridable {
 
     mapping(address => uint256) public registeredContracts; // 0 EMPTY, 1 ERC1155, 2 ERC721, 3 HANDLER, 4 ERC20, 5 BALANCE, 6 CLAIM, 7 UNKNOWN, 8 FACTORY, 9 STAKING, 10 BYPASS
     mapping(uint256 => address[]) public registeredOfType;
     
-    uint256 public contractCount = 0;
+    uint256 public contractCount;
 
     modifier isRegisteredContract(address _contract) {
         require(registeredContracts[_contract] > 0, "Contract is not registered");
@@ -20,7 +14,7 @@ contract HasRegistration is IsOverridable {
     }
 
     modifier isRegisteredContractOrOwner(address _contract) {
-        require(registeredContracts[_contract] > 0 || owner == _msgSender(), "Contract is not registered nor Owner");
+        require(registeredContracts[_contract] > 0 || owner() == _msgSender(), "Contract is not registered nor Owner");
         _;
     }
 
@@ -32,7 +26,9 @@ contract HasRegistration is IsOverridable {
 
     function unregisterContract(address _contract, uint256 index) public onlyOwner isRegisteredContract(_contract) {
         require(contractCount > 0, 'No vault contracts to remove');
-        delete registeredOfType[registeredContracts[_contract]][index];
+        address[] storage arr = registeredOfType[registeredContracts[_contract]];
+        arr[index] = arr[arr.length - 1];
+        arr.pop();
         delete registeredContracts[_contract];
         contractCount--;
     }

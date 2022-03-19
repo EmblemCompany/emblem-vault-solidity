@@ -1,7 +1,5 @@
 pragma solidity 0.8.4;
 import "./IERC721.sol";
-import "./Ownable.sol";
-import "./Context.sol";
 import "./ReentrancyGuard.sol";
 import "./HasRegistration.sol";
 
@@ -41,15 +39,16 @@ contract Balance is ReentrancyGuard, HasRegistration {
     bool canAddBalances = true;
     
     constructor(address storageContract) {
+        __Ownable_init();
         StorageAddress = storageContract;
         initialize();
     }
     
     function initialize() internal {
-        require(!initialized, 'already initialized');
+        // require(!initialized, 'already initialized');
         IBalanceStorage _storage = IBalanceStorage(StorageAddress);
         _storage.upgradeVersion(address(this));
-        initialized = true;
+        // initialized = true;
     }
 
     /* ADMIN WRITE */

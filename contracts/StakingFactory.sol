@@ -1,9 +1,6 @@
 pragma solidity 0.8.4;
-
 import "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "./VaultHandlerV8.sol";
-
+import "./TokenStaking.sol";
 
 contract StakingFactory is OwnableUpgradeable {
 
@@ -23,17 +20,13 @@ contract StakingFactory is OwnableUpgradeable {
     handlerAddress = _handlerAddress;
   }
 
-  function getOwner() public view returns (address _owner) {
-    return owner();
-  }
-
   function createStaking(address _newOwner, IERC20 _tokenContract, uint256 _startBlock) public onlyOwner returns (address clone){
     address _clone = ClonesUpgradeable.clone(stakingImplementation);
-    VaultHandlerV8 handler = VaultHandlerV8(handlerAddress);
+    HasRegistration handler = HasRegistration(handlerAddress);
     if (handler.isRegistered(address(this), 8)) { // if factory registered with handler
       handler.registerContract(_clone, 9);
     }
-    TokenStaking(_clone).init(address(this), _tokenContract, _startBlock); // owned by this contract
+    TokenStaking(_clone).init(_tokenContract, _startBlock); // owned by this contract
     TokenStaking(_clone).registerContract(handlerAddress, 3); // register handler on erc721
     TokenStaking(_clone).transferOwnership(_newOwner); // transfer to newOwner
     stakingClones.push(_clone);
