@@ -20,24 +20,24 @@ describe('Vault Handler', () => {
     ERC1155 = util.erc1155
     ERC721 = util.emblem
   })
-  it.only('should deploy handler', async ()=>{
+  it('should deploy handler', async ()=>{
     expect(util.handler.address).to.not.equal("0x0000000000000000000000000000000000000000")
   })
-  it.only('should deploy ERC721 and ERC1155 Vaults', async ()=>{
+  it('should deploy ERC721 and ERC1155 Vaults', async ()=>{
     expect(ERC721.address).to.exist
     expect(ERC1155.address).to.exist
   })
-  it.only('non admin can not add vaultContract', async ()=>{
+  it('non admin can not add vaultContract', async ()=>{
     let handler = util.getHandler(util.handler.address, util.alice)
     let tx = handler.registerContract(ERC721.address, 0)
     await expect(tx).to.be.revertedWith('Contract is not registered nor Owner')
   })
-  it.only('admin can add vaultContract', async ()=>{
+  it('admin can add vaultContract', async ()=>{
     let contractRecord = await util.handler.registeredContracts(ERC721.address)
     expect(contractRecord).to.equal(2)
   })
 
-  it.only('admin can remove vaultContract', async ()=>{
+  it('admin can remove vaultContract', async ()=>{
     expect(await util.handler.contractCount()).to.equal(9)
     await util.handler.unregisterContract(ERC721.address, 0)
     contractRecord = await util.handler.registeredContracts(ERC721.address)
@@ -45,7 +45,7 @@ describe('Vault Handler', () => {
     expect(await util.handler.contractCount()).to.equal(8)
   })
 
-  it.only('can not move from unregistered contract', async ()=>{
+  it('can not move from unregistered contract', async ()=>{
     var provider = selectProvider("mainnet")
     var web3 = new Web3(provider)
     let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(0), 111)
@@ -59,7 +59,7 @@ describe('Vault Handler', () => {
     await expect(tx).to.be.revertedWith('Contract is not registered')
   })
 
-  it.only('can move from ERC721 to ERC1155 with registered contracts', async ()=>{
+  it('can move from ERC721 to ERC1155 with registered contracts', async ()=>{
     await ERC721.mint(util.deployer.address, 1, "uri", "payload")
     await ERC1155.toggleOverloadSerial()
     await ERC1155.transferOwnership(util.handler.address)
@@ -82,7 +82,7 @@ describe('Vault Handler', () => {
     expect(balanceERC721).to.equal(0)
   })
 
-  it.only('can move from ERC1155 to ERC721 with registered contracts', async ()=>{
+  it('can move from ERC1155 to ERC721 with registered contracts', async ()=>{
     await ERC1155.toggleOverloadSerial()
     await ERC1155.registerContract(util.handler.address, 3)
     await ERC1155.mint(util.deployer.address, 123, 2)
@@ -107,7 +107,7 @@ describe('Vault Handler', () => {
     expect(balanceERC721).to.equal(1)
   })
 
-  it.only('can not move ERC1155 to ERC721 when new tokenId already exists', async ()=>{
+  it('can not move ERC1155 to ERC721 when new tokenId already exists', async ()=>{
     await ERC721.mint(util.deployer.address, 1, "test", 0x0)
     await ERC1155.toggleOverloadSerial()
     await ERC1155.mint(util.deployer.address, 123, 2)
@@ -131,7 +131,7 @@ describe('Vault Handler', () => {
     await expect(tx).to.be.revertedWith('003006')
   })
 
-  it.only('can not move when overload serial is true and no serial number provided', async()=>{
+  it('can not move when overload serial is true and no serial number provided', async()=>{
     await ERC721.mint(util.deployer.address, 1, "test", 0x0)
     await ERC1155.transferOwnership(util.handler.address)
     await ERC721.setApprovalForAll(util.handler.address, true)
@@ -148,7 +148,7 @@ describe('Vault Handler', () => {
     await expect(tx).to.be.revertedWith("Handler: must provide serial number")
   })
 
-  it.only('MOVE sig: for testing purposes only', async ()=>{
+  it('MOVE sig: for testing purposes only', async ()=>{
     var provider = selectProvider("mainnet")
     var web3 = new Web3(provider)
     let hash = web3.utils.soliditySha3("0x67f3d3b7eF0359D92605F48E46F069d06805751f", "0x9022fb4487EBa36D5BBb0a1459247E0A6072430E", 54321, 326113, 8438894575)
@@ -156,7 +156,7 @@ describe('Vault Handler', () => {
     let sig = await sign(web3, hash)
     // console.log("sig", sig)
   })
-  it.only('ABI: for testing purposes only', async ()=>{
+  it('ABI: for testing purposes only', async ()=>{
     var web3 = new Web3()
     // console.log("hash", web3.utils.soliditySha3(123))
     // console.log("bytes", util.serializeUintToBytes(123))

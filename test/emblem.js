@@ -31,18 +31,25 @@ describe('ERC721', () => {
     expect(owner).to.equal(util.deployer.address)
   })
 
+  it('should deploy stream', async ()=>{
+    let streamAddress = await util.emblem.streamAddress()
+    let stream = util.getContract(streamAddress, "Stream", util.deployer)
+    expect(await util.emblem.owner()).to.equal(util.deployer.address)
+    expect(await stream.owner()).to.equal(util.deployer.address)
+  })
+
   describe('Mint', ()=>{
-    it.only('should allow minting if owned', async ()=>{
+    it('should allow minting if owned', async ()=>{
       await util.emblem.mint(util.deployer.address, 100, "test", 0x0)
       let owner = await util.emblem.ownerOf(100)
       await expect(owner).to.equal(util.deployer.address)
     })
-    it.only('should serialize and hash locally', async () => {
+    it('should serialize and hash locally', async () => {
       var web3 = new Web3()
       let hash = web3.utils.soliditySha3(util.emblem.address, util.deployer.address, 123, {type: 'uint256[]', value: [4,5,6]})
       expect(hash).to.exist
     })
-    it.only('should verify signature and hash in handler', async () => {
+    it('should verify signature and hash in handler', async () => {
       var provider = selectProvider("mainnet")
       var web3 = new Web3(provider)
       let hash = web3.utils.soliditySha3(util.emblem.address, util.deployer.address, 123, {type: 'uint256[]', value: [4,5,6]})
@@ -50,7 +57,7 @@ describe('ERC721', () => {
       let address = await util.handler.getAddressFromSignatureHash(hash, sig)
       expect(address).to.equal('0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396')
     })
-    it.only('should not be witnessed if signer not a witness', async () => {
+    it('should not be witnessed if signer not a witness', async () => {
       let emblemAddress = util.emblem.address
       var provider = selectProvider("mainnet")
       var web3 = new Web3(provider)
@@ -59,7 +66,7 @@ describe('ERC721', () => {
       let witnessed = await util.handler.isWitnessed(hash, sig)
       expect(witnessed).to.equal(false)
     })
-    it.only('should be witnessed if signer is a witness', async () => {
+    it('should be witnessed if signer is a witness', async () => {
       let emblemAddress = util.emblem.address
       await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
       var provider = selectProvider("mainnet")
@@ -69,7 +76,7 @@ describe('ERC721', () => {
       let witnessed = await util.handler.isWitnessed(hash, sig)
       expect(witnessed).to.equal(true)
     })
-    it.only('should get correct address from signature', async () => {
+    it('should get correct address from signature', async () => {
       let emblemAddress = util.emblem.address
       await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
       var provider = selectProvider("mainnet")
@@ -81,7 +88,7 @@ describe('ERC721', () => {
       let address = await util.handler.getAddressFromSignatureMint(emblemAddress, util.deployer.address, 123, 111, "payload", sig);
       expect(address).to.equal('0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396')
     })
-    it.only('should fail to mint with signature if signer is not a witness', async () => {
+    it('should fail to mint with signature if signer is not a witness', async () => {
       let emblemAddress = util.emblem.address
       var provider = selectProvider("mainnet")
       var web3 = new Web3(provider)
@@ -90,7 +97,7 @@ describe('ERC721', () => {
       let tx = util.handler.buyWithSignedPrice(emblemAddress, util.erc20.address, 0, util.deployer.address, 123, "payload", 111, sig, util.serializeUintToBytes(0))
       await expect(tx).to.be.revertedWith('Not Witnessed')
     })
-    it.only('should mint via handler with signature if signer is a witness', async () => {
+    it('should mint via handler with signature if signer is a witness', async () => {
       let emblemAddress = util.emblem.address
       let emblemContract = await util.getEmblemVault(emblemAddress, util.deployer)
       await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
@@ -106,7 +113,7 @@ describe('ERC721', () => {
       balance = await emblemContract.balanceOf(util.deployer.address)
       expect(balance.toNumber()).to.equal(1)
     })
-    it.only('should mint via handler with signed price', async () => {
+    it('should mint via handler with signed price', async () => {
       let emblemAddress = util.emblem.address
       let covalAddress = util.erc20.address
       let emblemContract = await util.getEmblemVault(emblemAddress, util.deployer)
@@ -128,27 +135,27 @@ describe('ERC721', () => {
     beforeEach(async ()=>{
     })
 
-    it.only('not allow bypass if bypass not allowed', async()=>{
+    it('not allow bypass if bypass not allowed', async()=>{
         await util.emblem.mint(util.deployer.address, 789, "uri", "payload")
         ERC721 = await util.getEmblemVault(util.emblem.address, util.bob)
         let tx = ERC721.transferFrom(util.deployer.address, util.bob.address, 789)
         await expect(tx).to.be.revertedWith("003004")
     })
-    it.only('not allow bypass if bypass allowed and not registered as bypasser', async()=>{
+    it('not allow bypass if bypass allowed and not registered as bypasser', async()=>{
       await util.emblem.mint(util.deployer.address, 789, "uri", "payload")
       await util.emblem.toggleBypassability()
       ERC721 = await util.getEmblemVault(util.emblem.address, util.bob)
       let tx = ERC721.transferFrom(util.deployer.address, util.bob.address, 789)
       await expect(tx).to.be.revertedWith("003004")
     })
-    it.only('only admin can add bypasser', async()=>{
+    it('only admin can add bypasser', async()=>{
         await util.emblem.mint(util.deployer.address, 789, "uri", "payload")
         await util.emblem.toggleBypassability()
         ERC721 = await util.getEmblemVault(util.emblem.address, util.bob)
         let tx = ERC721.registerContract(util.bob.address, REGISTRATION_TYPE.BYPASS)
         await expect(tx).to.be.revertedWith("Contract is not registered nor Owner")
     })
-    it.only('allow bypass if bypass allowed and registered as bypasser', async()=>{       
+    it('allow bypass if bypass allowed and registered as bypasser', async()=>{       
         await util.emblem.mint(util.deployer.address, 789, "uri", "payload")
         let balanceERC721 = await util.emblem.balanceOf(util.bob.address)
         expect(balanceERC721).to.equal(0)
@@ -159,13 +166,13 @@ describe('ERC721', () => {
         balanceERC721 = await ERC721.balanceOf(util.bob.address)
         expect(balanceERC721).to.equal(1)
     })
-    it.only('not allow bypass of ownerOnly if no valid rule', async()=>{
+    it('not allow bypass of ownerOnly if no valid rule', async()=>{
       await util.emblem.toggleBypassability()
       ERC721 = await util.getEmblemVault(util.emblem.address, util.bob)
       let tx = ERC721.changeName("New Name", "smbl")
       await expect(tx).to.be.revertedWith("Not owner or able to bypass")
     })
-    it.only('allow bypass of ownerOnly if valid rule', async()=>{
+    it('allow bypass of ownerOnly if valid rule', async()=>{
       await util.emblem.toggleBypassability()
       let currentName = await util.emblem.name()
       expect(currentName).to.equal("Emblem Vault V2")
@@ -175,7 +182,7 @@ describe('ERC721', () => {
       currentName = await util.emblem.name()
       expect(currentName).to.equal("New Name")
     })
-    it.only('removal of rule prevents bypass of ownerOnly', async()=>{
+    it('removal of rule prevents bypass of ownerOnly', async()=>{
       await util.emblem.toggleBypassability()
       await util.emblem.addBypassRule(util.bob.address, "0x86575e40", 0);
       ERC721 = await util.getEmblemVault(util.emblem.address, util.bob)
@@ -190,7 +197,7 @@ describe('ERC721', () => {
     })
   })
   describe('Claim', ()=>{
-    it.only('should not claim via handler without permission', async()=>{
+    it('should not claim via handler without permission', async()=>{
       let claimedContract = util.claimedUpgradable
       let emblemAddress = util.emblem.address
       let emblemContract = util.emblem
@@ -201,7 +208,7 @@ describe('ERC721', () => {
       let tx = util.handler.claim(emblemAddress, 1)
       expect(tx).to.be.revertedWith("003004")
     })
-    it.only('should claim erc721 via handler with permission', async()=>{
+    it('should claim erc721 via handler with permission', async()=>{
       let claimedContract = util.claimedUpgradable
       await util.handler.registerContract(util.claimedUpgradable.address, 6)    
       await claimedContract.registerContract(util.handler.address, 3)
@@ -226,7 +233,7 @@ describe('ERC721', () => {
       expect(claimedBy[0]).to.equal(util.deployer.address)
       expect(claimedBy[1]).to.equal('record')
     })
-    it.only('should not be able to mint previously claimed erc721 vault', async()=>{
+    it('should not be able to mint previously claimed erc721 vault', async()=>{
       let claimedContract = util.claimedUpgradable
       await util.handler.registerContract(util.claimedUpgradable.address, 6)
       await claimedContract.registerContract(util.handler.address, 3)
@@ -247,7 +254,7 @@ describe('ERC721', () => {
       expect(claimedBy[0]).to.equal(util.deployer.address)
       expect(claimedBy[1]).to.equal('record')
     })
-    it.only('should be able to toggle can claim if admin', async()=>{
+    it('should be able to toggle can claim if admin', async()=>{
       let claimedContract = util.claimedUpgradable
       await util.handler.registerContract(util.claimedUpgradable.address, 6)    
       await claimedContract.registerContract(util.handler.address, 3)
@@ -263,7 +270,7 @@ describe('ERC721', () => {
     })
   })
   describe('Handler Callbacks', ()=>{
-    it.only('can execute single mint callback', async()=>{
+    it('can execute single mint callback', async()=>{
       let emblemAddress = util.emblem.address
       let ERC721 = await util.getEmblemVault(emblemAddress, util.deployer)
       await ERC721.registerContract(util.handler.address, REGISTRATION_TYPE.HANDLER)
@@ -280,7 +287,7 @@ describe('ERC721', () => {
       expect(lastTokenId).to.equal(1)
       expect(lastTo).to.equal(util.deployer.address)
     })
-    it.only('can execute single transfer callback', async()=>{
+    it('can execute single transfer callback', async()=>{
       let emblemAddress = util.emblem.address
       let ERC721 = await util.getEmblemVault(emblemAddress, util.deployer)
       await ERC721.registerContract(util.handler.address, REGISTRATION_TYPE.HANDLER)
@@ -300,7 +307,7 @@ describe('ERC721', () => {
       expect(lastTo).to.equal(util.bob.address)
       expect(lastFrom).to.equal(util.deployer.address)
     })
-    it.only('can execute wildcard callbacks on mint', async()=>{
+    it('can execute wildcard callbacks on mint', async()=>{
       let emblemAddress = util.emblem.address
       let ERC721 = await util.getEmblemVault(emblemAddress, util.deployer)
       await ERC721.registerContract(util.handler.address, REGISTRATION_TYPE.HANDLER)
@@ -320,7 +327,7 @@ describe('ERC721', () => {
       expect(lastTo).to.equal(util.deployer.address)
       expect(lastFrom).to.equal("0x0000000000000000000000000000000000000000")
     })
-    it.only('can turn toggle all callbacks', async()=>{
+    it('can turn toggle all callbacks', async()=>{
       let emblemAddress = util.emblem.address
       let ERC721 = await util.getEmblemVault(emblemAddress, util.deployer)
       await ERC721.registerContract(util.handler.address, REGISTRATION_TYPE.HANDLER)

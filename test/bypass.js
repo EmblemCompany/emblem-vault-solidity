@@ -6,18 +6,17 @@ const util = new Util()
 
 
 
-describe('ContractNFT', () => {
-  beforeEach(async () => { 
+describe('Bypass: Fuse Burn (lock function forever)', () => {
+  beforeEach(async () => {
     await util.deployHandler()
     await util.deployBalanceUpgradable()
     await util.deployClaimedUpgradable()
     await util.deployERC721Factory()
     await util.deployERC20Factory() 
   })
-  it('deploys ContractNFTFactory', async () => {
-    await util.deployContractNFTFactory()
-    expect(util.contractNFTFactory.address).to.not.equal("0x0000000000000000000000000000000000000000")
-    await util.contractNFT.createClone(util.deployer.address, 1337, "uri://")
-  })
+  it('burning a fuse prevents any bypasses from working')
+  it('burning a fuse prevents owner of accessing function')
+  it('burning adheres to minimum')
+  it('burning adheres threshold')
   
 })

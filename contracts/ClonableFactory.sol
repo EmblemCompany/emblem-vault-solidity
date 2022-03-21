@@ -46,16 +46,23 @@ abstract contract ClonableFactory is OwnableUpgradeable {
     }
     function createClone(address _newOwner) public onlyOwner {
         address clone = ClonesUpgradeable.clone(CurrentImplementation);
+        handleClone(clone, _newOwner);
+    }
+
+    function createCloneAtVersion(address _newOwner, uint256 _version) public onlyOwner {
+        address clone = ClonesUpgradeable.clone(AllImplementations[_version.sub(1)].implementation);
+        handleClone(clone, _newOwner);
+    }
+
+    function handleClone(address clone, address _newOwner) internal{
         IClonable(clone).initialize();
         Clones.push(clone);
         emit CloneCreated(clone, CurrentImplementation);
         afterClone(_newOwner, clone);
     }
 
-    function createCloneAtVersion(address _newOwner, uint256 version) public onlyOwner {
-        address clone = ClonesUpgradeable.clone(AllImplementations[version.sub(1)].implementation);
-        Clones.push(clone);
-        emit CloneCreated(clone, CurrentImplementation);
+    function transferCloneOwnership(address clone, address newOwner) public onlyOwner {
+        OwnableUpgradeable(clone).transferOwnership(newOwner);
     }
 
 }

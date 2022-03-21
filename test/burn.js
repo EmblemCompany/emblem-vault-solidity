@@ -14,7 +14,7 @@ describe('Burn tokens', () => {
     await util.deployERC721Factory()
     await util.deployERC20Factory() 
   })
-  it.only('should burn directly via vault contract', async()=>{
+  it('should burn directly via vault contract', async()=>{
     let emblemAddress = util.emblem.address
     let emblemContract = util.getEmblemVault(emblemAddress, util.deployer)
     await emblemContract.transferOwnership(util.handler.address)
@@ -25,7 +25,7 @@ describe('Burn tokens', () => {
     owner = emblemContract.ownerOf(1)
     expect(owner).to.be.revertedWith("003002")    
   })  
-  it.only('unminted should not return claimed', async()=>{
+  it('unminted should not return claimed', async()=>{
     let emblemAddress = util.emblem.address
     let isClaimed = await util.claimedUpgradable.isClaimed(emblemAddress, 1, [])
     expect(isClaimed).to.be.false  
@@ -33,7 +33,7 @@ describe('Burn tokens', () => {
     expect(claimedBy[0]).to.equal('0x0000000000000000000000000000000000000000')
     expect(claimedBy[1]).to.equal('unknown')  
   })
-  it.only('burnt via emblem vault should not return claimed', async()=>{
+  it('burnt via emblem vault should not return claimed', async()=>{
     let emblemAddress = util.emblem.address
     let emblemContract = util.getEmblemVault(emblemAddress, util.deployer)
     await emblemContract.transferOwnership(util.handler.address)

@@ -19,11 +19,11 @@ beforeEach(async ()=>{
 describe('Claimed', () => {     
   describe('V2 Upgradable', ()=>{
     beforeEach(async ()=>{ })
-    it.only('should be owned by deployer', async ()=>{
+    it('should be owned by deployer', async ()=>{
       let owner = await util.claimedUpgradable.owner()
       expect(owner).to.equal(util.deployer.address)
     })
-    it.only('initialized storage can add legacy claim', async ()=>{
+    it('initialized storage can add legacy claim', async ()=>{
       let claimedContract = util.claimedUpgradable
       let emblemAddress = await util.emblem.address
       
@@ -38,7 +38,7 @@ describe('Claimed', () => {
       let contractRoot = await claimedContract.getLegacyClaims(emblemAddress)
       expect(contractRoot).to.equal(root)
     })
-    it.only('should not be legacy claimed when legacy claimed root not stored', async()=>{
+    it('should not be legacy claimed when legacy claimed root not stored', async()=>{
       let claimedContract = util.claimedUpgradable
       let emblemAddress = util.emblem.address
       
@@ -53,19 +53,19 @@ describe('Claimed', () => {
       let isClaimed = await claimedContract.isClaimed(emblemAddress, 1, proof)
       expect(isClaimed).to.equal(false)
     })
-    it.only('should be claimed by ZERO ADDRESS when not minted', async()=>{
+    it('should be claimed by ZERO ADDRESS when not minted', async()=>{
       let claimedContract = util.claimedUpgradable
       let emblemAddress = util.emblem.address
       let isClaimed = await claimedContract.claimedBy(emblemAddress, 1)
       expect(isClaimed._owner).to.equal("0x0000000000000000000000000000000000000000")
     })
-    it.only('should be claimed by type of "unknown" when not minted', async()=>{
+    it('should be claimed by type of "unknown" when not minted', async()=>{
       let claimedContract = util.claimedUpgradable
       let emblemAddress = util.emblem.address
       let isClaimed = await claimedContract.claimedBy(emblemAddress, 1)
       expect(isClaimed._type).to.equal("unknown")
     })
-    it.only('should be claimed when legacy', async ()=>{
+    it('should be claimed when legacy', async ()=>{
       let claimedContract = util.claimedUpgradable
       let emblemAddress = util.emblem.address
       
@@ -81,7 +81,7 @@ describe('Claimed', () => {
       let isClaimed = await claimedContract.isClaimed(emblemAddress, 1, proof)
       expect(isClaimed).to.equal(true)
     })
-    it.only('should verify valid merklescript', async()=>{
+    it('should verify valid merklescript', async()=>{
       let values = [[util.deployer.address, 1], [util.claimedUpgradable.address, 2], [util.deployer.address, 3]]
       const script = new Merklescript({
         types: ["address", "uint256"],
@@ -97,7 +97,7 @@ describe('Claimed', () => {
       expect(isClaimed[0]).to.equal(util.deployer.address)
       expect(isClaimed[1]).to.equal('legacy')
     })
-    it.only('should verify valid merkle proof', async()=>{
+    it('should verify valid merkle proof', async()=>{
       var provider = selectProvider("mainnet")
       var web3 = new Web3(provider)
       let claimedContract = util.claimedUpgradable
@@ -113,7 +113,7 @@ describe('Claimed', () => {
       let isValid = await claimedContract.verifyScript(root, hash, proof)
       expect(isValid).to.equal(true)
     })
-    it.only('should not verify invalid merkle proof', async()=>{
+    it('should not verify invalid merkle proof', async()=>{
       let claimedContract = util.claimedUpgradable
       var provider = selectProvider("mainnet")
       var web3 = new Web3(provider)
@@ -136,7 +136,7 @@ describe('Claimed', () => {
       let isValid = await claimedContract.verifyScript(root, hash, badProof)
       expect(isValid).to.equal(false)
     })
-    it.only('should verify valid complex merkle proof', async()=>{
+    it('should verify valid complex merkle proof', async()=>{
       let claimedContract = util.claimedUpgradable
 
       var provider = selectProvider("mainnet")

@@ -36,6 +36,8 @@ contract ERC1155Factory is ClonableFactory {
     }
     IHasRegistration(clone).registerContract(handlerAddress, 3); // register handler on erc1155
     OwnableUpgradeable(clone).transferOwnership(newOwner); // transfer to newOwner
+    Stream(ERC1155Upgradable(clone).streamAddress()).addMember(Stream.Member(newOwner, 1, 1));
+    OwnableUpgradeable(ERC1155Upgradable(clone).streamAddress()).transferOwnership(newOwner);
   }
 
   function version() virtual override public view returns (uint256 _version) {

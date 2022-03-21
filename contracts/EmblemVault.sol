@@ -4,8 +4,10 @@ import "./SafeMath.sol";
 import "./ERC165.sol";
 import "./HasRegistration.sol";
 import "./IHandlerCallback.sol";
-import "./IsOverridable.sol";
+import "./IsBypassable.sol";
 import "./Clonable.sol";
+import "./Stream.sol";
+import "./ERC2981Royalties.sol";
 
 /**
  * @dev Optional enumeration extension for ERC-721 non-fungible token standard.
@@ -891,8 +893,8 @@ function _setTokenPayload(
 /**
  * @dev This is an example contract implementation of NFToken with metadata extension.
  */
-contract EmblemVault is NFTokenEnumerableMetadata, Clonable {
-
+contract EmblemVault is NFTokenEnumerableMetadata, Clonable, ERC2981Royalties {
+  address payable public streamAddress;
   function initialize() public override initializer {
     __Ownable_init();
     nftName = "Emblem Vault V2";
@@ -900,7 +902,15 @@ contract EmblemVault is NFTokenEnumerableMetadata, Clonable {
     _registerInterface(0x5b5e139f); // ERC721Metadata
     _registerInterface(0x780e9d63); // ERC721Enumerable
     _registerInterface(0x80ac58cd); // ERC721
+    _registerInterface(0x2a55205a); // ERC2981
     initializeERC165();
+    streamAddress = payable(address(new Stream()));
+    Stream(streamAddress).initialize();
+    OwnableUpgradeable(streamAddress).transferOwnership(_msgSender());
+  }
+
+  function updateStreamAddress(address _streamAddress) public onlyOwner {
+    streamAddress = payable(_streamAddress);
   }
   
   function changeName(string calldata _name, string calldata _symbol) public onlyOwner {

@@ -1,13 +1,13 @@
-pragma solidity 0.8.4;
+pragma solidity ^0.8.4;
 
 import "./BasicERC20.sol";
-import "./IsOverridableUpgradable.sol";
+import "./IsBypassable.sol";
 
 interface Transferable {
   function transferOwnership(address _governance) external;
 }
 
-contract DemoCallbackCatchV4 is IsOverridableUpgradable {
+contract DemoCallbackCatchV4 is IsBypassable {
 
   mapping(address => bool) public validSenders;
   address public tokenContract;

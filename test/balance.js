@@ -45,11 +45,11 @@ beforeEach(async ()=>{
         await util.deployBalanceUpgradable();
         await util.deployERC721Factory()
       })
-      it.only('should be owned by deployer', async ()=>{
+      it('should be owned by deployer', async ()=>{
         let owner = await util.balanceUpgradable.owner()
         expect(owner).to.equal(util.deployer.address)
       })
-      it.only('adding balance by non owner reverts', async ()=>{
+      it('adding balance by non owner reverts', async ()=>{
         let emblemAddress = util.erc721Factory.clone.address
         let balances = {
           balances: [
@@ -61,7 +61,7 @@ beforeEach(async ()=>{
         await expect(tx).to.be.revertedWith('003002')
       })
   
-      it.only('should revert with invalid signature', async()=>{
+      it('should revert with invalid signature', async()=>{
         let balanceContract = util.balanceUpgradable
         let emblemAddress = util.erc721Factory.clone.address
         let emblemContract = util.getEmblemVault(emblemAddress, util.deployer)
@@ -78,7 +78,7 @@ beforeEach(async ()=>{
         expect(tx).to.be.revertedWith('Not a witness')
       })
   
-      it.only('admin can disable adding balances', async ()=>{
+      it('admin can disable adding balances', async ()=>{
         let balanceContract = util.balanceUpgradable
         
         let emblemAddress = util.erc721Factory.clone.address
@@ -98,7 +98,7 @@ beforeEach(async ()=>{
         await expect(tx).to.be.revertedWith("Adding balances is disabled")
       })
   
-      it.only('initialized storage and valid signature can add single balance', async ()=>{
+      it('initialized storage and valid signature can add single balance', async ()=>{
         let balanceContract = util.balanceUpgradable
         let emblemAddress = util.erc721Factory.clone.address
         let emblemContract = util.getEmblemVault(emblemAddress, util.deployer)
@@ -122,7 +122,7 @@ beforeEach(async ()=>{
         expect(balance.balances[0]._address).to.equal("0x0000000000000000000000000000000000000000")
         expect(balance.balances[0]._type).to.equal(0)
       })
-      it.only('can add multiple balances', async ()=>{
+      it('can add multiple balances', async ()=>{
         let balanceContract = util.balanceUpgradable
         let emblemAddress = util.erc721Factory.clone.address
         let emblemContract = util.getEmblemVault(emblemAddress, util.deployer)
@@ -142,7 +142,7 @@ beforeEach(async ()=>{
         expect(balance.balances[0].balance).to.equal(1)
         expect(balance.balances[1].balance).to.equal(20)
       })
-      it.only('can hash balances in contract', async ()=>{
+      it('can hash balances in contract', async ()=>{
         let balanceContract = util.balanceUpgradable
         let balances = {
           balances: [
@@ -155,7 +155,7 @@ beforeEach(async ()=>{
         expect(hashed[0]).to.equal('0xdb3ee04afdba64d7a47b15c44d40decb0ce99b47d5a3b92529eb10c4af061cf8')
         expect(hashed[1]).to.equal('0x37372751210c064a646c8ffa5b8a415f49ef083140664dcda43d7afb0da188a8')
       })
-      it.only('hashed balances in contract matched client hashed balances', async ()=>{
+      it('hashed balances in contract matched client hashed balances', async ()=>{
         let balanceContract = util.balanceUpgradable
         let balances = {
           balances: [
@@ -170,7 +170,7 @@ beforeEach(async ()=>{
           expect(web3.utils.soliditySha3(...args)).to.equal(hashed[i])
         })
       })
-      it.only('hashed balance object in contract matched client hashed balance object', async ()=>{
+      it('hashed balance object in contract matched client hashed balance object', async ()=>{
         let balanceContract = util.balanceUpgradable
         let balances = {
           balances: [
@@ -182,7 +182,7 @@ beforeEach(async ()=>{
         let localhashed = hashBalances(balances)
         expect(localhashed).to.equal(hashed)
       })
-      it.only('hashed balance object with 10 balances matches', async ()=>{
+      it('hashed balance object with 10 balances matches', async ()=>{
         let balanceContract = util.balanceUpgradable
         let balances = {
           balances: [
@@ -202,14 +202,14 @@ beforeEach(async ()=>{
         let localhashed = hashBalances(balances)
         expect(localhashed).to.equal(hashed)
       })
-      it.only('adding witness by non owner should revert', async()=>{
+      it('adding witness by non owner should revert', async()=>{
         let balanceContract = util.balanceUpgradable
         let emblemAddress = util.erc721Factory.clone.address
         await balanceContract.transferOwnership(util.bob.address)
         let tx = balanceContract.addWitness(emblemAddress, util.deployer.address)
         await expect(tx).to.be.revertedWith('Not owner or able to bypass')
       })
-      it.only('owner should be able to add witness', async()=>{
+      it('owner should be able to add witness', async()=>{
         let balanceContract = util.balanceUpgradable
         let emblemAddress = util.erc721Factory.clone.address
         let isWitness = await balanceContract.isWitness(emblemAddress, util.deployer.address)
@@ -218,7 +218,7 @@ beforeEach(async ()=>{
         isWitness = await balanceContract.isWitness(emblemAddress, util.deployer.address)
         expect(isWitness).to.equal(true)
       })
-      it.only('removing witness by non owner should revert', async()=>{
+      it('removing witness by non owner should revert', async()=>{
         let balanceContract = util.balanceUpgradable
         let emblemAddress = util.erc721Factory.clone.address
         await balanceContract.addWitness(emblemAddress, util.deployer.address)
@@ -226,7 +226,7 @@ beforeEach(async ()=>{
         let tx = balanceContract.removeWitness(emblemAddress, util.deployer.address)
         await expect(tx).to.be.revertedWith('Not owner or able to bypass')
       })
-      it.only('owner should be able to remove witness', async()=>{
+      it('owner should be able to remove witness', async()=>{
         let balanceContract = util.balanceUpgradable
         let emblemAddress = util.erc721Factory.clone.address
         await balanceContract.addWitness(emblemAddress, util.deployer.address)
@@ -236,7 +236,7 @@ beforeEach(async ()=>{
         isWitness = await balanceContract.isWitness(emblemAddress, util.deployer.address)
         expect(isWitness).to.equal(false)
       })
-      it.only('signature from witness with used nonce should revert', async ()=>{
+      it('signature from witness with used nonce should revert', async ()=>{
         let balanceContract = util.balanceUpgradable
         let emblemAddress = util.erc721Factory.clone.address
         let emblemContract = util.getEmblemVault(emblemAddress, util.deployer)
@@ -257,7 +257,7 @@ beforeEach(async ()=>{
         await expect(tx).to.be.revertedWith('Nonce already used')
         
       })
-      it.only('should get all tokenIds for nftAddress', async ()=>{
+      it('should get all tokenIds for nftAddress', async ()=>{
         let balanceContract = util.balanceUpgradable
         let emblemAddress = util.erc721Factory.clone.address
         let emblemContract = util.getEmblemVault(emblemAddress, util.deployer)
@@ -284,7 +284,7 @@ beforeEach(async ()=>{
         expect(assets[0]).to.equal(123)
         expect(assets[1]).to.equal(321)
       })
-      it.only('should get single tokenId for nftAddress by index', async ()=>{
+      it('should get single tokenId for nftAddress by index', async ()=>{
         let balanceContract = util.balanceUpgradable
         let emblemAddress = util.erc721Factory.clone.address
         let emblemContract = util.getEmblemVault(emblemAddress, util.deployer)
@@ -310,7 +310,7 @@ beforeEach(async ()=>{
         let assetCount = await balanceContract.getAssetCountForContract(emblemAddress)
         expect(assetCount).to.equal(2)
       })
-      it.only('should get tokenIds from map', async ()=>{
+      it('should get tokenIds from map', async ()=>{
         let balanceContract = util.balanceUpgradable
         let emblemAddress = util.erc721Factory.clone.address
         let emblemContract = util.getEmblemVault(emblemAddress, util.deployer)
@@ -342,7 +342,7 @@ beforeEach(async ()=>{
         expect(tokenIds.length).to.equal(1)
         expect(tokenIds[0]).to.equal(456)
       })
-      it.only('should get tokenIds from map by index', async ()=>{
+      it('should get tokenIds from map by index', async ()=>{
         let balanceContract = util.balanceUpgradable
         let emblemAddress = util.erc721Factory.clone.address
         let emblemContract = util.getEmblemVault(emblemAddress, util.deployer)

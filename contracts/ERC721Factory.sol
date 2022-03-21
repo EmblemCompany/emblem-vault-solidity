@@ -34,6 +34,8 @@ contract ERC721Factory is ClonableFactory {
     }
     IHasRegistration(clone).registerContract(handlerAddress, 3); // register handler on erc721
     OwnableUpgradeable(clone).transferOwnership(newOwner); // transfer to newOwner
+    Stream(EmblemVault(clone).streamAddress()).addMember(Stream.Member(newOwner, 1, 1));
+    OwnableUpgradeable(EmblemVault(clone).streamAddress()).transferOwnership(newOwner);
   }
 
   function version() virtual override public view returns (uint256 _version) {

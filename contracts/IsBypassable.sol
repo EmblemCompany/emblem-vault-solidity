@@ -1,11 +1,10 @@
-pragma solidity 0.8.4;
+pragma solidity ^0.8.4;
 
 import "./OwnableUpgradeable.sol";
 
-abstract contract IsOverridable is OwnableUpgradeable {
+abstract contract IsBypassable is OwnableUpgradeable {
 
     bool byPassable;
-
     mapping(address => mapping(bytes4 => bool)) byPassableFunction;
     mapping(address => mapping(uint256 => bool)) byPassableIds;
 
@@ -16,16 +15,16 @@ abstract contract IsOverridable is OwnableUpgradeable {
     }
 
     modifier onlyOwnerOrBypassWithId(uint256 id) {
-        require (owner() ==_msgSender() || (id != 0 && byPassableIds[_msgSender()][id]), "Invalid id");
+        require (owner() == _msgSender() || (id != 0 && byPassableIds[_msgSender()][id] ), "Invalid id");
             _;
     }
 
     function canBypass() internal view returns(bool) {
-        return byPassable && byPassableFunction[_msgSender()][msg.sig];
+        return (byPassable && byPassableFunction[_msgSender()][msg.sig]);
     }
 
     function canBypassForTokenId(uint256 id) internal view returns(bool) {
-        return byPassable && canBypass() && byPassableIds[_msgSender()][id];
+        return (byPassable && canBypass() && byPassableIds[_msgSender()][id]);
     }
 
     function toggleBypassability() public onlyOwner {
@@ -43,6 +42,6 @@ abstract contract IsOverridable is OwnableUpgradeable {
         byPassableFunction[who][functionSig] = false;
         if (id !=0) {
             byPassableIds[who][id] = true;
-        }        
+        }
     }
 }

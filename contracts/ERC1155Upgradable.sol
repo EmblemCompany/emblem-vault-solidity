@@ -5,12 +5,13 @@ import "./IERC1155.sol";
 import "./ERC165.sol";
 import "./IHandlerCallback.sol";
 import "./IsSerializedUpgradable.sol";
-import "./BytesLib.sol";
 import "./Clonable.sol";
+import "./Stream.sol";
+import "./ERC2981Royalties.sol";
 
-contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradable, Clonable {
+contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradable, Clonable, ERC2981Royalties {
     using SafeMath for uint256;
-
+    address payable public streamAddress;
     event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value);
     event TransferBatch(address indexed operator, address indexed from, address indexed to, uint256[] ids, uint256[] values);
     event ApprovalForAll(address indexed account, address indexed operator, bool approved);
@@ -32,11 +33,15 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
         _registerInterface(0xd9b67a26); //_INTERFACE_ID_ERC1155
         _registerInterface(0x0e89341c); //_INTERFACE_ID_ERC1155_METADATA_URI
         initializeERC165();
+        _registerInterface(0x2a55205a); // ERC2981
         _uri = "https://api.emblemvault.io/s:evmetadata/meta/";
         serialized = true;
         overloadSerial = true;
-        tokenName = "name";
-        tokenSymbol = "sym";
+        // tokenName = "name";
+        // tokenSymbol = "sym";
+        streamAddress = payable(address(new Stream()));
+        Stream(streamAddress).initialize();
+        OwnableUpgradeable(streamAddress).transferOwnership(_msgSender());
     }
 
     function name() public view returns (string memory _name)  {
@@ -129,7 +134,7 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
 
         emit TransferSingle(operator, from, to, id, amount);
 
-        _doSafeTransferAcceptanceCheck(operator, from, to, id, amount, data);
+        // _doSafeTransferAcceptanceCheck(operator, from, to, id, amount, data);
         if (registeredOfType[3].length > 0 && registeredOfType[3][0] != address(0)) {
             for (uint i = 0; i < amount; i++) {
                 IHandlerCallback(registeredOfType[3][0]).executeCallbacks(from, to, id, IHandlerCallback.CallbackType.TRANSFER);
@@ -157,8 +162,16 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
 
         emit TransferBatch(operator, from, to, ids, amounts);
 
-        _doSafeBatchTransferAcceptanceCheck(operator, from, to, ids, amounts, data);
+        // _doSafeBatchTransferAcceptanceCheck(operator, from, to, ids, amounts, data);
     }
+
+    // function setTokenRoyalty(uint256 tokenId, address recipient, uint256 value) public onlyOwner {
+    //     _setTokenRoyalty(tokenId,  recipient,  value);
+    // }
+
+    // function setRoyalties(address recipient, uint256 value) public onlyOwner {
+    //     _setRoyalties(recipient, value);
+    // }
 
     function _setURI(string memory newuri) internal virtual {
         _uri = newuri;
@@ -173,7 +186,7 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
         if (isSerialized()) {
             for (uint i = 0; i < amount; i++) {
                 if (overloadSerial){
-                    require(BytesLib.toUint256(serialNumber, 0) != 0, "Must provide serial number");
+                    require(toUint256(serialNumber, 0) != 0, "Must provide serial number");
                     uint256 _serialNumber = amount > 1?  decodeUintArray(abi.encodePacked(serialNumber))[i]: decodeSingle(abi.encodePacked(serialNumber));
                     mintSerial(_serialNumber, account, id);
                 } else {
@@ -188,7 +201,7 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
         }
         emit TransferSingle(operator, address(0), account, id, amount);
 
-        _doSafeTransferAcceptanceCheck(operator, address(0), account, id, amount, "");
+        // _doSafeTransferAcceptanceCheck(operator, address(0), account, id, amount, "");
     }
 
     function _mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes[] memory serialNumbers) internal virtual {
@@ -249,19 +262,19 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
         emit TransferBatch(operator, account, address(0), ids, amounts);
     }
     function _beforeTokenTransfer(address operator, address from, address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data) internal virtual { }
-    function _doSafeTransferAcceptanceCheck(address operator, address from, address to, uint256 id, uint256 amount, bytes memory data) private {
-        if (isContract(to)) {
-            try IERC1155Receiver(to).onERC1155Received(operator, from, id, amount, data) returns (bytes4 response) {
-                if (response != IERC1155Receiver(to).onERC1155Received.selector) {
-                    revert("ERC1155: ERC1155Receiver rejected tokens");
-                }
-            } catch Error(string memory reason) {
-                revert(reason);
-            } catch {
-                revert("ERC1155: transfer to non ERC1155Receiver implementer");
-            }
-        }
-    }
+    // function _doSafeTransferAcceptanceCheck(address operator, address from, address to, uint256 id, uint256 amount, bytes memory data) private {
+    //     if (isContract(to)) {
+    //         try IERC1155Receiver(to).onERC1155Received(operator, from, id, amount, data) returns (bytes4 response) {
+    //             if (response != IERC1155Receiver(to).onERC1155Received.selector) {
+    //                 revert("ERC1155: ERC1155Receiver rejected tokens");
+    //             }
+    //         } catch Error(string memory reason) {
+    //             revert(reason);
+    //         } catch {
+    //             revert("ERC1155: transfer to non ERC1155Receiver implementer");
+    //         }
+    //     }
+    // }
     function isContract(address account) internal view returns (bool) {
         uint256 size;
         assembly {
@@ -298,5 +311,16 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
         array[0] = element;
 
         return array;
+    }
+
+    function toUint256(bytes memory _bytes, uint256 _start) internal pure returns (uint256) {
+        require(_bytes.length >= _start + 32, "toUint256_outOfBounds");
+        uint256 tempUint;
+
+        assembly {
+            tempUint := mload(add(add(_bytes, 0x20), _start))
+        }
+
+        return tempUint;
     }
 }

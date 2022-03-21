@@ -15,7 +15,7 @@ contract TestFactoryV2 is TestFactory {
     initialized = true;
   }
   
-  function version() public view override returns (uint256) {
+  function version() public pure override returns (uint256) {
     return 2;
   }
 
