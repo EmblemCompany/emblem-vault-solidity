@@ -1,4 +1,5 @@
-pragma solidity 0.8.4;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "./SafeMath.sol";
 import "./IERC1155.sol";
@@ -97,9 +98,9 @@ contract ERC1155 is ERC165, IERC1155MetadataURI, IsSerialized {
     }
     
     function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes memory data) public virtual {
-        bool canBypass = canBypassForTokenId(id);
+        bool _canBypass = canBypassForTokenId(id);
         require(to != address(0), "ERC1155: transfer to the zero address");
-        require(from == _msgSender() || isApprovedForAll(from, _msgSender()) || canBypass, "ERC1155: caller is not owner nor approved nor bypasser");
+        require(from == _msgSender() || isApprovedForAll(from, _msgSender()) || _canBypass, "ERC1155: caller is not owner nor approved nor bypasser");
 
         address operator = _msgSender();
 

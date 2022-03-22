@@ -1,4 +1,5 @@
-pragma solidity 0.8.4;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.4;
 library SafeMath {
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;

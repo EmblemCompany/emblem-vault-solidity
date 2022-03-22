@@ -1,4 +1,5 @@
-pragma solidity 0.8.4;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.4;
 interface IIsSerialized {
     function isSerialized() external view returns (bool);
     function getSerial(uint256 tokenId, uint256 index) external view returns (uint256);

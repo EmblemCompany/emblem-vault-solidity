@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.4;
 import "./HasRegistrationUpgradable.sol";
 
@@ -64,10 +65,10 @@ contract IsSerializedUpgradable is HasRegistrationUpgradable {
         }
     }
 
-    function getFirstSerialByOwner(address owner, uint256 tokenId) public view returns (uint256) {
+    function getFirstSerialByOwner(address _owner, uint256 tokenId) public view returns (uint256) {
         for (uint256 i = 0; i < tokenIdToSerials[tokenId].length; ++i) {
            uint256 serialNumber = tokenIdToSerials[tokenId][i];
-           if (serialToOwner[serialNumber] == owner) {
+           if (serialToOwner[serialNumber] == _owner) {
                return serialNumber;
            }
         }

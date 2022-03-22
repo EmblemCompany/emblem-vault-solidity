@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
@@ -33,9 +34,11 @@ contract ERC721Factory is ClonableFactory {
       IHasRegistration(handlerAddress).registerContract(clone, 2);
     }
     IHasRegistration(clone).registerContract(handlerAddress, 3); // register handler on erc721
-    OwnableUpgradeable(clone).transferOwnership(newOwner); // transfer to newOwner
-    Stream(EmblemVault(clone).streamAddress()).addMember(Stream.Member(newOwner, 1, 1));
-    OwnableUpgradeable(EmblemVault(clone).streamAddress()).transferOwnership(newOwner);
+    
+    Stream(EmblemVault(clone).streamAddress()).addMember(Stream.Member(newOwner, 1, 1)); // add owner as stream recipient
+    IERC2981Royalties(clone).setTokenRoyalty(0, EmblemVault(clone).streamAddress(), 10000); // set contract wide royalties to stream
+    OwnableUpgradeable(EmblemVault(clone).streamAddress()).transferOwnership(newOwner); // transfer stream, to new owner
+    OwnableUpgradeable(clone).transferOwnership(newOwner); // transfer clone to newOwner
   }
 
   function version() virtual override public view returns (uint256 _version) {
