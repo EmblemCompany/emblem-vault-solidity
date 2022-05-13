@@ -8,35 +8,6 @@ const Web3 = require('web3');
 const TEST_CALLBACK_FUNCTION = "0x684ee7de" //web3.eth.abi.encodeFunctionSignature('testCallback(address _from, address _to, uint256 tokenId)').substr(0, 10)
 const TEST_REVERT_CALLBACK_FUNCTION = "0x5d1c03dd"
 const TEST_FAKE_CALLBACK_FUNCTION = "0x4e1c03dd"
-function getRandom(myArray) {
-    let selected = myArray[Math.floor(Math.random() * myArray.length)];
-    return selected
-  }
-let selectProvider = function(network) {
-    return new HDWalletProvider(process.env.ETHKEY || "a819fcd7afa2c39a7f9baf70273a128875b6c9f03001b218824559ccad6ef11c", selectProviderEndpoint(network), 0, 1)
-  }
-  function selectProviderEndpoint(network) {
-    return infuraEndpoints.filter(item => { return item.network == network })[0].address
-  }
-  const MATIC_IDS = [
-    "41f5f3cbf83536b2bf235d2be67a16bf6e5647dd"
-  ]
-  const INFURA_IDS = [  
-    "6112845322b74decbf08005aea176252", // <-- free backup
-    "8e5d2af8fbe244f7b7f32e2ddc152508",
-    "2e2998d61b0644fe8174bca015096245"
-  ]
-  const infuraEndpoints = [
-    { network: "rinkeby", address: "https://rinkeby.infura.io/v3/" + getRandom(INFURA_IDS) || INFURA_ID },
-    { network: "mainnet", address: "https://mainnet.infura.io/v3/" + getRandom(INFURA_IDS) || INFURA_ID },
-    { network: "mumbai", address: "https://rpc-mumbai.maticvigil.com/v1/" + getRandom(MATIC_IDS) },
-    { network: "matic", address: "https://rpc-mainnet.maticvigil.com/v1/" + getRandom(MATIC_IDS) },
-    { network: "xdai", address: "https://rpc.xdaichain.com/" },
-    { network: "bsc", address: "https://bsc-dataseed.binance.org/" },
-    { network: "fantom", address: "https://rpcapi.fantom.network" }
-  ]
-// var provider = selectProvider("mainnet")
-// var web3 = new Web3(provider)
 
 const CALLBACK_TYPE = {"MINT": 0,"TRANSFER": 1,"CLAIM":2}
 const REGISTRATION_TYPE = {"EMPTY": 0, "ERC1155": 1, "ERC721":2, "HANDLER":3, "ERC20":4, "BALANCE":5, "CLAIM":6, "UNKNOWN":7, "FACTORY":8, "STAKING": 9, "BYPASS": 10}// 0 EMPTY, 1 ERC1155, 2 ERC721, 3 HANDLER, 4 ERC20, 5 BALANCE, 6 CLAIM 7 UNKNOWN
@@ -102,7 +73,7 @@ describe('ERC1155', () => {
             //     await ERC1155.transferOwnership(util.handler.address)
             //     await util.handler.changePrice(0)
             //     await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
-            //     var provider = selectProvider("mainnet")
+            //     var provider = util.selectProvider("mainnet")
             //     var web3 = new Web3(provider)
             //     let hash = web3.utils.soliditySha3(ERC1155.address, util.deployer.address, 123, 111, "payload")
             //     let sig = await sign(web3, hash)
@@ -114,11 +85,13 @@ describe('ERC1155', () => {
             //   })
         
             it('should mint via handler with signed price', async () => {
+                let serialized = await ERC1155.isSerialized()
+                console.log("serialized", serialized)
                 await ERC1155.toggleSerialization()
                 await ERC1155.transferOwnership(util.handler.address)
                 let covalAddress = util.erc20.address
-                await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
-                var provider = selectProvider("mainnet")
+                await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
+                var provider = util.selectProvider("mainnet")
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC1155.address, covalAddress, 0, util.deployer.address, 123, 111, "payload")
                 let sig = await sign(web3, hash)
@@ -130,12 +103,13 @@ describe('ERC1155', () => {
               })
     
               it('MINT sig: for testing purposes only', async () => {
-                var provider = selectProvider("mainnet")
+                var provider = util.selectProvider("mainnet")
                 var web3 = new Web3(provider)
-                let hash = web3.utils.soliditySha3("0x9022fb4487EBa36D5BBb0a1459247E0A6072430E", "0x44c1a9d7d1f932b4c2811a70edffdd6ae2eb60e6", 0, "0x5B3cFb86a9575a2C42fd88AA71F0957004fa9209", 899828, 6358892423, "payload")
+                let hash = web3.utils.soliditySha3("0x125355e3A87CB49ABD798bD96E7C5dA6F509cD09", "0x0b815bd8a298c2788c5b36e33d75a65cb29a5ab4", 100000000, "0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111", 123, 5555, "payload")
                 console.log("hash", hash)
                 let sig = await sign(web3, hash)
                 console.log("sig", sig)
+                console.log("serial", util.serializeUintToBytes(0))
               })
         })
     
@@ -339,7 +313,7 @@ describe('ERC1155', () => {
                 let ticks = await util.handler.ticks()
                 expect(ticks).to.equal(0)
     
-                var provider = selectProvider("mainnet")
+                var provider = util.selectProvider("mainnet")
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
@@ -447,7 +421,7 @@ describe('ERC1155', () => {
                 let ticks = await util.handler.ticks()
                 expect(ticks).to.equal(0)
     
-                var provider = selectProvider("mainnet")
+                var provider = util.selectProvider("mainnet")
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
@@ -491,7 +465,7 @@ describe('ERC1155', () => {
                 let ticks = await util.handler.ticks()
                 expect(ticks).to.equal(0)
     
-                var provider = selectProvider("mainnet")
+                var provider = util.selectProvider("mainnet")
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
@@ -515,7 +489,7 @@ describe('ERC1155', () => {
                 let ticks = await util.handler.ticks()
                 expect(ticks).to.equal(0)
     
-                var provider = selectProvider("mainnet")
+                var provider = util.selectProvider("mainnet")
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 222)
                 let sig = await sign(web3, hash)
@@ -535,7 +509,7 @@ describe('ERC1155', () => {
                 await ERC721.setApprovalForAll(util.handler.address, true)
                 await ERC1155.transferOwnership(util.handler.address)
     
-                var provider = selectProvider("mainnet")
+                var provider = util.selectProvider("mainnet")
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
@@ -556,7 +530,7 @@ describe('ERC1155', () => {
                 await util.handler.registerCallback(ERC1155.address, util.handler.address, 1, CALLBACK_TYPE.MINT, TEST_REVERT_CALLBACK_FUNCTION, true)
                 await ERC1155.transferOwnership(util.handler.address)
     
-                var provider = selectProvider("mainnet")
+                var provider = util.selectProvider("mainnet")
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
@@ -572,7 +546,7 @@ describe('ERC1155', () => {
                 await util.handler.registerCallback(ERC1155.address, util.handler.address, 1, CALLBACK_TYPE.MINT, TEST_FAKE_CALLBACK_FUNCTION, true)
                 await ERC1155.transferOwnership(util.handler.address)
     
-                var provider = selectProvider("mainnet")
+                var provider = util.selectProvider("mainnet")
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
@@ -588,7 +562,7 @@ describe('ERC1155', () => {
                 await util.handler.registerCallback(ERC1155.address, util.handler.address, 1, CALLBACK_TYPE.MINT, TEST_REVERT_CALLBACK_FUNCTION, false)
                 await ERC1155.transferOwnership(util.handler.address)
                 
-                var provider = selectProvider("mainnet")
+                var provider = util.selectProvider("mainnet")
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
@@ -609,7 +583,7 @@ describe('ERC1155', () => {
                 await util.handler.registerCallback(ERC1155.address, util.handler.address, 1, CALLBACK_TYPE.MINT, TEST_FAKE_CALLBACK_FUNCTION, false)
                 await ERC1155.transferOwnership(util.handler.address)
                 
-                var provider = selectProvider("mainnet")
+                var provider = util.selectProvider("mainnet")
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
@@ -631,7 +605,7 @@ describe('ERC1155', () => {
                 await util.handler.registerCallback(ERC1155.address, util.handler.address, 1, CALLBACK_TYPE.MINT, TEST_CALLBACK_FUNCTION, true)
                 await ERC1155.transferOwnership(util.handler.address)
                 
-                var provider = selectProvider("mainnet")
+                var provider = util.selectProvider("mainnet")
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
@@ -653,7 +627,7 @@ describe('ERC1155', () => {
                 await util.handler.registerCallback(ERC1155.address, util.handler.address, 1, CALLBACK_TYPE.MINT, TEST_REVERT_CALLBACK_FUNCTION, true)
                 await ERC1155.transferOwnership(util.handler.address)
     
-                var provider = selectProvider("mainnet")
+                var provider = util.selectProvider("mainnet")
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
@@ -740,7 +714,7 @@ describe('ERC1155', () => {
             })
             it('should execute callbacks on batch mint')
             it('FUNCTION generate: for testing purposes only', async()=>{
-                var provider = selectProvider("mainnet")
+                var provider = util.selectProvider("mainnet")
                 var web3 = new Web3(provider)
                 // let hash = web3.eth.abi.encodeFunctionSignature('catchCallbackFrom(address,address,uint256)').substr(0, 10) //catchCallback(address, address _to, uint256)
                 let hash = web3.eth.abi.encodeFunctionSignature('changeName(string,string)').substr(0, 10) //getFunctions()

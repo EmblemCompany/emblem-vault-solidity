@@ -29,21 +29,21 @@ contract IsSerialized is HasRegistration {
         overloadSerial = !overloadSerial;
     }
 
-    function mintSerial(uint256 tokenId, address owner) public onlyOwner {
-        uint256 serialNumber = uint256(keccak256(abi.encode(tokenId, owner, serialCount)));
-        _mintSerial(serialNumber, owner, tokenId);
+    function mintSerial(uint256 tokenId, address _owner) public onlyOwner {
+        uint256 serialNumber = uint256(keccak256(abi.encode(tokenId, _owner, serialCount)));
+        _mintSerial(serialNumber, _owner, tokenId);
     }
 
-    function mintSerial(uint256 serialNumber, address owner, uint256 tokenId) public onlyOwner {
-        _mintSerial(serialNumber, owner, tokenId);
+    function mintSerial(uint256 serialNumber, address _owner, uint256 tokenId) public onlyOwner {
+        _mintSerial(serialNumber, _owner, tokenId);
     }
 
-    function _mintSerial(uint256 serialNumber, address owner, uint256 tokenId)internal onlyOwner {
+    function _mintSerial(uint256 serialNumber, address _owner, uint256 tokenId)internal onlyOwner {
         require(serialToTokenId[serialNumber] == 0, "Serial number already used");
         tokenIdToSerials[tokenId].push(serialNumber);
         serialToTokenId[serialNumber] = tokenId;
-        serialToOwner[serialNumber] = owner;
-        ownerSerialCount[owner]++;
+        serialToOwner[serialNumber] = _owner;
+        ownerSerialCount[_owner]++;
         if (!hasSerialized) {
             hasSerialized = true;
         }
@@ -65,10 +65,10 @@ contract IsSerialized is HasRegistration {
         }
     }
 
-    function getFirstSerialByOwner(address owner, uint256 tokenId) public view returns (uint256) {
+    function getFirstSerialByOwner(address _owner, uint256 tokenId) public view returns (uint256) {
         for (uint256 i = 0; i < tokenIdToSerials[tokenId].length; ++i) {
            uint256 serialNumber = tokenIdToSerials[tokenId][i];
-           if (serialToOwner[serialNumber] == owner) {
+           if (serialToOwner[serialNumber] == _owner) {
                return serialNumber;
            }
         }

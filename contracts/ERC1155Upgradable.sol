@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.4;
-import "@openzeppelin/contracts/utils/Strings.sol";
 import "./SafeMath.sol";
 import "./IERC1155.sol";
 import "./ERC165.sol";
@@ -20,8 +19,11 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
 
     mapping (uint256 => mapping(address => uint256)) private _balances;
     mapping (address => mapping(address => bool)) private _operatorApprovals;
-    string internal tokenName;
-    string internal tokenSymbol;
+    mapping (uint256 => bool) private usedTokenId;
+    uint256[] public tokenIds;
+
+    string public name;
+    string public symbol;
 
     string private _uri;
 
@@ -35,7 +37,7 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
         _registerInterface(0x0e89341c); //_INTERFACE_ID_ERC1155_METADATA_URI
         initializeERC165();
         _registerInterface(0x2a55205a); // ERC2981
-        _uri = "https://api.emblemvault.io/s:evmetadata/meta/";
+        _uri = "https://api.emblemvault.io/s:evmetadata/meta/"; 
         serialized = true;
         overloadSerial = true;
         // tokenName = "name";
@@ -43,14 +45,17 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
         streamAddress = payable(address(new Stream()));
         Stream(streamAddress).initialize();
         OwnableUpgradeable(streamAddress).transferOwnership(_msgSender());
+        isClaimable = true;
     }
 
-    function name() public view returns (string memory _name)  {
-        return tokenName;
+    function changeName(string calldata _name, string calldata _symbol) public onlyOwner {
+      name = _name;
+      symbol = _symbol;
     }
-    function symbol() public view returns (string memory _symbol)  {
-        return tokenSymbol;
-    }
+
+    // function getTokenIds() public view returns (uint256[] memory arr) {
+    //    return tokenIds;
+    // }
 
     function mint(address _to, uint256 _tokenId, uint256 _amount) public onlyOwner {
         bytes memory empty = abi.encodePacked(uint256(0));
@@ -70,19 +75,39 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
         _burn(_from, _tokenId, _amount);
     }
 
-    function burnBatch(address account, uint256[] memory ids, uint256[] memory amounts) public {
-        require(account == _msgSender() || isApprovedForAll(account, _msgSender()), 'Not Approved to burn');
-        _burnBatch(account, ids, amounts);
-    }
+    // function burnBatch(address account, uint256[] memory ids, uint256[] memory amounts) public {
+    //     require(account == _msgSender() || isApprovedForAll(account, _msgSender()), 'Not Approved to burn');
+    //     _burnBatch(account, ids, amounts);
+    // }
 
     function setURI(string memory newuri) public onlyOwner {
         _uri = newuri;
     }
     
     function uri(uint256 _tokenId) external view override returns (string memory) {
-        return string(abi.encodePacked(_uri, Strings.toString(_tokenId)));
+        return string(abi.encodePacked(_uri, toString(_tokenId)));
     }
-    
+
+    function toString(uint256 value) internal pure returns (string memory) {
+
+        if (value == 0) {
+            return "0";
+        }
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(digits);
+        while (value != 0) {
+            digits -= 1;
+            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+            value /= 10;
+        }
+        return string(buffer);
+    }
+
     function balanceOf(address account, uint256 id) public view returns (uint256) {
         require(account != address(0), "ERC1155: balance query for the zero address");
         return _balances[id][account];
@@ -170,8 +195,8 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
         require(account != address(0), "ERC1155: mint to the zero address");
         address operator = _msgSender();
         // _beforeTokenTransfer(operator, address(0), account, _asSingletonArray(id), _asSingletonArray(amount), "");
-
-        _balances[id][account] = _balances[id][account].add(amount);
+        
+        !usedTokenId[id] ? tokenIds.push(id) : ();
         if (isSerialized()) {
             for (uint i = 0; i < amount; i++) {
                 if (overloadSerial){
@@ -188,6 +213,8 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
                 IHandlerCallback(_msgSender()).executeCallbacks(address(0), account, id, IHandlerCallback.CallbackType.MINT);
             }
         }
+        usedTokenId[id] = true;
+        _balances[id][account] = _balances[id][account].add(amount);
         emit TransferSingle(operator, address(0), account, id, amount);
 
         // _doSafeTransferAcceptanceCheck(operator, address(0), account, id, amount, "");
@@ -199,7 +226,7 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
 
         address operator = _msgSender();
 
-        _beforeTokenTransfer(operator, address(0), to, ids, amounts, "");
+        // _beforeTokenTransfer(operator, address(0), to, ids, amounts, "");
 
         for (uint i = 0; i < ids.length; i++) {
             bytes memory _serialNumber = amounts[i] > 1? abi.encode(decodeUintArray(serialNumbers[i])) : serialNumbers[i];
@@ -216,7 +243,7 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
 
         address operator = _msgSender();
 
-        _beforeTokenTransfer(operator, account, address(0), _asSingletonArray(id), _asSingletonArray(amount), "");
+        // _beforeTokenTransfer(operator, account, address(0), _asSingletonArray(id), _asSingletonArray(amount), "");
 
         _balances[id][account] = _balances[id][account].sub(
             amount,
@@ -226,7 +253,7 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
         if (isSerialized()) {
             uint256 serialNumber = getFirstSerialByOwner(account, id);
             if (serialNumber != 0 ) {
-                transferSerial(serialNumber, account, address(0));
+                burnSerial(serialNumber);
             }
         }
         if (registeredOfType[3].length > 0 && registeredOfType[3][0] != address(0)) {
@@ -236,21 +263,21 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
         emit TransferSingle(operator, account, address(0), id, amount);
     }
 
-    function _burnBatch(address account, uint256[] memory ids, uint256[] memory amounts) internal virtual {
-        require(account != address(0), "ERC1155: burn from the zero address");
-        require(ids.length == amounts.length, "ERC1155: ids and amounts length mismatch");
+    // function _burnBatch(address account, uint256[] memory ids, uint256[] memory amounts) internal virtual {
+    //     require(account != address(0), "ERC1155: burn from the zero address");
+    //     require(ids.length == amounts.length, "ERC1155: ids and amounts length mismatch");
 
-        address operator = _msgSender();
+    //     address operator = _msgSender();
 
-        _beforeTokenTransfer(operator, account, address(0), ids, amounts, "");
+    //     _beforeTokenTransfer(operator, account, address(0), ids, amounts, "");
 
-        for (uint i = 0; i < ids.length; i++) {
-            _burn(account, ids[i], amounts[i]);
-        }
+    //     for (uint i = 0; i < ids.length; i++) {
+    //         _burn(account, ids[i], amounts[i]);
+    //     }
 
-        emit TransferBatch(operator, account, address(0), ids, amounts);
-    }
-    function _beforeTokenTransfer(address operator, address from, address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data) internal virtual { }
+    //     emit TransferBatch(operator, account, address(0), ids, amounts);
+    // }
+    // function _beforeTokenTransfer(address operator, address from, address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data) internal virtual { }
     // function _doSafeTransferAcceptanceCheck(address operator, address from, address to, uint256 id, uint256 amount, bytes memory data) private {
     //     if (isContract(to)) {
     //         try IERC1155Receiver(to).onERC1155Received(operator, from, id, amount, data) returns (bytes4 response) {
@@ -284,6 +311,10 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
     //             revert("ERC1155: transfer to non ERC1155Receiver implementer");
     //         }
     //     }
+    // }
+
+    // fallback() external onlyOwner {
+        
     // }
 
     function _asSingletonArray(uint256 element) private pure returns (uint256[] memory) {

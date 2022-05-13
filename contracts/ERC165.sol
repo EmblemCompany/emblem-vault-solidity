@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.4;
+pragma solidity ^0.8.4;
 
 contract ERC165 {
 
     mapping(bytes4 => bool) private supportedInterfaces;
 
-    function initializeERC165() public {
+    function initializeERC165() internal {
         require(supportedInterfaces[0x01ffc9a7] == false, "Already Registered");
         _registerInterface(0x01ffc9a7);
     }

@@ -130,7 +130,7 @@ describe('Factory', () => {
       await util.deployTestFactory("upgradable");
       await util.upgradeTestFactory()
       await util.testFactory.updateImplementation()
-      await util.testFactory.createCloneAtVersion(util.deployer.address, 1)
+      await util.testFactory.createCloneAtVersion(util.deployer.address, 1, "test clone")
       let versions = await util.testFactory.versions()
       expect(versions).to.equal(2)
       let clones = await util.testFactory.getClones()

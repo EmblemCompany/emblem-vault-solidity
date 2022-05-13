@@ -6,8 +6,6 @@ contract HasRegistrationUpgradable is IsBypassable {
 
     mapping(address => uint256) private registeredContracts; // 0 EMPTY, 1 ERC1155, 2 ERC721, 3 HANDLER, 4 ERC20, 5 BALANCE, 6 CLAIM, 7 UNKNOWN, 8 FACTORY, 9 STAKING, 10 BYPASS
     mapping(uint256 => address[]) internal registeredOfType;
-    
-    uint256 private contractCount;
 
     modifier isRegisteredContract(address _contract) {
         require(registeredContracts[_contract] > 0, "Contract is not registered");

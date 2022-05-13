@@ -1,0 +1,82 @@
+{
+    "handler": {
+        "address": "0xF2eCdFa77C3c8Cabf913529D95081DCB2DE314ec",
+        "delegation": null,
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0xF2eCdFa77C3c8Cabf913529D95081DCB2DE314ec",
+                "asType": 3
+            },
+            {
+                "registered": "0xef88f3788D4b310397550a9883F54701c1162A63",
+                "asType": 5
+            },
+            {
+                "registered": "0xFC94275b914d07cbBB62807fc838d5B17EEc3393",
+                "asType": 6
+            },
+            {
+                "registered": "0x839fCd3Eb3E6D259A46783a9952b7114cF094F1E",
+                "asType": 8
+            },
+            {
+                "registered": "0x1C1734D9A844F2Ce5A02D8166920666De75433DF",
+                "asType": 8
+            },
+            {
+                "registered": "0x0b4643B7Df00b55d6a51Afd1c5a9cd2e48BaF3B2",
+                "asType": 8
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableBalances": {
+        "address": "0xef88f3788D4b310397550a9883F54701c1162A63",
+        "delegation": "0x53d1279f9e1d658fd3aa2989c640f5853078864c",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0xF2eCdFa77C3c8Cabf913529D95081DCB2DE314ec",
+                "asType": 3
+            }
+        ],
+        "contractType": 5
+    },
+    "upgradableClaim": {
+        "address": "0xFC94275b914d07cbBB62807fc838d5B17EEc3393",
+        "delegation": "0x5d9d23296e7772a75e7db9860c83487eb772a48d",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0xF2eCdFa77C3c8Cabf913529D95081DCB2DE314ec",
+                "asType": 3
+            }
+        ],
+        "contractType": 6
+    },
+    "erc1155Factory": {
+        "address": "0x839fCd3Eb3E6D259A46783a9952b7114cF094F1E",
+        "delegation": "0x34d0b46147c98884186964389957c7ffd35ca2df",
+        "verified": true,
+        "registrations": [],
+        "contractType": 8,
+        "clones": []
+    },
+    "erc721Factory": {
+        "address": "0x1C1734D9A844F2Ce5A02D8166920666De75433DF",
+        "delegation": "0x2cb9f057a12c3cbd493a157c123fa23e5b2e3308",
+        "verified": true,
+        "registrations": [],
+        "contractType": 8,
+        "clones": []
+    },
+    "erc20Factory": {
+        "address": "0x0b4643B7Df00b55d6a51Afd1c5a9cd2e48BaF3B2",
+        "delegation": "0x87e553ad7981e1c3714ce967a91d27cdea65e9fb",
+        "verified": true,
+        "registrations": [],
+        "contractType": 8,
+        "clones": []
+    }
+}

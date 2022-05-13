@@ -16,6 +16,7 @@ contract ERC1155Factory is ClonableFactory {
 
   function initialize() virtual override public initializer {
     __Ownable_init();
+    factoryType = "ERC1155";
   }
 
   function initializeStage2(address _handlerAddress) public onlyOwner {
@@ -23,7 +24,7 @@ contract ERC1155Factory is ClonableFactory {
     ClonableFactory.initialize();
   }
 
-  function implement() virtual override public returns(address) {
+  function implement() virtual override internal returns(address) {
     return address(new ERC1155Upgradable());
   }
 
@@ -31,7 +32,7 @@ contract ERC1155Factory is ClonableFactory {
     handlerAddress = _handlerAddress;
   }
 
-  function afterClone(address newOwner, address clone) public override onlyOwner {
+  function afterClone(address newOwner, address clone) internal override onlyOwner {
     if (IHasRegistration(handlerAddress).isRegistered(address(this), 8)) { // if factory registered with handler
       IHasRegistration(handlerAddress).registerContract(clone, 1);
     }

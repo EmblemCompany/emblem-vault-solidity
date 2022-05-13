@@ -16,12 +16,13 @@ contract ERC721Factory is ClonableFactory {
 
   function initialize() virtual override public initializer {
     __Ownable_init();
+    factoryType = "ERC721";
   }
   function initializeStage2(address _handlerAddress) public onlyOwner {
     handlerAddress = _handlerAddress;
     ClonableFactory.initialize();
   }
-  function implement() virtual override public returns(address) {
+  function implement() virtual override internal returns(address) {
     return address(new EmblemVault());
   }
 
@@ -29,7 +30,7 @@ contract ERC721Factory is ClonableFactory {
     handlerAddress = _handlerAddress;
   }
 
-  function afterClone(address newOwner, address clone) public override onlyOwner {
+  function afterClone(address newOwner, address clone) internal override onlyOwner {
     if (IHasRegistration(handlerAddress).isRegistered(address(this), 8)) { // if factory registered with handler
       IHasRegistration(handlerAddress).registerContract(clone, 2);
     }

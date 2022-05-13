@@ -2,14 +2,12 @@ const { ethers, upgrades} = require("hardhat");
 const spawn = require('await-spawn')
 const utils = require("./utils")
 const fs = require('fs')
-let Deployments = require('../deployed.json')
+let deploymentsFilename = "./deployed"+("-"+process.env.NETWORK || "-unknown-network")+".json"
+let Deployments = fs.existsSync(deploymentsFilename) ? require("."+deploymentsFilename) : {}
 
-let HANDLER_ADDRESS //= "0x404d4FfB1887aA8Ca5973B4F1C5257DE4d887D59"
-let CALLBACK_STORAGE //= "0xcA00Eb2CC4fb26f5eb07CF49BB907af3536CD036";
-let CALLBACK_WITH_STORAGE //= "0x8c2282a3311cB856fF2677Dd9c4985B08Dd55B3f";
-let BALANCE_STORAGE, BALANCE, CLAIM_STORAGE, CLAIMED, ERC1155FACTORY_PROXY, ERC721FACTORY_PROXY, PROXY, ERC20FACTORY_PROXY, STAKINGFACTORY_PROXY, ERC20_PROXY, ERC20UPGRADABLE_FACTORY, ERC1155_PROXY
-let VERIFY = false
+let VERIFY = process.env.NETWORK == "rinkeby" ? true: false
 let results = {time: Date.now()}
+
 
 async function main() {
   const [_deployer] = await hre.ethers.getSigners();
@@ -18,10 +16,6 @@ async function main() {
   const ERC721Factory = await ethers.getContractFactory("ERC721Factory");
   const ERC20Factory = await ethers.getContractFactory("ERC20Factory");
   const StakingFactory = await ethers.getContractFactory("StakingFactory");
-  const ClaimStorage = await ethers.getContractFactory("Storage");
-  const Claimed = await ethers.getContractFactory("Claimed");
-  const BalanceStorage = await ethers.getContractFactory("BalanceStorage");
-  const Balance = await ethers.getContractFactory("Balance");
   const BalanceUpgradable = await ethers.getContractFactory("BalanceUpgradable");
   const ClaimedUpgradable = await ethers.getContractFactory("ClaimedUpgradable");
   const ConfigurableERC20Upgradable = await ethers.getContractFactory("ConfigurableERC20Upgradable");
@@ -30,122 +24,93 @@ async function main() {
   const UpgradableTest = await hre.ethers.getContractFactory("UpgradableTest");
   const UpgradableTestV2 = await hre.ethers.getContractFactory("UpgradableTestV2");
 
-  results.handler = Deployments[0]?.handler? Deployments[0]?.handler: null
+  results = Deployments
   
   // /* HANDLER */
   results.handler = await verifyContract(await getOrDeploy(results.handler, "VaultHandlerV8", VaultHandlerV8))
-  await utils.registerWithContract(utils.REGISTRATION_TYPE.HANDLER, results.handler, results.handler) // register handler with self to allow callbacks
+  results.handler.action != "get"? await utils.perform(results.handler, "initialize"): null
+  results.handler.action != "get"? await utils.registerWithContract(utils.REGISTRATION_TYPE.HANDLER, results.handler, results.handler) : null // register handler with self to allow callbacks
   save()
 
   // /* BALANCE UPGRADABLE */
-  results.upgradableBalances = await verifyContract(await getOrDeployProxy(BALANCE, "BalanceUpgradable", BalanceUpgradable))
-  await utils.registerWithContract(utils.REGISTRATION_TYPE.BALANCE, results.handler, results.upgradableBalances)
-  await utils.registerWithContract(utils.REGISTRATION_TYPE.HANDLER, results.upgradableBalances, results.handler)
+  results.upgradableBalances = await verifyContract(await getOrDeployProxy(results.upgradableBalances, "BalanceUpgradable", BalanceUpgradable))
+  results.upgradableBalances.action != "get"? await utils.registerWithContract(utils.REGISTRATION_TYPE.BALANCE, results.handler, results.upgradableBalances): null
+  results.upgradableBalances.action != "get"? await utils.registerWithContract(utils.REGISTRATION_TYPE.HANDLER, results.upgradableBalances, results.handler): null
+  // results.upgradableBalances = await verifyContract(await utils.upgradeProxy(results.upgradableBalances.address, "BalanceUpgradable", BalanceUpgradable))
   save()
-  // /* UPGRADE */
-  // await utils.upgradeProxy(Deployments[0].upgradableBalances.address, "BalanceUpgradable", BalanceUpgradable)
-  
-  // /* BALANCE */
-  // results.balanceStorage = await verifyContract(await getOrDeploy(BALANCE_STORAGE, "BalanceStorage", BalanceStorage))
-  // results.balances = await verifyContract(await getOrDeploy(BALANCE, "Balance", Balance, results.balanceStorage.address), [results.balanceStorage.address])
-  // await utils.registerWithContract(utils.REGISTRATION_TYPE.BALANCE, results.handler, results.balances)
-  // await utils.registerWithContract(utils.REGISTRATION_TYPE.HANDLER, results.balances, results.handler)
-
-  // /* BALANCE OLD DEPLOYMENT METHOD */
-  // // results.balances = await utils.deploy("Balance", Balance, results.balanceStorage.address)
-  // // results.balances = VERIFY? await utils.verify(results.balances, [results.balanceStorage.address]): results.balances
-  // // await utils.registerWithContract(utils.REGISTRATION_TYPE.BALANCE, results.handler, results.balances)
-  // // await utils.registerWithContract(utils.REGISTRATION_TYPE.HANDLER, results.balances, results.handler)
-
-  // /* CLAIM */
-  // results.claimStorage = await verifyContract(await getOrDeploy(CLAIM_STORAGE, "ClaimStorage", ClaimStorage))
-  // results.claimed = await verifyContract(await getOrDeploy(CLAIMED, "Claimed", Claimed, results.claimStorage.address), [results.claimStorage.address])
-  // await utils.registerWithContract(utils.REGISTRATION_TYPE.CLAIM, results.handler, results.claimed)
-  // await utils.registerWithContract(utils.REGISTRATION_TYPE.HANDLER, results.claimed, results.handler)
 
   // /* CLAIM UPGRADABLE */
-  results.upgradableClaim = await verifyContract(await getOrDeployProxy(BALANCE, "ClaimedUpgradable", ClaimedUpgradable))
-  await utils.registerWithContract(utils.REGISTRATION_TYPE.CLAIM, results.handler, results.upgradableClaim)
-  await utils.registerWithContract(utils.REGISTRATION_TYPE.HANDLER, results.upgradableClaim, results.handler)
+  results.upgradableClaim = await verifyContract(await getOrDeployProxy(results.upgradableClaim, "ClaimedUpgradable", ClaimedUpgradable))
+  results.upgradableClaim.action != "get"? await utils.registerWithContract(utils.REGISTRATION_TYPE.CLAIM, results.handler, results.upgradableClaim): null
+  results.upgradableClaim.action != "get"? await utils.registerWithContract(utils.REGISTRATION_TYPE.HANDLER, results.upgradableClaim, results.handler): null
   save()
   /* UPGRADE */
   // await utils.upgradeProxy(PROXY, "ClaimedUpgradable", ClaimedUpgradable)
 
-  // /* ERC1155 Factory */
-  results.erc1155Factory = await verifyContract(await getOrDeployProxy(ERC1155FACTORY_PROXY, "ERC1155Factory", ERC1155Factory, [results.handler.address]))
-  await utils.registerWithContract(utils.REGISTRATION_TYPE.FACTORY, results.handler, results.erc1155Factory)
+  /* ERC1155 Factory */
+  results.erc1155Factory = await verifyContract(await getOrDeployProxy(results.erc1155Factory, "ERC1155Factory", ERC1155Factory))
+  results.erc1155Factory.action != "get"? await utils.perform(results.erc1155Factory, "initializeStage2", [results.handler.address]): null
+  results.erc1155Factory.action != "get"? await utils.registerWithContract(utils.REGISTRATION_TYPE.FACTORY, results.handler, results.erc1155Factory): null
   save()
-  // results.erc1155Base = await verifyAddress({address: await results.erc1155Factory.contract.erc1155Implementation()})
-  // /* Upgrade ERC1155 Factory */
-  // let factory = await utils.upgradeProxy(Deployments[0].erc1155Factory.address, "ERC1155Factory", ERC1155Factory)
-  // await verifyAddress({address: factory.delegation})
+  // results.erc1155Factory = await verifyContract(await utils.upgradeProxy(results.erc1155Factory.address, "ERC1155Factory", ERC1155Factory))
+  let tx = await results.erc1155Factory.contract.updateImplementation()
+  await tx.wait(1)
+  await results.erc1155Factory.contract.createClone(_deployer.address)
   
-  // /* ERC1155 UPGRADABLE */
-  // results.upgradableERC1155 = await verifyContract(await getOrDeployProxy(results.upgradableERC1155? results.upgradableERC1155 : null, "ERC1155Upgradable", ERC1155Upgradable, ["Name","Smb"]))
-  // await utils.registerWithContract(utils.REGISTRATION_TYPE.ERC1155, results.handler, results.upgradableERC1155)
-  // await utils.registerWithContract(utils.REGISTRATION_TYPE.HANDLER, results.upgradableERC1155, results.handler)
-  // // /* UPGRADE */
-  // await utils.upgradeProxy(Deployments[0].upgradableERC1155.address, "ERC1155Upgradable", ERC1155Upgradable)
-
-  // // /* ERC721 Factory */
-  results.erc721Factory = await verifyContract(await getOrDeployProxy(ERC721FACTORY_PROXY, "ERC721Factory", ERC721Factory, [results.handler.address]))
-  await utils.registerWithContract(utils.REGISTRATION_TYPE.FACTORY, results.handler, results.erc721Factory)
+  /* ERC721 Factory */
+  results.erc721Factory = await verifyContract(await getOrDeployProxy(results.erc721Factory, "ERC721Factory", ERC721Factory))
+  results.erc721Factory.action != "get"? await utils.perform(results.erc721Factory, "initializeStage2", [results.handler.address]): null
+  results.erc721Factory.action != "get"? await utils.registerWithContract(utils.REGISTRATION_TYPE.FACTORY, results.handler, results.erc721Factory): null
   save()
-  // results.erc721Base = await verifyAddress({address: await results.erc721Factory.contract.erc721Implementation()})
-
-  // /* Upgrade ERC721 Factory */
-  // factory = await utils.upgradeProxy(Deployments[0].erc721Factory.address, "ERC721Factory", ERC721Factory)
-  // await verifyAddress({address: factory.delegation})
-
+  // results.erc721Factory = await verifyContract(await utils.upgradeProxy(results.erc721Factory.address, "ERC721Factory", ERC721Factory))
   
-  // // /* ERC20 Factory */
-  results.erc20Factory = await verifyContract(await getOrDeployProxy(ERC20FACTORY_PROXY, "ERC20Factory", ERC20Factory, [results.handler.address]))
-  await utils.registerWithContract(utils.REGISTRATION_TYPE.FACTORY, results.handler, results.erc20Factory)
+  /* ERC20 Factory */
+  results.erc20Factory = await verifyContract(await getOrDeployProxy(results.erc20Factory, "ERC20Factory", ERC20Factory))
+  results.erc20Factory.action != "get"? await utils.perform(results.erc20Factory, "initializeStage2", [results.handler.address]): null
+  results.erc20Factory.action != "get"? await utils.registerWithContract(utils.REGISTRATION_TYPE.FACTORY, results.handler, results.erc20Factory): null
   save()
-  // results.erc20Base = await verifyAddress({address: await results.erc20Factory.contract.erc20Implementation()})
-  
-  // /* Upgrade ERC20 Factory */
-  // await utils.upgradeProxy(Deployments[0].erc20Factory.address, "ERC20Factory", ERC20Factory)
+  // results.erc20Factory = await verifyContract(await utils.upgradeProxy(results.erc20Factory.address, "ERC721Factory", ERC721Factory))
 
   // /* Staking Factory */
-  results.stakingFactory = await verifyContract(await getOrDeployProxy(STAKINGFACTORY_PROXY, "StakingFactory", StakingFactory, [results.handler.address]))
-  await utils.registerWithContract(utils.REGISTRATION_TYPE.FACTORY, results.handler, results.stakingFactory)
-  save()
+  // results.stakingFactory = await verifyContract(await getOrDeployProxy(STAKINGFACTORY_PROXY, "StakingFactory", StakingFactory, [results.handler.address]))
+  // await utils.registerWithContract(utils.REGISTRATION_TYPE.FACTORY, results.handler, results.stakingFactory)
+  // save()
   // results.stakingBase = await verifyAddress({address: await results.stakingFactory.contract.stakingImplementation()})
 
   // /* ContractNFT Factory */
-  // results.contractNFTFactory = await verifyContract(await getOrDeployProxy(Deployments[0].contractNFTFactory, "ContractNFTFactory", ContractNFTFactory))
+  // results.contractNFTFactory = await verifyContract(await getOrDeployProxy(Deployments.contractNFTFactory, "ContractNFTFactory", ContractNFTFactory))
   // results.contractNFTBase = await verifyAddress({address: await results.contractNFTFactory.contract.implementation()})
-  // await utils.upgradeProxy(Deployments[0].contractNFTFactory.address, "ContractNFTFactory", ContractNFTFactory)
+  // await utils.upgradeProxy(Deployments.contractNFTFactory.address, "ContractNFTFactory", ContractNFTFactory)
 
-  // results.upgradableTest = await verifyContract(await getOrDeployProxy(Deployments[0].upgradableTest, "UpgradableTest", UpgradableTest))
+  /* Upgradable Test */
+  // results.upgradableTest = await verifyContract(await getOrDeployProxy(Deployments.upgradableTest, "UpgradableTest", UpgradableTest))
   // await utils.upgradeProxy(results.upgradableTest.address, "UpgradableTestV2", UpgradableTestV2)
 
   /* Save Results */
-  save()
+  // save()
 
 
   /* utils */
 
   function save(){
-    Deployments.reverse().push(utils.formatResults(results))
-    utils.saveFile(Deployments.reverse(), "./deployed.json")
+    Object.keys(results).filter(items=>{ return items != "time"}).forEach((key, index)=>{
+      Deployments[key] = results[key]
+    })
+    let formatted = utils.formatResults(JSON.parse(JSON.stringify(Deployments)))
+    
+    utils.saveFile(formatted, deploymentsFilename)
   }
 
   async function getOrDeploy(proxy, className, contractClass, args = null) {
-    return proxy ? { verified: true, address: proxy.address, contract: await utils.getContract(proxy.address, className, _deployer), registrations: proxy.registrations } : await utils.deploy(className, contractClass, args);
+    return proxy ? { action: "get", verified: proxy.verified, address: proxy.address, contractType: proxy.contractType, delegation: proxy.delegation, contract: await utils.getContract(proxy.address, className, _deployer), registrations: proxy.registrations } : await utils.deploy(className, contractClass, args);
   }
   
   async function getOrDeployProxy(proxy, className, contractClass, args = []) {
-    return proxy ? { verified: true, address: proxy.address, contract: await utils.getContract(proxy.address, className, _deployer), registrations: proxy.registrations } : await utils.deployProxy(className, contractClass, args);
+    return proxy ? { action: "get", verified: proxy.verified, address: proxy.address, contractType: proxy.contractType, delegation: proxy.delegation, contract: await utils.getContract(proxy.address, className, _deployer), registrations: proxy.registrations } : await utils.deployProxy(className, contractClass, args);
   }
   
   async function verifyContract(deployment, args = []) {
     return VERIFY && !deployment.verified ? await utils.verify(deployment, args) : deployment;
-  }
-  
-  async function verifyAddress(deployment, args = []) {
-    return VERIFY && !deployment.verified? await utils.verifyAddress(deployment): deployment
   }
 }
 

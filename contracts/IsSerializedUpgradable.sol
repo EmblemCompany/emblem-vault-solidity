@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.4;
-import "./HasRegistrationUpgradable.sol";
+import "./HasRegistration.sol";
 
-contract IsSerializedUpgradable is HasRegistrationUpgradable {
+contract IsSerializedUpgradable is HasRegistration {
     bool internal serialized;
     bool internal hasSerialized;
     bool internal overloadSerial;
@@ -10,7 +10,7 @@ contract IsSerializedUpgradable is HasRegistrationUpgradable {
     mapping(uint256 => uint256[]) internal tokenIdToSerials;
     mapping(uint256 => uint256) internal serialToTokenId;
     mapping(uint256 => address) internal serialToOwner;
-    mapping(address => uint256) public ownerSerialCount;
+    // mapping(address => uint256) public ownerSerialCount;
 
     function isSerialized() public view returns (bool) {
         return serialized;
@@ -29,33 +29,59 @@ contract IsSerializedUpgradable is HasRegistrationUpgradable {
         overloadSerial = !overloadSerial;
     }
 
-    function mintSerial(uint256 tokenId, address _owner) public onlyOwner {
+    function mintSerial(uint256 tokenId, address _owner) internal onlyOwner {
         uint256 serialNumber = uint256(keccak256(abi.encode(tokenId, _owner, serialCount)));
         _mintSerial(serialNumber, _owner, tokenId);
     }
 
-    function mintSerial(uint256 serialNumber, address _owner, uint256 tokenId) public onlyOwner {
+    function mintSerial(uint256 serialNumber, address _owner, uint256 tokenId) internal onlyOwner {
         _mintSerial(serialNumber, _owner, tokenId);
     }
 
     function _mintSerial(uint256 serialNumber, address _owner, uint256 tokenId)internal onlyOwner {
-        require(serialToTokenId[serialNumber] == 0, "Serial number already used");
+        require(serialToTokenId[serialNumber] == 0 || serialToOwner[serialNumber] == address(0), "Serial number already used");
         tokenIdToSerials[tokenId].push(serialNumber);
         serialToTokenId[serialNumber] = tokenId;
         serialToOwner[serialNumber] = _owner;
-        ownerSerialCount[_owner]++;
-        if (!hasSerialized) {
-            hasSerialized = true;
-        }
+        // ownerSerialCount[_owner]++;
+        // if (!hasSerialized) {
+        //     hasSerialized = true;
+        // }
+        hasSerialized = true;
         serialCount++;
     }
 
     function transferSerial(uint256 serialNumber, address from, address to) internal {
         require(serialToOwner[serialNumber] == from, 'Not correct owner of serialnumber');
         serialToOwner[serialNumber] = to;
-        ownerSerialCount[to]++;
-        ownerSerialCount[from]--;
+        // ownerSerialCount[to]++;
+        // ownerSerialCount[from]--;
+        // if (to == address(0)) {
+        // serialToTokenId[serialNumber] = 0;
+        //     uint256 tokenId = serialToTokenId[serialNumber];
+        //     serialToTokenId[serialNumber] = 0;
+        //     for(uint i=0; i<tokenIdToSerials[tokenId].length; i++) {
+        //         if (tokenIdToSerials[tokenId][i] == serialNumber) {
+        //             tokenIdToSerials[tokenId][i] = tokenIdToSerials[tokenId][tokenIdToSerials[tokenId].length - 1];
+        //             tokenIdToSerials[tokenId].pop();
+        //         }
+        //     }
+        // }
     }
+
+function burnSerial(uint256 serialNumber) internal {
+    uint256 tokenId = serialToTokenId[serialNumber];
+    serialToTokenId[serialNumber] = 0;
+    serialToOwner[serialNumber] = address(0);
+    // serialCount--;
+    for(uint i=0; i<tokenIdToSerials[tokenId].length; i++) {
+        if (tokenIdToSerials[tokenId][i] == serialNumber) {
+            tokenIdToSerials[tokenId][i] = tokenIdToSerials[tokenId][tokenIdToSerials[tokenId].length - 1];
+            tokenIdToSerials[tokenId].pop();
+        }
+    }
+}
+
 
     function getSerial(uint256 tokenId, uint256 index) public view returns (uint256) {
         if(tokenIdToSerials[tokenId].length == 0) {

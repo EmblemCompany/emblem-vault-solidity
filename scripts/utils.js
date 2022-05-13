@@ -6,7 +6,7 @@ async function deploy(name, ContractClass, constructorArgs = null) {
     let contract = await ContractClass.deploy(constructorArgs)
     await contract.deployed()
     console.log(name, "deployed to", contract.address)
-    return {address: contract.address, contract: contract, verified: false, registrations: []}
+    return {action: "deploy", address: contract.address, contract: contract, verified: false, registrations: []}
 }
 
 async function deployProxy(name, ContractClass, constructorArgs = []) {
@@ -15,7 +15,7 @@ async function deployProxy(name, ContractClass, constructorArgs = []) {
     await contract.deployed()
     console.log(name, "deployed to", contract.address)
     const implementationAddress = await getImplementationAddress(contract.address);
-    return {address: contract.address, delegation: implementationAddress, contract: contract, verified: true, registrations: []}
+    return {action: "deploy", address: contract.address, delegation: implementationAddress, contract: contract, verified: false, registrations: []}
 }
 
 async function upgradeProxy(PROXY, name, ContractClass, constructorArgs = []) {
@@ -24,13 +24,14 @@ async function upgradeProxy(PROXY, name, ContractClass, constructorArgs = []) {
     await contract.deployed()
     const implementationAddress = await getImplementationAddress(contract.address);
     console.log(name, "upgraded to", implementationAddress)
-    return {address: contract.address, delegation: implementationAddress, contract: contract, verified: true, registrations: []}
+    return {address: contract.address, delegation: implementationAddress, contract: contract, verified: false, registrations: []}
 }
 
 async function verify(contractResult, constructor = []) {
     let address = contractResult.delegation ? contractResult.delegation : contractResult.address
+    console.log("Verifying contract at address", address )
     let results = await verifyAddress(address, constructor)
-    return { contract: contractResult.contract, delegation: contractResult.delegation? contractResult.delegation : null, address: contractResult.address, verified: results.verified, registrations: contractResult.registrations}
+    return { action: contractResult.action, contract: contractResult.contract, delegation: contractResult.delegation? contractResult.delegation : null, address: contractResult.address, verified: results.verified, registrations: contractResult.registrations}
 }
 
 async function verifyAddress(address, constructor = []) {
@@ -54,15 +55,20 @@ async function verifyAddress(address, constructor = []) {
             return await(verifyAddress(address, constructor))
         } else {
             console.log("Error reason:", reason)
-            return { address: address, verified: false }
+            return { address: address, verified: reason.includes("already verified")? true: false }
         }    
     }
 }
 
 async function registerWithContract(registrationType, registerWhere, contractResult) {
+    console.log("registering", registerWhere.address, registrationType)
     let results = {registered: contractResult.address, asType: registrationType}
-    await registerWhere.contract.registerContract(contractResult.address, registrationType)
-    registerWhere.registrations.push(results)
+    let found = registerWhere.registrations.filter(registration => { return registration.registered == contractResult.address && registration.asType == registrationType }).length > 0? true : false
+    if (!found) {
+        await registerWhere.contract.registerContract(contractResult.address, registrationType)
+        contractResult.contractType = registrationType
+        registerWhere.registrations.push(results)
+    }
     return results
 }
 
@@ -81,7 +87,9 @@ function formatResults(results) {
             address: results[key]?.address? results[key].address: null,
             delegation: results[key]?.delegation? results[key]?.delegation: null, 
             verified: results[key]?.verified? results[key]?.verified: false,
-            registrations: results[key]?.registrations? results[key]?.registrations: []} : null
+            registrations: results[key]?.registrations? results[key]?.registrations: [],
+            contractType: results[key]?.contractType? results[key]?.contractType: 7
+        } : null
     })
     Object.keys(formatted).forEach((key, index)=>{
         if (key.includes("Factory") && !formatted[key].clones) {
@@ -89,7 +97,7 @@ function formatResults(results) {
         }
     })
 
-    console.log(formatted)
+    // console.log(formatted)
     return formatted
 }
 
@@ -120,6 +128,15 @@ async function getContract(address, _class, signer) {
     return contract;
 }
 
+async function perform(deployment, method, args = []) {
+    console.log("Attempting to perform", method, args, deployment.action)
+    if(deployment.contract && deployment.action == "deploy") {
+        console.log("Performing", method, args)
+        let tx = await deployment.contract[method](...args)
+        await tx.wait(1)
+    }
+}
+
 module.exports = {
     deploy,
     verify,
@@ -133,5 +150,6 @@ module.exports = {
     getContract,
     getOrDeploy,
     getOrDeployProxy,
+    perform,
     REGISTRATION_TYPE
 }

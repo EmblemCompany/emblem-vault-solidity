@@ -908,6 +908,7 @@ contract EmblemVault is NFTokenEnumerableMetadata, Clonable, ERC2981Royalties {
     streamAddress = payable(address(new Stream()));
     Stream(streamAddress).initialize();
     OwnableUpgradeable(streamAddress).transferOwnership(_msgSender());
+    isClaimable = true;
   }
 
   function updateStreamAddress(address _streamAddress) public onlyOwner {

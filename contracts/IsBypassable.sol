@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.4;
 
-import "./OwnableUpgradeable.sol";
+import "./IsClaimable.sol";
 
-abstract contract IsBypassable is OwnableUpgradeable {
+abstract contract IsBypassable is IsClaimable {
 
     bool byPassable;
     mapping(address => mapping(bytes4 => bool)) byPassableFunction;

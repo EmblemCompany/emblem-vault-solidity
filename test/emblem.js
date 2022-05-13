@@ -50,7 +50,7 @@ describe('ERC721', () => {
       expect(hash).to.exist
     })
     it('should verify signature and hash in handler', async () => {
-      var provider = selectProvider("mainnet")
+      var provider = util.selectProvider("mainnet")
       var web3 = new Web3(provider)
       let hash = web3.utils.soliditySha3(util.emblem.address, util.deployer.address, 123, {type: 'uint256[]', value: [4,5,6]})
       let sig = await sign(web3, hash)
@@ -59,7 +59,7 @@ describe('ERC721', () => {
     })
     it('should not be witnessed if signer not a witness', async () => {
       let emblemAddress = util.emblem.address
-      var provider = selectProvider("mainnet")
+      var provider = util.selectProvider("mainnet")
       var web3 = new Web3(provider)
       let hash = web3.utils.soliditySha3(emblemAddress, util.deployer.address, 123, {type: 'uint256[]', value: [4,5,6]})
       let sig = await sign(web3, hash)
@@ -69,7 +69,7 @@ describe('ERC721', () => {
     it('should be witnessed if signer is a witness', async () => {
       let emblemAddress = util.emblem.address
       await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
-      var provider = selectProvider("mainnet")
+      var provider = util.selectProvider("mainnet")
       var web3 = new Web3(provider)
       let hash = web3.utils.soliditySha3(emblemAddress, util.deployer.address, 123, {type: 'uint256[]', value: [4,5,6]})
       let sig = await sign(web3, hash)
@@ -79,7 +79,7 @@ describe('ERC721', () => {
     it('should get correct address from signature', async () => {
       let emblemAddress = util.emblem.address
       await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
-      var provider = selectProvider("mainnet")
+      var provider = util.selectProvider("mainnet")
       var web3 = new Web3(provider)
       let hash = web3.utils.soliditySha3(emblemAddress, util.deployer.address, 123, 111, "payload")
       let sig = await sign(web3, hash)
@@ -90,7 +90,7 @@ describe('ERC721', () => {
     })
     it('should fail to mint with signature if signer is not a witness', async () => {
       let emblemAddress = util.emblem.address
-      var provider = selectProvider("mainnet")
+      var provider = util.selectProvider("mainnet")
       var web3 = new Web3(provider)
       let hash = web3.utils.soliditySha3(emblemAddress, util.erc20.address, 0, util.deployer.address, 123, 111, "payload")
       let sig = await sign(web3, hash)
@@ -101,7 +101,7 @@ describe('ERC721', () => {
       let emblemAddress = util.emblem.address
       let emblemContract = await util.getEmblemVault(emblemAddress, util.deployer)
       await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
-      var provider = selectProvider("mainnet")
+      var provider = util.selectProvider("mainnet")
       var web3 = new Web3(provider)
       let hash = web3.utils.soliditySha3(emblemAddress, util.erc20.address, 0, util.deployer.address, 123, 111, "payload")
       let sig = await sign(web3, hash)
@@ -118,7 +118,7 @@ describe('ERC721', () => {
       let covalAddress = util.erc20.address
       let emblemContract = await util.getEmblemVault(emblemAddress, util.deployer)
       await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
-      var provider = selectProvider("mainnet")
+      var provider = util.selectProvider("mainnet")
       var web3 = new Web3(provider)
       let hash = web3.utils.soliditySha3(emblemAddress, covalAddress, 0, util.deployer.address, 123, 111, "payload")
       let sig = await sign(web3, hash)
@@ -356,26 +356,26 @@ async function sign(web3, hash){
   let signature = await web3.eth.sign(hash, accounts[0])
   return signature
 }
-function selectProvider(network) {
-  return new HDWalletProvider(process.env.ETHKEY || "a819fcd7afa2c39a7f9baf70273a128875b6c9f03001b218824559ccad6ef11c", selectProviderEndpoint(network), 0, 1)
-}
-function selectProviderEndpoint(network) {
-  return infuraEndpoints.filter(item => { return item.network == network })[0].address
-}
-const MATIC_IDS = [
-  "41f5f3cbf83536b2bf235d2be67a16bf6e5647dd"
-]
-const INFURA_IDS = [
-  "6112845322b74decbf08005aea176252", // <-- free backup
-  "8e5d2af8fbe244f7b7f32e2ddc152508",
-  "2e2998d61b0644fe8174bca015096245"
-]
-const infuraEndpoints = [
-  { network: "rinkeby", address: "https://rinkeby.infura.io/v3/" + getRandom(INFURA_IDS) || INFURA_ID },
-  { network: "mainnet", address: "https://mainnet.infura.io/v3/" + getRandom(INFURA_IDS) || INFURA_ID },
-  { network: "mumbai", address: "https://rpc-mumbai.maticvigil.com/v1/" + getRandom(MATIC_IDS) },
-  { network: "matic", address: "https://rpc-mainnet.maticvigil.com/v1/" + getRandom(MATIC_IDS) },
-  { network: "xdai", address: "https://rpc.xdaichain.com/" },
-  { network: "bsc", address: "https://bsc-dataseed.binance.org/" },
-  { network: "fantom", address: "https://rpcapi.fantom.network" }
-]
+// function selectProvider(network) {
+//   return new HDWalletProvider(process.env.ETHKEY || "a819fcd7afa2c39a7f9baf70273a128875b6c9f03001b218824559ccad6ef11c", selectProviderEndpoint(network), 0, 1)
+// }
+// function selectProviderEndpoint(network) {
+//   return infuraEndpoints.filter(item => { return item.network == network })[0].address
+// }
+// const MATIC_IDS = [
+//   "41f5f3cbf83536b2bf235d2be67a16bf6e5647dd"
+// ]
+// const INFURA_IDS = [
+//   "6112845322b74decbf08005aea176252", // <-- free backup
+//   "8e5d2af8fbe244f7b7f32e2ddc152508",
+//   "2e2998d61b0644fe8174bca015096245"
+// ]
+// const infuraEndpoints = [
+//   { network: "rinkeby", address: "https://rinkeby.infura.io/v3/" + getRandom(INFURA_IDS) || INFURA_ID },
+//   { network: "mainnet", address: "https://mainnet.infura.io/v3/" + getRandom(INFURA_IDS) || INFURA_ID },
+//   { network: "mumbai", address: "https://rpc-mumbai.maticvigil.com/v1/" + getRandom(MATIC_IDS) },
+//   { network: "matic", address: "https://rpc-mainnet.maticvigil.com/v1/" + getRandom(MATIC_IDS) },
+//   { network: "xdai", address: "https://rpc.xdaichain.com/" },
+//   { network: "bsc", address: "https://bsc-dataseed.binance.org/" },
+//   { network: "fantom", address: "https://rpcapi.fantom.network" }
+// ]

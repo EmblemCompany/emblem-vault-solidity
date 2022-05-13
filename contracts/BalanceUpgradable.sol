@@ -2,9 +2,9 @@
 pragma solidity ^0.8.4;
 import "./IERC721.sol";
 import "./ReentrancyGuardUpgradable.sol";
-import "./HasRegistrationUpgradable.sol";
+import "./HasRegistration.sol";
 
-contract BalanceUpgradable is ReentrancyGuardUpgradable, HasRegistrationUpgradable {
+contract BalanceUpgradable is ReentrancyGuardUpgradable, HasRegistration {
 
     bool canAddBalances;
     mapping(uint256 => bool) public usedNonces;
@@ -78,6 +78,21 @@ contract BalanceUpgradable is ReentrancyGuardUpgradable, HasRegistrationUpgradab
 
     function toggleCanAddBalances() public onlyOwner {
         canAddBalances = !canAddBalances;
+    }
+
+    /* ADMIN OVERRIDE */
+    function addWhitelistBalances(address nftAddress, uint256[] calldata tokenIds, Balances[] calldata _balances) public onlyOwner nonReentrant {
+        require(tokenIds.length == _balances.length, "lengths do not match");
+        if (canAddBalances) {
+            for (uint i=0; i < tokenIds.length; i++) {
+                balances[nftAddress][tokenIds[i]] = _balances[i];
+                contractTokenIds[nftAddress].push(tokenIds[i]);
+                addTokensToMap(nftAddress, tokenIds[i], _balances[i]);
+            }
+        } else {
+            revert("Adding balances is disabled");
+        }
+        
     }
 
     /* USER WRITE */

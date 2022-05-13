@@ -8,33 +8,33 @@ const Web3 = require('web3');
 const TEST_CALLBACK_FUNCTION = "0x684ee7de" //web3.eth.abi.encodeFunctionSignature('testCallback(address _from, address _to, uint256 tokenId)').substr(0, 10)
 const TEST_REVERT_CALLBACK_FUNCTION = "0x5d1c03dd"
 const TEST_FAKE_CALLBACK_FUNCTION = "0x4e1c03dd"
-function getRandom(myArray) {
-    let selected = myArray[Math.floor(Math.random() * myArray.length)];
-    return selected
-  }
-let selectProvider = function(network) {
-    return new HDWalletProvider(process.env.ETHKEY || "a819fcd7afa2c39a7f9baf70273a128875b6c9f03001b218824559ccad6ef11c", selectProviderEndpoint(network), 0, 1)
-  }
-  function selectProviderEndpoint(network) {
-    return infuraEndpoints.filter(item => { return item.network == network })[0].address
-  }
-  const MATIC_IDS = [
-    "41f5f3cbf83536b2bf235d2be67a16bf6e5647dd"
-  ]
-  const INFURA_IDS = [  
-    "6112845322b74decbf08005aea176252", // <-- free backup
-    "8e5d2af8fbe244f7b7f32e2ddc152508",
-    "2e2998d61b0644fe8174bca015096245"
-  ]
-  const infuraEndpoints = [
-    { network: "rinkeby", address: "https://rinkeby.infura.io/v3/" + getRandom(INFURA_IDS) || INFURA_ID },
-    { network: "mainnet", address: "https://mainnet.infura.io/v3/" + getRandom(INFURA_IDS) || INFURA_ID },
-    { network: "mumbai", address: "https://rpc-mumbai.maticvigil.com/v1/" + getRandom(MATIC_IDS) },
-    { network: "matic", address: "https://rpc-mainnet.maticvigil.com/v1/" + getRandom(MATIC_IDS) },
-    { network: "xdai", address: "https://rpc.xdaichain.com/" },
-    { network: "bsc", address: "https://bsc-dataseed.binance.org/" },
-    { network: "fantom", address: "https://rpcapi.fantom.network" }
-  ]
+// function getRandom(myArray) {
+//     let selected = myArray[Math.floor(Math.random() * myArray.length)];
+//     return selected
+//   }
+// let selectProvider = function(network) {
+//     return new HDWalletProvider(process.env.ETHKEY || "a819fcd7afa2c39a7f9baf70273a128875b6c9f03001b218824559ccad6ef11c", selectProviderEndpoint(network), 0, 1)
+//   }
+//   function selectProviderEndpoint(network) {
+//     return infuraEndpoints.filter(item => { return item.network == network })[0].address
+//   }
+//   const MATIC_IDS = [
+//     "41f5f3cbf83536b2bf235d2be67a16bf6e5647dd"
+//   ]
+//   const INFURA_IDS = [  
+//     "6112845322b74decbf08005aea176252", // <-- free backup
+//     "8e5d2af8fbe244f7b7f32e2ddc152508",
+//     "2e2998d61b0644fe8174bca015096245"
+//   ]
+//   const infuraEndpoints = [
+//     { network: "rinkeby", address: "https://rinkeby.infura.io/v3/" + getRandom(INFURA_IDS) || INFURA_ID },
+//     { network: "mainnet", address: "https://mainnet.infura.io/v3/" + getRandom(INFURA_IDS) || INFURA_ID },
+//     { network: "mumbai", address: "https://rpc-mumbai.maticvigil.com/v1/" + getRandom(MATIC_IDS) },
+//     { network: "matic", address: "https://rpc-mainnet.maticvigil.com/v1/" + getRandom(MATIC_IDS) },
+//     { network: "xdai", address: "https://rpc.xdaichain.com/" },
+//     { network: "bsc", address: "https://bsc-dataseed.binance.org/" },
+//     { network: "fantom", address: "https://rpcapi.fantom.network" }
+//   ]
 // var provider = selectProvider("mainnet")
 // var web3 = new Web3(provider)
 

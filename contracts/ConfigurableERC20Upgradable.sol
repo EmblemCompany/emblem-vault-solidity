@@ -30,13 +30,13 @@
   --- > (https://emblemlabs.github.io/ConfigurableERC20/)
 */
 
-pragma solidity 0.8.4;
+pragma solidity ^0.8.4;
 import "./SafeMath.sol";
-import "./HasRegistrationUpgradable.sol";
+import "./HasRegistration.sol";
 import "./IERC20.sol";
 import "./IHandlerCallback.sol";
 
-contract Configurable is HasRegistrationUpgradable {
+contract Configurable is HasRegistration {
     using SafeMath for uint256;
 
     address private governance;
@@ -212,7 +212,9 @@ contract Configurable is HasRegistrationUpgradable {
     }
     /* For compatibility with Ownable */
     function transferOwnership(address _governance) public override onlyOwner notLocked {
+        OwnableUpgradeable.transferOwnership(_governance);
         _setGovernance(_governance);
+
     }
     function _setGovernance(address _governance) internal {
         minters[governance] = false; // Remove old owner from minters list

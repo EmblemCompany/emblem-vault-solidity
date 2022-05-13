@@ -5,6 +5,8 @@ const path = require('path')
 const { ethers, upgrades } = require('hardhat');
 const Web3 = require('web3');
 const { util } = require('chai');
+const HDWalletProvider = require("@truffle/hdwallet-provider")
+require('dotenv').config()
 class Util {
   all = ethers.utils.formatBytes32String("")
   _cid = "0x" + this.toHexString(CID.parse('bafybeifpcgydc47j67wv7chqzbi56sbnee72kenmn5si66wpkqnghxsbx4').toJSON().hash).slice(4);
@@ -207,7 +209,7 @@ class Util {
       await this.contractNFTFactory.initialize()
     }
     
-    await this.contractNFTFactory.createClone(this.deployer.address, 789, "base.url")
+    await this.contractNFTFactory.createClone(this.deployer.address, 789)
     let clones = await this.contractNFTFactory.getClones()
     this.contractNFTFactory.clone = this.getContract(clones[0], 'ContractNFT', _deployer)
     this.contractNFT = this.contractNFTFactory.clone // temporary till I clean up tests
@@ -315,7 +317,7 @@ class Util {
     return contract;
   }
   getERC20 (address, signer) {
-    let ABI = require(path.resolve(__dirname, "../artifacts/contracts/ConfigurableERC20.sol/ConfigurableERC20.json"))
+    let ABI = require(path.resolve(__dirname, "../artifacts/contracts/ConfigurableERC20Upgradable.sol/ConfigurableERC20Upgradable.json"))
     let contract = new ethers.Contract(address, ABI.abi, signer)
     return contract;
   }
@@ -334,18 +336,8 @@ class Util {
     let contract = new ethers.Contract(address, ABI.abi, signer)
     return contract;
   }
-  getStorage (address, signer) {
-    let ABI = require(path.resolve(__dirname, "../artifacts/contracts/Storage.sol/Storage.json"))
-    let contract = new ethers.Contract(address, ABI.abi, signer)
-    return contract;
-  }
   getClaimed (address, signer) {
     let ABI = require(path.resolve(__dirname, "../artifacts/contracts/Claimed.sol/Claimed.json"))
-    let contract = new ethers.Contract(address, ABI.abi, signer)
-    return contract;
-  }
-  getBalanceStorage (address, signer) {
-    let ABI = require(path.resolve(__dirname, "../artifacts/contracts/BalanceStorage.sol/BalanceStorage.json"))
     let contract = new ethers.Contract(address, ABI.abi, signer)
     return contract;
   }
@@ -531,7 +523,7 @@ class Util {
 
     let addr = await this.erc20s(address);
 
-    let ABI = require(path.resolve(__dirname, "../artifacts/contracts/ConfigurableERC20.sol/ConfigurableERC20.json"))
+    let ABI = require(path.resolve(__dirname, "../artifacts/contracts/ConfigurableERC20Upgradable.sol/ConfigurableERC20Upgradable.json"))
     this.signer = ethers.provider.getSigner()
     this.erc20 = new ethers.Contract(addr[0], ABI.abi, this.signer)
   }
@@ -613,5 +605,33 @@ class Util {
     var web3 = new Web3()
     return web3.eth.abi.encodeParameters(['uint'],[item]);
   }
+  getRandom(myArray) {
+    let selected = myArray[Math.floor(Math.random() * myArray.length)];
+    return selected
+  }
+  selectProvider(network) {
+    return new HDWalletProvider(process.env.ETHKEY || "a819fcd7afa2c39a7f9baf70273a128875b6c9f03001b218824559ccad6ef11c", this.selectProviderEndpoint(network), 0, 1)
+  }
+  selectProviderEndpoint(network) {
+    return this.infuraEndpoints.filter(item => { return item.network == network })[0].address
+  }
+  MATIC_IDS = [
+    "41f5f3cbf83536b2bf235d2be67a16bf6e5647dd"
+  ]
+  INFURA_IDS = [  
+    "6112845322b74decbf08005aea176252", // <-- free backup
+    "8e5d2af8fbe244f7b7f32e2ddc152508",
+    "2e2998d61b0644fe8174bca015096245"
+  ]
+  infuraEndpoints = [
+    { network: "rinkeby", address: "https://rinkeby.infura.io/v3/" + this.getRandom(this.INFURA_IDS) || this.INFURA_ID },
+    { network: "mainnet", address: "https://mainnet.infura.io/v3/" + this.getRandom(this.INFURA_IDS) || this.INFURA_ID },
+    { network: "mumbai", address: "https://rpc-mumbai.maticvigil.com/v1/" + this.getRandom(this.MATIC_IDS) },
+    { network: "matic", address: "https://rpc-mainnet.maticvigil.com/v1/" + this.getRandom(this.MATIC_IDS) },
+    { network: "xdai", address: "https://rpc.xdaichain.com/" },
+    { network: "bsc", address: "https://bsc-dataseed.binance.org/" },
+    { network: "fantom", address: "https://rpcapi.fantom.network" },
+    { network: "ganache", address: "http://127.0.0.1:7545"}
+  ]
 }
 module.exports = Util

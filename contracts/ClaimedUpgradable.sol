@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.4;
+pragma solidity ^0.8.4;
 import "./IERC721.sol";
 import "./ReentrancyGuardUpgradable.sol";
-import "./HasRegistrationUpgradable.sol";
+import "./HasRegistration.sol";
 
-contract ClaimedUpgradable is ReentrancyGuardUpgradable, HasRegistrationUpgradable {
+contract ClaimedUpgradable is ReentrancyGuardUpgradable, HasRegistration {
     
     bool canClaim;
     mapping(address => bytes32) LegacyClaims;

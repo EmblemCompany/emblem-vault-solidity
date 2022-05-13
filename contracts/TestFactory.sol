@@ -16,11 +16,11 @@ contract TestFactory is ClonableFactory {
     return 1;
   }
 
-  function implement() virtual override public returns(address) {
+  function implement() virtual override internal returns(address) {
     return address(new TestThing());
   }
 
-  function afterClone(address newOwner, address clone) public virtual override onlyOwner {
+  function afterClone(address newOwner, address clone) internal virtual override onlyOwner {
     OwnableUpgradeable(clone).transferOwnership(newOwner);
   }
 }

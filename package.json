@@ -12,6 +12,7 @@
     "build": "npm run build:solidity && npm run build:js",
     "test": "npx hardhat test",
     "deploy:rinkeby": "NETWORK=rinkeby npx hardhat run scripts/deploy.js --network rinkeby",
+    "deploy:ganache": "NETWORK=ganache npx hardhat run scripts/deploy.js --network ganache",
     "demos:rinkeby": "NETWORK=rinkeby npx hardhat run scripts/demos.js --network rinkeby",
     "verify:rinkeby": "NETWORK=rinkeby npx hardhat run scripts/verify.js --network rinkeby",
     "verify": "npx hardhat verify --network "

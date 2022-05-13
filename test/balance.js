@@ -6,33 +6,9 @@ const Util = require('./util.js')
 const HDWalletProvider = require("@truffle/hdwallet-provider")
 const Web3 = require('web3');
 const util = new Util()
-require('dotenv').config()
 
-let selectProvider = function(network) {
-  return new HDWalletProvider(process.env.ETHKEY || "a819fcd7afa2c39a7f9baf70273a128875b6c9f03001b218824559ccad6ef11c", selectProviderEndpoint(network), 0, 1)
-}
-function selectProviderEndpoint(network) {
-  return infuraEndpoints.filter(item => { return item.network == network })[0].address
-}
-const MATIC_IDS = [
-  "41f5f3cbf83536b2bf235d2be67a16bf6e5647dd"
-]
-const INFURA_IDS = [  
-  "6112845322b74decbf08005aea176252", // <-- free backup
-  "8e5d2af8fbe244f7b7f32e2ddc152508",
-  "2e2998d61b0644fe8174bca015096245"
-]
-const infuraEndpoints = [
-  { network: "rinkeby", address: "https://rinkeby.infura.io/v3/" + getRandom(INFURA_IDS) || INFURA_ID },
-  { network: "mainnet", address: "https://mainnet.infura.io/v3/" + getRandom(INFURA_IDS) || INFURA_ID },
-  { network: "mumbai", address: "https://rpc-mumbai.maticvigil.com/v1/" + getRandom(MATIC_IDS) },
-  { network: "matic", address: "https://rpc-mainnet.maticvigil.com/v1/" + getRandom(MATIC_IDS) },
-  { network: "xdai", address: "https://rpc.xdaichain.com/" },
-  { network: "bsc", address: "https://bsc-dataseed.binance.org/" },
-  { network: "fantom", address: "https://rpcapi.fantom.network" }
-]
 
-var provider = selectProvider("mainnet")
+var provider = util.selectProvider("mainnet")
 var web3 = new Web3()
 
 beforeEach(async ()=>{
@@ -299,7 +275,7 @@ beforeEach(async ()=>{
         }    
         let localhashed = hashBalancesAndNonce(balances, 123456)
         let signature = await sign(localhashed)
-        await balanceContract.addBalanceToAsset(emblemAddress, 123, balances, 123456, signature)    
+        await balanceContract.addBalanceToAsset(emblemAddress, 123, balances, 123456, signature)
         localhashed = hashBalancesAndNonce(balances, 654321)
         signature = await sign(localhashed)
         await balanceContract.addBalanceToAsset(emblemAddress, 321, balances, 654321, signature)
@@ -377,6 +353,7 @@ beforeEach(async ()=>{
         tokenCount = await balanceContract.getTokenIdCountFromMap(emblemAddress, 1, "token2")
         expect(tokenCount).to.equal(1)
       })
+      it('owner should be able to pre-load balances (for curated erc1155)')
     })
 })
 
@@ -398,11 +375,6 @@ function hashBalances(balances) {
 function hashBalancesAndNonce(balances, nonce) {
   let localhashed = hashBalances(balances)  
   return addNonceToHashedBalances(localhashed, nonce);
-}
-
-function getRandom(myArray) {
-  let selected = myArray[Math.floor(Math.random() * myArray.length)];
-  return selected
 }
 
 async function sign(hash) {

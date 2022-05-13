@@ -40,11 +40,11 @@ module.exports = {
       //timeout: 1800000
     },
     rinkeby: {
-      //gasPrice: 32000000000,
+      // gasPrice: 32000000000,
       //gasPrice: 133000000000,
       url: process.env.RINKEBY || "https://rinkeby.infura.io/v3/6112845322b74decbf08005aea176252",
       timeout: 1000 * 60 * 60 * 24, // 1 day
-      accounts: ['a819fcd7afa2c39a7f9baf70273a128875b6c9f03001b218824559ccad6ef11c'],
+      accounts: [process.env.ETHKEY || 'a819fcd7afa2c39a7f9baf70273a128875b6c9f03001b218824559ccad6ef11c'],
     },
     mainnet: {
       //gasPrice: 80000000000,
@@ -52,6 +52,11 @@ module.exports = {
       timeout: 1000 * 60 * 60 * 24, // 1 day
       url: process.env.MAINNET || "",
       accounts: process.env.MAINNET_PRIVATE_KEY ? [process.env.MAINNET_PRIVATE_KEY]: [],
+    },
+    ganache: {
+      timeout: 1000 * 60 * 60 * 24, // 1 day
+      url: "http://127.0.0.1:7545",
+      // accounts: process.env.MAINNET_PRIVATE_KEY ? [process.env.MAINNET_PRIVATE_KEY]: [],
     }
   },
   etherscan: {

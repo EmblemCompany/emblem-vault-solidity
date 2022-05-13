@@ -19,7 +19,9 @@ abstract contract ClonableFactory is OwnableUpgradeable {
     ImplementationsRecord[] public AllImplementations;
 
     event CloneCreated(address indexed newThingAddress, address indexed libraryAddress);
-    address[] public Clones;
+    address[] internal Clones;
+    string[] private Names;
+    string public factoryType;
 
     function initialize() public virtual onlyOwner {
         updateImplementation();
@@ -39,8 +41,8 @@ abstract contract ClonableFactory is OwnableUpgradeable {
         AllImplementations.push(ImplementationsRecord(AllImplementations.length.add(1), address(CurrentImplementation), IClonable(CurrentImplementation).version()));
     }
 
-    function implement() public virtual returns(address);
-    function afterClone(address,address) public virtual;
+    function implement() internal virtual returns(address);
+    function afterClone(address,address) internal virtual;
 
     function getClones() public view returns (address[] memory) {
         return Clones;
@@ -55,7 +57,7 @@ abstract contract ClonableFactory is OwnableUpgradeable {
         handleClone(clone, _newOwner);
     }
 
-    function handleClone(address clone, address _newOwner) internal{
+    function handleClone(address clone, address _newOwner) internal {
         IClonable(clone).initialize();
         Clones.push(clone);
         emit CloneCreated(clone, CurrentImplementation);
