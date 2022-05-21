@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: CLOSED // Pending Licensing Audit
 pragma solidity ^0.8.4;
 import "./HasRegistration.sol";
 

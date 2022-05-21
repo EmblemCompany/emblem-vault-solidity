@@ -46,6 +46,11 @@ module.exports = {
       timeout: 1000 * 60 * 60 * 24, // 1 day
       accounts: [process.env.ETHKEY || 'a819fcd7afa2c39a7f9baf70273a128875b6c9f03001b218824559ccad6ef11c'],
     },
+    aurora: {
+      url: process.env.AURORA || "https://mainnet.aurora.dev",
+      timeout: 1000 * 60 * 60 * 24, // 1 day
+      accounts: [process.env.ETHKEY || 'a819fcd7afa2c39a7f9baf70273a128875b6c9f03001b218824559ccad6ef11c'],
+    },
     mainnet: {
       //gasPrice: 80000000000,
       //gasPrice: 96000000000,
@@ -60,10 +65,11 @@ module.exports = {
     }
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY
+    apiKey: process.env.AURORA_API_KEY
     // apiKey: {
-    //   mainnet: "YOUR_ETHERSCAN_API_KEY",
-    //   ropsten: "YOUR_ETHERSCAN_API_KEY",
+    //   aurora: process.env.AURORA_API_KEY,
+    //   mainnet: process.env.ETHERSCAN_API_KEY,
+    // //   ropsten: "YOUR_ETHERSCAN_API_KEY",
     //   rinkeby: process.env.ETHERSCAN_API_KEY,
     //   goerli: "YOUR_ETHERSCAN_API_KEY",
     //   kovan: "YOUR_ETHERSCAN_API_KEY",

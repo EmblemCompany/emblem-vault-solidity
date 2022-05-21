@@ -3,7 +3,7 @@ const REGISTRATION_TYPE = {"EMPTY": 0, "ERC1155": 1, "ERC721":2, "HANDLER":3, "E
 
 async function deploy(name, ContractClass, constructorArgs = null) {
     console.log("Deploying", name)
-    let contract = await ContractClass.deploy(constructorArgs)
+    let contract = await ContractClass.deploy(...constructorArgs)
     await contract.deployed()
     console.log(name, "deployed to", contract.address)
     return {action: "deploy", address: contract.address, contract: contract, verified: false, registrations: []}
@@ -84,11 +84,11 @@ function formatResults(results) {
     let formatted = {time: results.time}
     Object.keys(results).forEach((key, index)=>{
         key!= "time"? formatted[key] = {
-            address: results[key]?.address? results[key].address: null,
-            delegation: results[key]?.delegation? results[key]?.delegation: null, 
-            verified: results[key]?.verified? results[key]?.verified: false,
-            registrations: results[key]?.registrations? results[key]?.registrations: [],
-            contractType: results[key]?.contractType? results[key]?.contractType: 7
+            address: results[key].address? results[key].address: null,
+            delegation: results[key].delegation? results[key].delegation: null, 
+            verified: results[key].verified? results[key].verified: false,
+            registrations: results[key].registrations? results[key].registrations: [],
+            contractType: results[key].contractType? results[key].contractType: 7
         } : null
     })
     Object.keys(formatted).forEach((key, index)=>{

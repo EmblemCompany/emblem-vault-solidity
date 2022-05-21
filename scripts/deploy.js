@@ -5,13 +5,15 @@ const fs = require('fs')
 let deploymentsFilename = "./deployed"+("-"+process.env.NETWORK || "-unknown-network")+".json"
 let Deployments = fs.existsSync(deploymentsFilename) ? require("."+deploymentsFilename) : {}
 
-let VERIFY = process.env.NETWORK == "rinkeby" ? true: false
+let VERIFY = process.env.NETWORK == "aurora" ? true: false
 let results = {time: Date.now()}
 
 
 async function main() {
   const [_deployer] = await hre.ethers.getSigners();
   const VaultHandlerV8 = await hre.ethers.getContractFactory("VaultHandlerV8");
+  const VaultHandlerV7 = await hre.ethers.getContractFactory("VaultHandlerV7");
+  const EmblemVaultV2 = await hre.ethers.getContractFactory("EmblemVaultV2");
   const ERC1155Factory = await ethers.getContractFactory("ERC1155Factory");
   const ERC721Factory = await ethers.getContractFactory("ERC721Factory");
   const ERC20Factory = await ethers.getContractFactory("ERC20Factory");
@@ -26,6 +28,21 @@ async function main() {
 
   results = Deployments
   
+
+
+  // /* LEGACY Emblem Vault */
+  results.legacyvault = await verifyContract(await getOrDeploy(results.legacyvault, "EmblemVaultV2", EmblemVaultV2))
+  save()
+
+  // /* LEGACY COVAL */
+  results.legacycoval = await verifyContract(await getOrDeploy(results.legacycoval, "ConfigurableERC20Upgradable", ConfigurableERC20Upgradable))
+  save()
+
+  // /* LEGACY HANDLER */
+  let deployArgs = [results.legacyvault.address, results.legacycoval.address, _deployer.address, 10 ]
+  results.legacyhandler = await verifyContract(await getOrDeploy(results.legacyhandler, "VaultHandlerV8", VaultHandlerV7, deployArgs), deployArgs)
+  // save()
+
   // /* HANDLER */
   results.handler = await verifyContract(await getOrDeploy(results.handler, "VaultHandlerV8", VaultHandlerV8))
   results.handler.action != "get"? await utils.perform(results.handler, "initialize"): null
@@ -53,9 +70,9 @@ async function main() {
   results.erc1155Factory.action != "get"? await utils.registerWithContract(utils.REGISTRATION_TYPE.FACTORY, results.handler, results.erc1155Factory): null
   save()
   // results.erc1155Factory = await verifyContract(await utils.upgradeProxy(results.erc1155Factory.address, "ERC1155Factory", ERC1155Factory))
-  let tx = await results.erc1155Factory.contract.updateImplementation()
-  await tx.wait(1)
-  await results.erc1155Factory.contract.createClone(_deployer.address)
+  //let tx = await results.erc1155Factory.contract.updateImplementation()
+  //await tx.wait(1)
+  //await results.erc1155Factory.contract.createClone(_deployer.address)
   
   /* ERC721 Factory */
   results.erc721Factory = await verifyContract(await getOrDeployProxy(results.erc721Factory, "ERC721Factory", ERC721Factory))

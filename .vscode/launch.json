@@ -11,6 +11,12 @@
             "type": "node-terminal"
         },
         {
+            "command": "npm run deploy:aurora",
+            "name": "Aurora Deploy script",
+            "request": "launch",
+            "type": "node-terminal"
+        },
+        {
             "command": "npm run demos:rinkeby",
             "name": "Rinkeby Demos script",
             "request": "launch",
