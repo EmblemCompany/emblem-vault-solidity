@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: CLOSED // Pending Licensing Audit
+// SPDX-License-Identifier: CLOSED - Pending Licensing Audit
 pragma solidity ^0.8.4;
 /**
  * @dev Contract module that helps prevent reentrant calls to a function.

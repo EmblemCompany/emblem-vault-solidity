@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: CLOSED // Pending Licensing Audit
+// SPDX-License-Identifier: CLOSED - Pending Licensing Audit
 pragma solidity ^0.8.4;
 import "./SafeMath.sol";
 import "./IERC1155.sol";
