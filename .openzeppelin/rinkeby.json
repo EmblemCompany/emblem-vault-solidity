@@ -229,6 +229,26 @@
       "address": "0x0b4643B7Df00b55d6a51Afd1c5a9cd2e48BaF3B2",
       "txHash": "0xfb844ab04da60d008f78f00dcba7784f5c7f408a3f1cb14eac2d18b8f619c2a0",
       "kind": "transparent"
+    },
+    {
+      "address": "0x8E888C49341DCAe1975c20c6640eE50f28B2E5aB",
+      "txHash": "0x87cc59026734f8780cbc12b147096bbd031359b40bc733071f9d440e02a54ac2",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xCb9Edb87B826642af518994F13Dd1e3A34589D90",
+      "txHash": "0x73469264704fd7c563e32155408e6487fd6eee0c4e77d04ee4f580460ddaffc2",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x3B663E22E4F43b831207b81454481E83635E4c3c",
+      "txHash": "0xebc6b1a93b6dd9464e9c12c1215b9b86eb4a972c98056cbbe56cfb854f2ce83a",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xC470cE917C6595B348C5B34Cd0B7569EE8C81cE4",
+      "txHash": "0xe0ad2212b59fb1a906170ef22f9c05de6910eaf639fb3c842d3c9e5e0a4afbc2",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -5266,6 +5286,502 @@
           "t_uint256": {
             "label": "uint256",
             "numberOfBytes": "32"
+          }
+        }
+      }
+    },
+    "62b7ae8c2b129417c66cb006a7c66387ed101953df58868c892c421726f8f719": {
+      "address": "0x973144305f159bf93C22e6Fb93E12c482220C583",
+      "txHash": "0x85268841058eb92a8c8ce30d2a82412be260b2466b30afe8fe60b5263caaae95",
+      "layout": {
+        "storage": [
+          {
+            "label": "_NOT_ENTERED",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint256",
+            "contract": "ReentrancyGuardUpgradable",
+            "src": "contracts/ReentrancyGuardUpgradable.sol:31"
+          },
+          {
+            "label": "_ENTERED",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint256",
+            "contract": "ReentrancyGuardUpgradable",
+            "src": "contracts/ReentrancyGuardUpgradable.sol:32"
+          },
+          {
+            "label": "_status",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_uint256",
+            "contract": "ReentrancyGuardUpgradable",
+            "src": "contracts/ReentrancyGuardUpgradable.sol:34"
+          },
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:39"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "3",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:44"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "54",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "contracts/OwnableUpgradeable.sol:21"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "55",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "contracts/OwnableUpgradeable.sol:86"
+          },
+          {
+            "label": "Inventory",
+            "offset": 0,
+            "slot": "104",
+            "type": "t_mapping(t_bytes32,t_struct(AssetInventory)975_storage)",
+            "contract": "Rental",
+            "src": "contracts/Rental.sol:36"
+          },
+          {
+            "label": "InventoryFee",
+            "offset": 0,
+            "slot": "105",
+            "type": "t_mapping(t_bytes32,t_struct(Fee)969_storage)",
+            "contract": "Rental",
+            "src": "contracts/Rental.sol:37"
+          },
+          {
+            "label": "_Identifiers",
+            "offset": 0,
+            "slot": "106",
+            "type": "t_array(t_bytes32)dyn_storage",
+            "contract": "Rental",
+            "src": "contracts/Rental.sol:38"
+          },
+          {
+            "label": "_InventoryIdentifierUsed",
+            "offset": 0,
+            "slot": "107",
+            "type": "t_mapping(t_bytes32,t_bool)",
+            "contract": "Rental",
+            "src": "contracts/Rental.sol:39"
+          },
+          {
+            "label": "_AssetToAssetInventory",
+            "offset": 0,
+            "slot": "108",
+            "type": "t_mapping(t_bytes32,t_array(t_bytes32)dyn_storage)",
+            "contract": "Rental",
+            "src": "contracts/Rental.sol:41"
+          },
+          {
+            "label": "_Assets",
+            "offset": 0,
+            "slot": "109",
+            "type": "t_array(t_bytes32)dyn_storage",
+            "contract": "Rental",
+            "src": "contracts/Rental.sol:42"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_bytes4": {
+            "label": "bytes4",
+            "numberOfBytes": "4"
+          },
+          "t_mapping(t_bytes32,t_array(t_bytes32)dyn_storage)": {
+            "label": "mapping(bytes32 => bytes32[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_bool)": {
+            "label": "mapping(bytes32 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(AssetInventory)975_storage)": {
+            "label": "mapping(bytes32 => struct Rental.AssetInventory)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(Fee)969_storage)": {
+            "label": "mapping(bytes32 => struct Rental.Fee)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Asset)962_storage": {
+            "label": "struct Rental.Asset",
+            "members": [
+              {
+                "label": "contractAddress",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "tokenId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "interfaceId",
+                "type": "t_bytes4",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(AssetInventory)975_storage": {
+            "label": "struct Rental.AssetInventory",
+            "members": [
+              {
+                "label": "asset",
+                "type": "t_struct(Asset)962_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "amount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_struct(Fee)969_storage": {
+            "label": "struct Rental.Fee",
+            "members": [
+              {
+                "label": "contractAddress",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "amount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "feeType",
+                "type": "t_uint8",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "2882eacd480008e49aee8c2105df5be1ca5978896e2df10828b90b8c223b7d88": {
+      "address": "0x5CD98c30b39719833F61802937182E1A487DD1E0",
+      "txHash": "0xf2e8b58c6c941d40f253dda21fcf1e1e9d8e097a33efdc4ba9fbf2d095bf5f6d",
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    },
+    "a7fd73ecbc843063371456ab095c0ca9267ac4d56d7c34f74f99593363fdd237": {
+      "address": "0xaBBD451dE45dce86368fd937aA6cd0281221a422",
+      "txHash": "0x2e618be319877abe6e0573b8caf38f7f2064b4baf37d95d95df2ee4cfb6c8e34",
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    },
+    "d8121e3d2de7ebe80823db36aac502754d5304d2a9e2f93b84ee4c4e3a79c93e": {
+      "address": "0xa05eAaB96A55960f16c6ca9bcE450246077dB5cE",
+      "txHash": "0x7efb93deff9ec06843f00e737cf0892ff0cbe4d4c134f0cb94c5c87789a0b20d",
+      "layout": {
+        "storage": [
+          {
+            "label": "_NOT_ENTERED",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint256",
+            "contract": "ReentrancyGuardUpgradable",
+            "src": "contracts/ReentrancyGuardUpgradable.sol:31"
+          },
+          {
+            "label": "_ENTERED",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint256",
+            "contract": "ReentrancyGuardUpgradable",
+            "src": "contracts/ReentrancyGuardUpgradable.sol:32"
+          },
+          {
+            "label": "_status",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_uint256",
+            "contract": "ReentrancyGuardUpgradable",
+            "src": "contracts/ReentrancyGuardUpgradable.sol:34"
+          },
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:39"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "3",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:44"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "54",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "contracts/OwnableUpgradeable.sol:21"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "55",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "contracts/OwnableUpgradeable.sol:86"
+          },
+          {
+            "label": "Inventory",
+            "offset": 0,
+            "slot": "104",
+            "type": "t_mapping(t_bytes32,t_struct(AssetInventory)14724_storage)",
+            "contract": "Rental",
+            "src": "contracts/Rental.sol:36"
+          },
+          {
+            "label": "InventoryFee",
+            "offset": 0,
+            "slot": "105",
+            "type": "t_mapping(t_bytes32,t_struct(Fee)14718_storage)",
+            "contract": "Rental",
+            "src": "contracts/Rental.sol:37"
+          },
+          {
+            "label": "_Identifiers",
+            "offset": 0,
+            "slot": "106",
+            "type": "t_array(t_bytes32)dyn_storage",
+            "contract": "Rental",
+            "src": "contracts/Rental.sol:38"
+          },
+          {
+            "label": "_InventoryIdentifierUsed",
+            "offset": 0,
+            "slot": "107",
+            "type": "t_mapping(t_bytes32,t_bool)",
+            "contract": "Rental",
+            "src": "contracts/Rental.sol:39"
+          },
+          {
+            "label": "_AssetToAssetInventory",
+            "offset": 0,
+            "slot": "108",
+            "type": "t_mapping(t_bytes32,t_array(t_bytes32)dyn_storage)",
+            "contract": "Rental",
+            "src": "contracts/Rental.sol:41"
+          },
+          {
+            "label": "_Assets",
+            "offset": 0,
+            "slot": "109",
+            "type": "t_array(t_bytes32)dyn_storage",
+            "contract": "Rental",
+            "src": "contracts/Rental.sol:42"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_bytes4": {
+            "label": "bytes4",
+            "numberOfBytes": "4"
+          },
+          "t_mapping(t_bytes32,t_array(t_bytes32)dyn_storage)": {
+            "label": "mapping(bytes32 => bytes32[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_bool)": {
+            "label": "mapping(bytes32 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(AssetInventory)14724_storage)": {
+            "label": "mapping(bytes32 => struct Rental.AssetInventory)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(Fee)14718_storage)": {
+            "label": "mapping(bytes32 => struct Rental.Fee)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Asset)14711_storage": {
+            "label": "struct Rental.Asset",
+            "members": [
+              {
+                "label": "contractAddress",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "tokenId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "interfaceId",
+                "type": "t_bytes4",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(AssetInventory)14724_storage": {
+            "label": "struct Rental.AssetInventory",
+            "members": [
+              {
+                "label": "asset",
+                "type": "t_struct(Asset)14711_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "amount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_struct(Fee)14718_storage": {
+            "label": "struct Rental.Fee",
+            "members": [
+              {
+                "label": "contractAddress",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "amount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "feeType",
+                "type": "t_uint8",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
           }
         }
       }

@@ -5,6 +5,7 @@ const path = require('path')
 const Util = require('./util.js')
 const HDWalletProvider = require("@truffle/hdwallet-provider")
 const Web3 = require('web3');
+const { utils } = require('web3');
 const TEST_CALLBACK_FUNCTION = "0x684ee7de" //web3.eth.abi.encodeFunctionSignature('testCallback(address _from, address _to, uint256 tokenId)').substr(0, 10)
 const TEST_REVERT_CALLBACK_FUNCTION = "0x5d1c03dd"
 const TEST_FAKE_CALLBACK_FUNCTION = "0x4e1c03dd"
@@ -49,13 +50,221 @@ beforeEach(async ()=>{
     await util.deployClaimedUpgradable()
     await util.deployERC721Factory()
     await util.deployERC20Factory()
-    await util.deployERC1155Upgradable()
+    await util.deployERC1155Factory()
+    await util.deployERC20V2()
     ERC20 = util.erc20
+    ERC20V2 = util.erc20v2
 
 })
 describe('ERC20', () => {
     it('should deploy ERC20 Token', async ()=>{
         expect(ERC20.address).to.exist
+    })
+    it('FIX: double approve', async()=>{
+      await ERC20.mint(util.deployer.address, 2)
+      let allowance = await ERC20.allowance(util.deployer.address, util.deployer.address)
+      expect(allowance).to.equal(0) // start with zero
+      await ERC20.approve(util.deployer.address, 1) // approve 1
+      await ERC20.transferFrom(util.deployer.address, util.bob.address, 1) // transfer 1
+      allowance = await ERC20.allowance(util.deployer.address, util.deployer.address)
+      expect(allowance).to.equal(0) // still zero
+    })
+
+    it('BUG: double approve', async()=>{
+      await ERC20V2.mint(util.deployer.address, 2)
+      let allowance = await ERC20V2.allowance(util.deployer.address, util.deployer.address)
+      expect(allowance).to.equal(0) // start with zero
+      await ERC20V2.approve(util.deployer.address, 1) // approve 1
+      let tx = ERC20V2["transferFrom(address,address,uint256)"](util.deployer.address, util.bob.address, 1) // transfer 1
+      await expect(tx).to.be.revertedWith("ERC20: transfer amount exceeds allowance")
+      allowance = await ERC20V2.allowance(util.deployer.address, util.deployer.address)
+      expect(allowance).to.equal(1) // still 1
+      await ERC20V2.approve(util.deployer.address, 2) // approve 2
+      ERC20V2["transferFrom(address,address,uint256)"](util.deployer.address, util.bob.address, 1) // transfer 1
+      expect(allowance).to.equal(1) // still 1
+    })
+
+    describe('Upgrade', ()=>{
+      it('Should not be an upgrade by default', async ()=>{
+        let upgraded = await ERC20.isUpgrade()
+        expect(upgraded).to.be.false
+      })
+      it('non admin can not set upgrade', async ()=>{
+        ERC20 = await util.getERC20(ERC20.address, util.bob)
+        let tx = ERC20.upgradeFrom(ERC20V2.address)
+        await expect(tx).to.be.revertedWith("Sender is not Governer")
+        let upgraded = await ERC20.isUpgrade()
+        expect(upgraded).to.be.false
+      })
+      it('admin can set upgrade', async ()=>{
+        await ERC20.upgradeFrom(ERC20V2.address)
+        let upgraded = await ERC20.isUpgrade()
+        let upgradeAddress = await ERC20.upgradedFrom()
+        expect(upgraded).to.be.true
+        expect(upgradeAddress).to.equal(ERC20V2.address)
+      })
+
+      it('admin can not set upgrade twice', async ()=>{
+        await ERC20.upgradeFrom(ERC20V2.address)
+        let tx = ERC20.upgradeFrom(ERC20V2.address)
+        await expect(tx).to.be.revertedWith("Contract already an upgrade")
+      })
+
+      it('upgraded checks balance of old contract if not seen', async ()=>{
+        await ERC20V2.mint(util.bob.address, 1)
+        let oldBalance = await ERC20V2.balanceOf(util.bob.address)
+        let newBalance = await ERC20.balanceOf(util.bob.address)
+        expect(oldBalance).to.equal(1)
+        expect(newBalance).to.equal(0)
+        await ERC20.upgradeFrom(ERC20V2.address)
+        newBalance = await ERC20.balanceOf(util.bob.address)
+        expect(newBalance).to.equal(1)
+      })
+
+      it('upgraded checks allowance of new contract if not seen', async ()=>{
+        await ERC20V2.mint(util.bob.address, 1)
+        ERC20V2 = util.getERC20V2(ERC20V2.address, util.bob)
+        await ERC20V2.approve(util.deployer.address, 1)
+        let oldAllowance = await ERC20V2.allowance(util.bob.address, util.deployer.address)
+        let newAllowance = await ERC20.allowance(util.bob.address, util.deployer.address)
+        expect(oldAllowance).to.equal(1)
+        expect(newAllowance).to.equal(0)
+        await ERC20.upgradeFrom(ERC20V2.address)
+        newBalance = await ERC20.allowance(util.bob.address, util.deployer.address)
+        expect(newBalance).to.equal(0)
+      })
+      it('upgraded checks totalSupply from old contract with zero balance', async ()=>{
+        let oldTotalSupply = await ERC20V2.totalSupply()
+        let newTotalSupply = await ERC20.totalSupply()
+        expect(oldTotalSupply).to.equal(0)
+        expect(newTotalSupply).to.equal(0)
+        await ERC20.upgradeFrom(ERC20V2.address)
+        newTotalSupply = await ERC20.totalSupply()
+        expect(newTotalSupply).to.equal(0)
+      })
+
+      it('upgraded checks totalSupply from old contract with 1 balance', async ()=>{
+        await ERC20V2.mint(util.bob.address, 1)
+        let oldTotalSupply = await ERC20V2.totalSupply()
+        let newTotalSupply = await ERC20.totalSupply()
+        expect(oldTotalSupply).to.equal(1)
+        expect(newTotalSupply).to.equal(0)
+        await ERC20.upgradeFrom(ERC20V2.address)
+        newTotalSupply = await ERC20.totalSupply()
+        expect(newTotalSupply).to.equal(1)
+      })
+
+      it('upgraded checks totalSupply from old contract plus any newly minted on new contract', async ()=>{
+        await ERC20V2.mint(util.bob.address, 1)
+        let oldTotalSupply = await ERC20V2.totalSupply()
+        let newTotalSupply = await ERC20.totalSupply()
+        expect(oldTotalSupply).to.equal(1)
+        expect(newTotalSupply).to.equal(0)
+        await ERC20.upgradeFrom(ERC20V2.address)
+        await ERC20.mint(util.alice.address, 1)
+        newTotalSupply = await ERC20.totalSupply()
+        expect(newTotalSupply).to.equal(2)
+      })
+
+      it('minting marks address seen', async ()=>{
+        let seen = await ERC20.seen(util.bob.address)
+        expect(seen).to.be.false
+        await ERC20.mint(util.bob.address, 1)
+        seen = await ERC20.seen(util.bob.address)
+        expect(seen).to.be.true
+      })
+
+      it('minting combines old and new balances', async ()=>{
+        await ERC20V2.mint(util.bob.address, 1)
+        let oldBalance = await ERC20V2.balanceOf(util.bob.address)
+        let newBalance = await ERC20.balanceOf(util.bob.address)
+        expect(oldBalance).to.equal(1)
+        expect(newBalance).to.equal(0)
+        await ERC20.upgradeFrom(ERC20V2.address)
+        await ERC20.mint(util.bob.address, 1)
+        newBalance = await ERC20.balanceOf(util.bob.address)
+        expect(newBalance).to.equal(2)
+      })
+      it('minting that combines old and new balances is reflected in totalSupply', async ()=>{
+        await ERC20V2.mint(util.bob.address, 1)
+        await ERC20V2.mint(util.alice.address, 1)
+        let totalSupply = await ERC20V2.totalSupply()
+        expect(totalSupply).to.equal(2)
+        await ERC20.upgradeFrom(ERC20V2.address)
+        await ERC20.mint(util.bob.address, 1)
+        newBalance = await ERC20.totalSupply()
+        expect(newBalance).to.equal(3)
+        await ERC20.mint(util.bob.address, 1)
+        newBalance = await ERC20.totalSupply()
+        expect(newBalance).to.equal(4)
+      })
+      it('minting to old after minting on new does not effect new contract balance', async ()=>{
+        await ERC20V2.mint(util.bob.address, 1)
+        let oldBalance = await ERC20V2.balanceOf(util.bob.address)
+        let newBalance = await ERC20.balanceOf(util.bob.address)
+        expect(oldBalance).to.equal(1)
+        expect(newBalance).to.equal(0)
+        await ERC20.upgradeFrom(ERC20V2.address)
+        await ERC20.mint(util.bob.address, 1)
+        newBalance = await ERC20.balanceOf(util.bob.address)
+        expect(newBalance).to.equal(2)
+        await ERC20V2.mint(util.bob.address, 1)
+        newBalance = await ERC20.balanceOf(util.bob.address)
+        expect(newBalance).to.equal(2)
+        oldBalance = await ERC20V2.balanceOf(util.bob.address)
+        expect(oldBalance).to.equal(2)
+      })
+      it('transfering 2 unseen addresses makes both seen', async ()=>{
+        await ERC20V2.mint(util.bob.address, 1)
+        await ERC20V2.mint(util.alice.address, 1)
+        await ERC20.upgradeFrom(ERC20V2.address)
+        let seenBob = await ERC20.seen(util.bob.address)
+        let seenAlice = await ERC20.seen(util.alice.address)
+        expect(seenBob).to.be.false
+        expect(seenAlice).to.be.false
+        ERC20 = await util.getERC20(ERC20.address, util.bob)
+        await ERC20['transfer(address,uint256)'](util.alice.address,1)
+        seenBob = await ERC20.seen(util.bob.address)
+        seenAlice = await ERC20.seen(util.alice.address)
+        expect(seenBob).to.be.true
+        expect(seenAlice).to.be.true
+        let bobBalance = await ERC20.balanceOf(util.bob.address)
+        let aliceBalance = await ERC20.balanceOf(util.alice.address)
+        expect(bobBalance).to.equal(0)
+        expect(aliceBalance).to.equal(2)
+      })
+
+      it('transfering from 1 unseen address makes it seen', async ()=>{
+        await ERC20V2.mint(util.deployer.address, 10)
+        await ERC20V2.mint(util.bob.address, 1)
+        await ERC20.upgradeFrom(ERC20V2.address)
+        let newTotalSupply = await ERC20.totalSupply()
+        expect(newTotalSupply).to.equal(11)
+        await ERC20.mint(util.alice.address, 1)
+        newTotalSupply = await ERC20.totalSupply()
+        expect(newTotalSupply).to.equal(12)
+        let aliceBalance = await ERC20.balanceOf(util.alice.address)
+        expect(aliceBalance).to.equal(1)
+        let seenBob = await ERC20.seen(util.bob.address)
+        let seenAlice = await ERC20.seen(util.alice.address)
+        expect(seenBob).to.be.false
+        expect(seenAlice).to.be.true
+        let oldTotalSupply = await ERC20V2.totalSupply()
+        expect(oldTotalSupply).to.equal(11)
+        ERC20 = await util.getERC20(ERC20.address, util.alice)
+        await ERC20['transfer(address,uint256)'](util.bob.address,1)
+        seenBob = await ERC20.seen(util.bob.address)
+        seenAlice = await ERC20.seen(util.alice.address)
+        expect(seenBob).to.be.true
+        expect(seenAlice).to.be.true
+        let bobBalance = await ERC20.balanceOf(util.bob.address)
+        aliceBalance = await ERC20.balanceOf(util.alice.address)
+        expect(bobBalance).to.equal(2)
+        expect(aliceBalance).to.equal(0)
+        newTotalSupply = await ERC20.totalSupply()
+        expect(newTotalSupply).to.equal(12)
+        
+      })
     })
 
     describe('Bypass', ()=>{

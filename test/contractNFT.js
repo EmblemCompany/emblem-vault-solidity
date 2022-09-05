@@ -15,7 +15,7 @@ describe('ContractNFT', () => {
     await util.deployERC20Factory() 
   })
   it('deploys ContractNFTFactory', async () => {
-    await util.deployContractNFTFactory()
+    await util.deployContractNFTFactory('')
     expect(util.contractNFTFactory.address).to.not.equal("0x0000000000000000000000000000000000000000")
     await util.contractNFT.createClone(util.deployer.address, 1337, "uri://")
   })

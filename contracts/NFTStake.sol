@@ -4,7 +4,6 @@ import "./IERC721.sol";
 import "./OwnableUpgradeable.sol";
 import "./SafeMath.sol";
 import "./ReentrancyGuard.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 contract NFTStake is OwnableUpgradeable, IERC721Receiver, ReentrancyGuard {
 

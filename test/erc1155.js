@@ -22,7 +22,7 @@ describe('ERC1155', () => {
         await util.deployClaimedUpgradable()
         await util.deployERC721Factory()
         await util.deployERC20Factory()
-        await util.deployERC1155Upgradable()
+        await util.deployERC1155Factory()
         ERC1155 = util.erc1155Factory.clone
       })
     describe('V2 Upgradable', ()=>{
@@ -72,7 +72,7 @@ describe('ERC1155', () => {
             // it('should mint via handler with signature if signer is a witness', async () => {
             //     await ERC1155.transferOwnership(util.handler.address)
             //     await util.handler.changePrice(0)
-            //     await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+            //     await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
             //     var provider = util.selectProvider("mainnet")
             //     var web3 = new Web3(provider)
             //     let hash = web3.utils.soliditySha3(ERC1155.address, util.deployer.address, 123, 111, "payload")
@@ -317,7 +317,7 @@ describe('ERC1155', () => {
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
-                await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+                await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
     
                 await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig, util.serializeUintToBytes(123))
                 ticks = await util.handler.ticks();
@@ -425,7 +425,7 @@ describe('ERC1155', () => {
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
-                await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+                await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
     
                 await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig, util.serializeUintToBytes(123))
                 ticks = await util.handler.ticks();
@@ -469,7 +469,7 @@ describe('ERC1155', () => {
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
-                await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+                await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
     
                 await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig, util.serializeUintToBytes(123))
                 ticks = await util.handler.ticks();
@@ -493,7 +493,7 @@ describe('ERC1155', () => {
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 222)
                 let sig = await sign(web3, hash)
-                await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+                await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
     
                 await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 222, sig, util.serializeUintToBytes(123))
                 ticks = await util.handler.ticks();
@@ -513,7 +513,7 @@ describe('ERC1155', () => {
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
-                await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+                await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
     
                 await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig, util.serializeUintToBytes(123))
                 ticks = await util.handler.ticks()
@@ -534,7 +534,7 @@ describe('ERC1155', () => {
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
-                await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+                await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
     
                 let tx = util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig, util.serializeUintToBytes(123))
                 await expect(tx).to.be.revertedWith("Callback Reverted")
@@ -550,7 +550,7 @@ describe('ERC1155', () => {
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
-                await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+                await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
     
                 let tx = util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig, util.serializeUintToBytes(123))
                 await expect(tx).to.be.revertedWith("Callback Reverted")
@@ -566,7 +566,7 @@ describe('ERC1155', () => {
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
-                await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+                await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
     
                 await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig, util.serializeUintToBytes(123))
                 let ticks = await util.handler.ticks()
@@ -587,7 +587,7 @@ describe('ERC1155', () => {
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
-                await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+                await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
     
                 await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig, util.serializeUintToBytes(123))
                 let ticks = await util.handler.ticks()
@@ -609,7 +609,7 @@ describe('ERC1155', () => {
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
-                await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+                await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
     
                 await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig, util.serializeUintToBytes(123))
                 let ticks = await util.handler.ticks()
@@ -631,7 +631,7 @@ describe('ERC1155', () => {
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
-                await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+                await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
     
                 let tx = util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig, util.serializeUintToBytes(123))
                 await expect(tx).to.be.revertedWith("Callback Reverted")
@@ -717,7 +717,7 @@ describe('ERC1155', () => {
                 var provider = util.selectProvider("mainnet")
                 var web3 = new Web3(provider)
                 // let hash = web3.eth.abi.encodeFunctionSignature('catchCallbackFrom(address,address,uint256)').substr(0, 10) //catchCallback(address, address _to, uint256)
-                let hash = web3.eth.abi.encodeFunctionSignature('changeName(string,string)').substr(0, 10) //getFunctions()
+                let hash = web3.eth.abi.encodeFunctionSignature('transferFrom(address sender, address recipient, uint256 amount)').substr(0, 10) //getFunctions()
                 console.log("hash", hash)
             })
         })
@@ -729,7 +729,7 @@ describe('ERC1155', () => {
                 expect(currentBalance).to.equal(1)
             })
             it('can mint with provided serial', async ()=>{
-                // await util.deployERC1155Upgradable(util.handler)
+                // await util.deployERC1155Factory(util.handler)
                 await ERC1155.mintWithSerial(util.deployer.address, 789, 1, util.serializeUintToBytes(123))
                 let currentBalance = await ERC1155.balanceOf(util.deployer.address, 789)
                 expect(currentBalance).to.equal(1)
@@ -737,23 +737,23 @@ describe('ERC1155', () => {
                 expect(currentSerial).to.equal(123)
             })
             it('should not mint with duplicate serial', async ()=>{
-                // await util.deployERC1155Upgradable(util.handler)
+                // await util.deployERC1155Factory(util.handler)
                 await ERC1155.mintWithSerial(util.deployer.address, 789, 1, util.serializeUintToBytes(123))
                 let tx = ERC1155.mintWithSerial(util.deployer.address, 789, 1, util.serializeUintToBytes(123))
                 await expect(tx).to.be.revertedWith("Serial number already used")
             })
             it('should not standard mint when overridable', async ()=>{
-                // await util.deployERC1155Upgradable(util.handler)
+                // await util.deployERC1155Factory(util.handler)
                 let tx = ERC1155.mint(util.deployer.address, 789, 1)
                 await expect(tx).to.be.revertedWith("Must provide serial number")
             })
             it('should not mint amounts over 1 with duplicate encoded serials', async ()=>{
-                // await util.deployERC1155Upgradable(util.handler)
+                // await util.deployERC1155Factory(util.handler)
                 let tx = ERC1155.mintWithSerial(util.deployer.address, 789, 2, util.serializeUintArrayToBytes([123, 123]))
                 await expect(tx).to.be.revertedWith("Serial number already used")
             })
             it('should mint amounts over 1 with encoded serials', async ()=>{
-                // await util.deployERC1155Upgradable(util.handler)
+                // await util.deployERC1155Factory(util.handler)
                 await ERC1155.mintWithSerial(util.deployer.address, 789, 2, util.serializeUintArrayToBytes([123, 456]))
                 let serial1 = await ERC1155.getSerial(789, 0)
                 let serial2 = await ERC1155.getSerial(789, 1)
@@ -761,12 +761,12 @@ describe('ERC1155', () => {
                 expect(serial2).to.equal(456)
             })
             it('should not mint batch with duplicate encoded serials', async ()=>{
-                // await util.deployERC1155Upgradable(util.handler)
+                // await util.deployERC1155Factory(util.handler)
                 let tx = ERC1155.mintBatch(util.deployer.address, [789, 543], [1,1], util.serializeToByteArray([123, 123]))
                 await expect(tx).to.be.revertedWith("Serial number already used")
             })
             it('should mint batch with encoded serials', async ()=>{
-                // await util.deployERC1155Upgradable(util.handler)
+                // await util.deployERC1155Factory(util.handler)
                 await ERC1155.mintBatch(util.deployer.address, [789, 543], [1,1], util.serializeToByteArray([123, 456]))
                 let serial1 = await ERC1155.getSerial(789, 0)
                 let serial2 = await ERC1155.getSerial(543, 0)
@@ -774,7 +774,7 @@ describe('ERC1155', () => {
                 expect(serial2).to.equal(456)
             })
             it('should mint batch with encoded serials and amounts', async ()=>{
-                // await util.deployERC1155Upgradable(util.handler)
+                // await util.deployERC1155Factory(util.handler)
                 await ERC1155.mintBatch(util.deployer.address, [789, 543], [1,2], util.serializeToByteArray([789, [123, 456]]))
                 let serial1 = await ERC1155.getSerial(789, 0)
                 let serial2 = await ERC1155.getSerial(543, 0)
@@ -784,7 +784,7 @@ describe('ERC1155', () => {
                 expect(serial3).to.equal(456)
             })
             it('should burn', async ()=>{
-                // await util.deployERC1155Upgradable(util.handler)
+                // await util.deployERC1155Factory(util.handler)
                 await ERC1155.toggleOverloadSerial()
                 await ERC1155.mint(util.deployer.address, 789, 1)
                 await ERC1155.burn(util.deployer.address, 789, 1)
@@ -792,7 +792,7 @@ describe('ERC1155', () => {
                 expect(currentBalance).to.equal(0)
             })
             it('should claim', async ()=>{
-                // await util.deployERC1155Upgradable(util.handler)
+                // await util.deployERC1155Factory(util.handler)
                 await ERC1155.toggleOverloadSerial()
                 await util.deployClaimedUpgradable()
                 await ERC1155.mint(util.deployer.address, 789, 1)

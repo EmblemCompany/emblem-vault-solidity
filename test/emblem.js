@@ -55,7 +55,7 @@ describe('ERC721', () => {
       let hash = web3.utils.soliditySha3(util.emblem.address, util.deployer.address, 123, {type: 'uint256[]', value: [4,5,6]})
       let sig = await sign(web3, hash)
       let address = await util.handler.getAddressFromSignatureHash(hash, sig)
-      expect(address).to.equal('0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396')
+      expect(address).to.equal('0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111')
     })
     it('should not be witnessed if signer not a witness', async () => {
       let emblemAddress = util.emblem.address
@@ -68,7 +68,7 @@ describe('ERC721', () => {
     })
     it('should be witnessed if signer is a witness', async () => {
       let emblemAddress = util.emblem.address
-      await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+      await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
       var provider = util.selectProvider("mainnet")
       var web3 = new Web3(provider)
       let hash = web3.utils.soliditySha3(emblemAddress, util.deployer.address, 123, {type: 'uint256[]', value: [4,5,6]})
@@ -78,7 +78,7 @@ describe('ERC721', () => {
     })
     it('should get correct address from signature', async () => {
       let emblemAddress = util.emblem.address
-      await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+      await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
       var provider = util.selectProvider("mainnet")
       var web3 = new Web3(provider)
       let hash = web3.utils.soliditySha3(emblemAddress, util.deployer.address, 123, 111, "payload")
@@ -86,7 +86,7 @@ describe('ERC721', () => {
       let witnessed = await util.handler.isWitnessed(hash, sig)
       expect(witnessed).to.equal(true)
       let address = await util.handler.getAddressFromSignatureMint(emblemAddress, util.deployer.address, 123, 111, "payload", sig);
-      expect(address).to.equal('0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396')
+      expect(address).to.equal('0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111')
     })
     it('should fail to mint with signature if signer is not a witness', async () => {
       let emblemAddress = util.emblem.address
@@ -100,7 +100,7 @@ describe('ERC721', () => {
     it('should mint via handler with signature if signer is a witness', async () => {
       let emblemAddress = util.emblem.address
       let emblemContract = await util.getEmblemVault(emblemAddress, util.deployer)
-      await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+      await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
       var provider = util.selectProvider("mainnet")
       var web3 = new Web3(provider)
       let hash = web3.utils.soliditySha3(emblemAddress, util.erc20.address, 0, util.deployer.address, 123, 111, "payload")
@@ -117,7 +117,7 @@ describe('ERC721', () => {
       let emblemAddress = util.emblem.address
       let covalAddress = util.erc20.address
       let emblemContract = await util.getEmblemVault(emblemAddress, util.deployer)
-      await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+      await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
       var provider = util.selectProvider("mainnet")
       var web3 = new Web3(provider)
       let hash = web3.utils.soliditySha3(emblemAddress, covalAddress, 0, util.deployer.address, 123, 111, "payload")

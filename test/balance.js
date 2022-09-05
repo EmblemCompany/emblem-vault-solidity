@@ -59,7 +59,7 @@ beforeEach(async ()=>{
         
         let emblemAddress = util.erc721Factory.clone.address
         let emblemContract = util.getEmblemVault(emblemAddress, util.deployer)
-        await balanceContract.addWitness(emblemAddress, "0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+        await balanceContract.addWitness(emblemAddress, "0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
         // await util.handler.transferNftOwnership(emblemAddress, util.deployer.address)
         await emblemContract.mint(util.deployer.address, 123, "test", 0x0)
         let balances = {
@@ -78,7 +78,7 @@ beforeEach(async ()=>{
         let balanceContract = util.balanceUpgradable
         let emblemAddress = util.erc721Factory.clone.address
         let emblemContract = util.getEmblemVault(emblemAddress, util.deployer)
-        await balanceContract.addWitness(emblemAddress, "0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+        await balanceContract.addWitness(emblemAddress, "0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
         // await util.handler.transferNftOwnership(emblemAddress, util.deployer.address)
         await emblemContract.mint(util.deployer.address, 123, "test", 0x0)
         let balances = {
@@ -102,7 +102,7 @@ beforeEach(async ()=>{
         let balanceContract = util.balanceUpgradable
         let emblemAddress = util.erc721Factory.clone.address
         let emblemContract = util.getEmblemVault(emblemAddress, util.deployer)
-        await balanceContract.addWitness(emblemAddress, "0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+        await balanceContract.addWitness(emblemAddress, "0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
         // await util.handler.transferNftOwnership(emblemAddress, util.deployer.address)
         await emblemContract.mint(util.deployer.address, 123, "test", 0x0)
         let balances = {
@@ -216,7 +216,7 @@ beforeEach(async ()=>{
         let balanceContract = util.balanceUpgradable
         let emblemAddress = util.erc721Factory.clone.address
         let emblemContract = util.getEmblemVault(emblemAddress, util.deployer)
-        await balanceContract.addWitness(emblemAddress, "0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+        await balanceContract.addWitness(emblemAddress, "0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
         // await util.handler.transferNftOwnership(emblemAddress, util.deployer.address)
         await emblemContract.mint(util.deployer.address, 123, "test", 0x0)
         let balances = {
@@ -237,7 +237,7 @@ beforeEach(async ()=>{
         let balanceContract = util.balanceUpgradable
         let emblemAddress = util.erc721Factory.clone.address
         let emblemContract = util.getEmblemVault(emblemAddress, util.deployer)
-        await balanceContract.addWitness(emblemAddress, "0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+        await balanceContract.addWitness(emblemAddress, "0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
         // await util.handler.transferNftOwnership(emblemAddress, util.deployer.address)
         await emblemContract.mint(util.deployer.address, 123, "test", 0x0)
         await emblemContract.mint(util.deployer.address, 321, "test", 0x0)
@@ -264,7 +264,7 @@ beforeEach(async ()=>{
         let balanceContract = util.balanceUpgradable
         let emblemAddress = util.erc721Factory.clone.address
         let emblemContract = util.getEmblemVault(emblemAddress, util.deployer)
-        await balanceContract.addWitness(emblemAddress, "0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+        await balanceContract.addWitness(emblemAddress, "0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
         // await util.handler.transferNftOwnership(emblemAddress, util.deployer.address)
         await emblemContract.mint(util.deployer.address, 123, "test", 0x0)
         await emblemContract.mint(util.deployer.address, 321, "test", 0x0)
@@ -290,7 +290,7 @@ beforeEach(async ()=>{
         let balanceContract = util.balanceUpgradable
         let emblemAddress = util.erc721Factory.clone.address
         let emblemContract = util.getEmblemVault(emblemAddress, util.deployer)
-        await balanceContract.addWitness(emblemAddress, "0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+        await balanceContract.addWitness(emblemAddress, "0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
         // await util.handler.transferNftOwnership(emblemAddress, util.deployer.address)
         await emblemContract.mint(util.deployer.address, 123, "test", 0x0)
         await emblemContract.mint(util.deployer.address, 321, "test", 0x0)
@@ -322,7 +322,7 @@ beforeEach(async ()=>{
         let balanceContract = util.balanceUpgradable
         let emblemAddress = util.erc721Factory.clone.address
         let emblemContract = util.getEmblemVault(emblemAddress, util.deployer)
-        await balanceContract.addWitness(emblemAddress, "0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+        await balanceContract.addWitness(emblemAddress, "0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
         // await util.handler.transferNftOwnership(emblemAddress, util.deployer.address)
         await emblemContract.mint(util.deployer.address, 123, "test", 0x0)
         await emblemContract.mint(util.deployer.address, 321, "test", 0x0)

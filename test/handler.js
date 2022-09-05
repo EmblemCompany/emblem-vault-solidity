@@ -16,7 +16,7 @@ describe('Vault Handler', () => {
     await util.deployClaimedUpgradable()
     await util.deployERC721Factory()
     await util.deployERC20Factory()
-    await util.deployERC1155Upgradable()
+    await util.deployERC1155Factory()
     ERC1155 = util.erc1155
     ERC721 = util.emblem
   })
@@ -53,7 +53,7 @@ describe('Vault Handler', () => {
     await ERC721.transferOwnership(util.handler.address)
     await ERC1155.transferOwnership(util.handler.address)
     await util.handler.unregisterContract(ERC721.address, 0)
-    await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+    await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
 
     let tx = util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig, util.serializeUintToBytes(0))
     await expect(tx).to.be.revertedWith('Contract is not registered')
@@ -73,7 +73,7 @@ describe('Vault Handler', () => {
     var web3 = new Web3(provider)
     let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 1, 1337, util.serializeUintToBytes(0), 111)
     let sig = await sign(web3, hash)
-    await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+    await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
 
     await util.handler.moveVault(ERC721.address, ERC1155.address, 1, 1337, 111, sig, util.serializeUintToBytes(0))
     balanceERC721 = await ERC721.balanceOf(util.deployer.address)
@@ -98,7 +98,7 @@ describe('Vault Handler', () => {
     var web3 = new Web3(provider)
     let hash = web3.utils.soliditySha3(ERC1155.address, ERC721.address, 123, 1337, util.serializeUintToBytes(0), 111)
     let sig = await sign(web3, hash)
-    await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+    await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
     
     await util.handler.moveVault(ERC1155.address, ERC721.address, 123, 1337, 111, sig, util.serializeUintToBytes(0))
     balanceERC721 = await ERC721.balanceOf(util.deployer.address)
@@ -125,7 +125,7 @@ describe('Vault Handler', () => {
     var web3 = new Web3(provider)
     let hash = web3.utils.soliditySha3(ERC1155.address, ERC721.address, 123, 1, util.serializeUintToBytes(123), 111)
     let sig = await sign(web3, hash)
-    await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+    await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
 
     let tx = util.handler.moveVault(ERC1155.address, ERC721.address, 123, 1, 111, sig, util.serializeUintToBytes(123))
     await expect(tx).to.be.revertedWith('003006')
@@ -143,7 +143,7 @@ describe('Vault Handler', () => {
     var web3 = new Web3(provider)
     let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 1, 1337, 0, 111)
     let sig = await sign(web3, hash)
-    await util.handler.addWitness("0xFad12e0531b6f53Ec05018Ae779E393a6CdDe396")
+    await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
     let tx = util.handler.moveVault(ERC721.address, ERC1155.address, 1, 1337, 111, sig, util.serializeUintToBytes(0))
     await expect(tx).to.be.revertedWith("Handler: must provide serial number")
   })

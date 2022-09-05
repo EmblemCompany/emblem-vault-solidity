@@ -4,7 +4,7 @@ import "./IsBypassable.sol";
 
 contract HasRegistration is IsBypassable {
 
-    mapping(address => uint256) private registeredContracts; // 0 EMPTY, 1 ERC1155, 2 ERC721, 3 HANDLER, 4 ERC20, 5 BALANCE, 6 CLAIM, 7 UNKNOWN, 8 FACTORY, 9 STAKING, 10 BYPASS
+    mapping(address => uint256) public registeredContracts; // 0 EMPTY, 1 ERC1155, 2 ERC721, 3 HANDLER, 4 ERC20, 5 BALANCE, 6 CLAIM, 7 UNKNOWN, 8 FACTORY, 9 STAKING, 10 BYPASS
     mapping(uint256 => address[]) internal registeredOfType;
 
     modifier isRegisteredContract(address _contract) {

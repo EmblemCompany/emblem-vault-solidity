@@ -20,11 +20,11 @@ contract ERC165 {
     }
 }
 
-interface IERC1155Receiver {
-    function onERC1155Received(address operator, address from, uint256 id, uint256 value, bytes calldata data) external returns(bytes4);
-    function onERC1155BatchReceived(address operator, address from, uint256[] calldata ids, uint256[] calldata values, bytes calldata data) external returns(bytes4);
-}
+// interface IERC1155Receiver {
+//     function onERC1155Received(address operator, address from, uint256 id, uint256 value, bytes calldata data) external returns(bytes4);
+//     function onERC1155BatchReceived(address operator, address from, uint256[] calldata ids, uint256[] calldata values, bytes calldata data) external returns(bytes4);
+// }
 
-interface IERC1155MetadataURI  {
-    function uri(uint256 id) external view returns (string memory);
-}
+// interface IERC1155MetadataURI  {
+//     function uri(uint256 id) external view returns (string memory);
+// }

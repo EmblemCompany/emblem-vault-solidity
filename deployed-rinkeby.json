@@ -78,5 +78,33 @@
         "registrations": [],
         "contractType": 8,
         "clones": []
+    },
+    "rental": {
+        "address": "0x8E888C49341DCAe1975c20c6640eE50f28B2E5aB",
+        "delegation": "0x973144305f159bf93c22e6fb93e12c482220c583",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "bytes2uint-old": {
+        "address": "0xCb9Edb87B826642af518994F13Dd1e3A34589D90",
+        "delegation": "0x5cd98c30b39719833f61802937182e1a487dd1e0",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "bytes2uint": {
+        "address": "0x3B663E22E4F43b831207b81454481E83635E4c3c",
+        "delegation": "0xabbd451de45dce86368fd937aa6cd0281221a422",
+        "verified": false,
+        "registrations": [],
+        "contractType": 7
+    },
+    "rental2": {
+        "address": "0xC470cE917C6595B348C5B34Cd0B7569EE8C81cE4",
+        "delegation": "0xa05eaab96a55960f16c6ca9bce450246077db5ce",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
     }
 }

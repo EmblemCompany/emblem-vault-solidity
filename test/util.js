@@ -128,7 +128,47 @@ class Util {
       return s.address
     })
   }
-  async deployERC1155Upgradable(deployType = null) {
+
+  async deployERC20V2() {
+    let ERC20V2 = await ethers.getContractFactory('ERC20V2');
+    this.erc20v2 = await ERC20V2.deploy()
+    await fs.promises.mkdir(path.resolve(__dirname, "../artifacts"), { recursive: true }).catch((e) => {})
+    await fs.promises.writeFile(path.resolve(__dirname, "../artifacts/Deployed.json"), JSON.stringify({ address: this.erc20v2.address }))
+    let signers = await ethers.getSigners();
+    this.signers = signers
+    this.addresses = signers.map((s) => {
+      return s.address
+    })
+  }
+
+  async deployRental() {
+    let Rental = await ethers.getContractFactory('Rental');
+    this.rental = await Rental.deploy()
+    await this.rental.deployed();
+    await this.rental.initialize()
+    await fs.promises.mkdir(path.resolve(__dirname, "../artifacts"), { recursive: true }).catch((e) => {})
+    await fs.promises.writeFile(path.resolve(__dirname, "../artifacts/Deployed.json"), JSON.stringify({ address: this.rental.address }))
+    let signers = await ethers.getSigners();
+    this.signers = signers
+    this.addresses = signers.map((s) => {
+      return s.address
+    })
+  }
+  async deployRentalV2() {
+    let RentalV2 = await ethers.getContractFactory('RentalV2');
+    this.rentalV2 = await RentalV2.deploy()
+    await this.rentalV2.deployed();
+    await this.rentalV2.initialize()
+    await fs.promises.mkdir(path.resolve(__dirname, "../artifacts"), { recursive: true }).catch((e) => {})
+    await fs.promises.writeFile(path.resolve(__dirname, "../artifacts/Deployed.json"), JSON.stringify({ address: this.rentalV2.address }))
+    let signers = await ethers.getSigners();
+    this.signers = signers
+    this.addresses = signers.map((s) => {
+      return s.address
+    })
+  }
+
+  async deployERC1155Factory(deployType = null) {
     const [_deployer, u1, u2] = await ethers.getSigners();
     this.alice = u1;
     this.bob = u2;
@@ -316,8 +356,23 @@ class Util {
     let contract = new ethers.Contract(address, ABI.abi, signer)
     return contract;
   }
+  getRental (address, signer) {
+    let ABI = require(path.resolve(__dirname, "../artifacts/contracts/Rental.sol/Rental.json"))
+    let contract = new ethers.Contract(address, ABI.abi, signer)
+    return contract;
+  }
+  getRentalV2 (address, signer) {
+    let ABI = require(path.resolve(__dirname, "../artifacts/contracts/RentalV2.sol/RentalV2.json"))
+    let contract = new ethers.Contract(address, ABI.abi, signer)
+    return contract;
+  }
   getERC20 (address, signer) {
     let ABI = require(path.resolve(__dirname, "../artifacts/contracts/ConfigurableERC20Upgradable.sol/ConfigurableERC20Upgradable.json"))
+    let contract = new ethers.Contract(address, ABI.abi, signer)
+    return contract;
+  }
+  getERC20V2 (address, signer) {
+    let ABI = require(path.resolve(__dirname, "../artifacts/contracts/ERC20V2.sol/ERC20V2.json"))
     let contract = new ethers.Contract(address, ABI.abi, signer)
     return contract;
   }
@@ -614,6 +669,9 @@ class Util {
   }
   selectProviderEndpoint(network) {
     return this.infuraEndpoints.filter(item => { return item.network == network })[0].address
+  }
+  getWeb3() {
+    return new Web3(this.selectProvider("mainnet"))
   }
   MATIC_IDS = [
     "41f5f3cbf83536b2bf235d2be67a16bf6e5647dd"

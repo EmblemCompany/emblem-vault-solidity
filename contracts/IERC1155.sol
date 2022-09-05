@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.4;
+pragma solidity ^0.8.4;
 
 interface IERC1155 {
     event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value);
@@ -16,4 +16,13 @@ interface IERC1155 {
     function mint(address _to, uint256 _tokenId, uint256 _amount) external;
     function burn(address _from, uint256 _tokenId, uint256 _amount) external;
     function mintWithSerial(address _to, uint256 _tokenId, uint256 _amount, bytes memory serialNumber) external;
+}
+
+interface IERC1155Receiver {
+    function onERC1155Received(address operator, address from, uint256 id, uint256 value, bytes calldata data) external returns(bytes4);
+    function onERC1155BatchReceived(address operator, address from, uint256[] calldata ids, uint256[] calldata values, bytes calldata data) external returns(bytes4);
+}
+
+interface IERC1155MetadataURI  {
+    function uri(uint256 id) external view returns (string memory);
 }
