@@ -9,6 +9,8 @@ require('hardhat-contract-sizer');
 require("@nomiclabs/hardhat-etherscan");
 require("@nomiclabs/hardhat-ethers");
 require("@openzeppelin/hardhat-upgrades");
+// require("@nomiclabs/hardhat-truffle5");
+// require('truffle-assertions');
 
 module.exports = {
 //  solidity: "0.8.4",

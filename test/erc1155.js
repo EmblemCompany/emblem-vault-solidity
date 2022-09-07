@@ -13,7 +13,7 @@ const CALLBACK_TYPE = {"MINT": 0,"TRANSFER": 1,"CLAIM":2}
 const REGISTRATION_TYPE = {"EMPTY": 0, "ERC1155": 1, "ERC721":2, "HANDLER":3, "ERC20":4, "BALANCE":5, "CLAIM":6, "UNKNOWN":7, "FACTORY":8, "STAKING": 9, "BYPASS": 10}// 0 EMPTY, 1 ERC1155, 2 ERC721, 3 HANDLER, 4 ERC20, 5 BALANCE, 6 CLAIM 7 UNKNOWN
 
 const util = new Util()
-let ERC1155
+let ERC1155, ERC1155V1
 
 describe('ERC1155', () => {
     beforeEach(async ()=>{
@@ -24,6 +24,9 @@ describe('ERC1155', () => {
         await util.deployERC20Factory()
         await util.deployERC1155Factory()
         ERC1155 = util.erc1155Factory.clone
+        await util.erc1155Factory.createClone(util.deployer.address)
+        let clones = await util.erc1155Factory.getClones()
+        ERC1155V1 = util.getERC1155(clones[1], util.deployer)
       })
     describe('V2 Upgradable', ()=>{
         it('should deploy ERC1155 Vaults', async ()=>{
@@ -38,7 +41,296 @@ describe('ERC1155', () => {
             let stream = util.getContract(streamAddress, "Stream", util.deployer)
             expect(await ERC1155.owner()).to.equal(util.deployer.address)
             expect(await stream.owner()).to.equal(util.deployer.address)
-          })
+        })
+        describe('Events',()=>{
+            it('only admin can emit events', async ()=>{
+                ERC1155 = util.getERC1155(ERC1155.address, util.bob)
+                let tx =  ERC1155['makeEvents(address[],uint256[],address[],address[],uint256[])'](["0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5"],[1234],["0x0000000000000000000000000000000000000000"], ["0x1684469EA0Ef1dB1dB91DA9524ba6022FDbd06E5"],[1])
+                await expect(tx).to.be.revertedWith("Not owner or able to bypass")
+            })
+            it('should emit one transfer event', async ()=>{
+              expect(ERC1155.address).to.exist
+              let tx =  await ERC1155['makeEvents(address[],uint256[],address[],address[],uint256[])'](["0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5"],[1234],["0x0000000000000000000000000000000000000000"], ["0x1684469EA0Ef1dB1dB91DA9524ba6022FDbd06E5"],[1])
+              let result = await tx.wait()
+              expect(result.events.length).to.equal(1)
+              expect(result.events[0].args.operator).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+              expect(result.events[0].args.from).to.equal("0x0000000000000000000000000000000000000000")
+              expect(result.events[0].args.to).to.equal("0x1684469EA0Ef1dB1dB91DA9524ba6022FDbd06E5")
+              expect(result.events[0].args.id).to.equal(1234)
+              expect(result.events[0].args.value).to.equal(1)
+            })
+
+            it('should emit two transfer events when multiple amounts', async ()=>{
+                expect(ERC1155.address).to.exist
+                let tx = await ERC1155['makeEvents(address[],uint256[],address[],address[],uint256[])'](["0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5"],[1234],["0x0000000000000000000000000000000000000000"], ["0x1684469EA0Ef1dB1dB91DA9524ba6022FDbd06E5"],[1, 10])
+                let result = await tx.wait()
+                expect(result.events.length).to.equal(2)
+                expect(result.events[0].args.operator).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+                expect(result.events[0].args.from).to.equal("0x0000000000000000000000000000000000000000")
+                expect(result.events[0].args.to).to.equal("0x1684469EA0Ef1dB1dB91DA9524ba6022FDbd06E5")
+                expect(result.events[0].args.id).to.equal(1234)
+                expect(result.events[0].args.value).to.equal(1)
+                
+                expect(result.events[1].args.operator).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+                expect(result.events[1].args.from).to.equal("0x0000000000000000000000000000000000000000")
+                expect(result.events[1].args.to).to.equal("0x1684469EA0Ef1dB1dB91DA9524ba6022FDbd06E5")
+                expect(result.events[1].args.id).to.equal(1234)
+                expect(result.events[1].args.value).to.equal(10)
+            })
+            it('should emit two transfer events when multiple to addresses and multiple amounts', async ()=>{
+                let tx = await ERC1155['makeEvents(address[],uint256[],address[],address[],uint256[])'](["0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5"],[1234],["0x0000000000000000000000000000000000000000"], ["0x1684469EA0Ef1dB1dB91DA9524ba6022FDbd06E5", "0x2d922712f5e99428c65b44f09Ea389373d185bB3"],[1, 10])
+                let result = await tx.wait()
+                console.log(result.events)
+                expect(result.events.length).to.equal(2)
+                expect(result.events[0].args.operator).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+                expect(result.events[0].args.from).to.equal("0x0000000000000000000000000000000000000000")
+                expect(result.events[0].args.to).to.equal("0x1684469EA0Ef1dB1dB91DA9524ba6022FDbd06E5")
+                expect(result.events[0].args.id).to.equal(1234)
+                expect(result.events[0].args.value).to.equal(1)
+                
+                expect(result.events[1].args.operator).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+                expect(result.events[1].args.from).to.equal("0x0000000000000000000000000000000000000000")
+                expect(result.events[1].args.to).to.equal("0x2d922712f5e99428c65b44f09Ea389373d185bB3")
+                expect(result.events[1].args.id).to.equal(1234)
+                expect(result.events[1].args.value).to.equal(10)
+              })
+              it('should emit two transfer events when multiple to addresses and single amount', async ()=>{
+                let tx = await ERC1155['makeEvents(address[],uint256[],address[],address[],uint256[])'](["0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5"],[1234],["0x0000000000000000000000000000000000000000"], ["0x1684469EA0Ef1dB1dB91DA9524ba6022FDbd06E5", "0x2d922712f5e99428c65b44f09Ea389373d185bB3"],[1])
+                let result = await tx.wait()
+                console.log(result.events)
+                expect(result.events.length).to.equal(2)
+                expect(result.events[0].args.operator).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+                expect(result.events[0].args.from).to.equal("0x0000000000000000000000000000000000000000")
+                expect(result.events[0].args.to).to.equal("0x1684469EA0Ef1dB1dB91DA9524ba6022FDbd06E5")
+                expect(result.events[0].args.id).to.equal(1234)
+                expect(result.events[0].args.value).to.equal(1)
+        
+                expect(result.events[1].args.operator).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+                expect(result.events[1].args.from).to.equal("0x0000000000000000000000000000000000000000")
+                expect(result.events[1].args.to).to.equal("0x2d922712f5e99428c65b44f09Ea389373d185bB3")
+                expect(result.events[1].args.id).to.equal(1234)
+                expect(result.events[1].args.value).to.equal(1)
+              })
+        
+              it('should emit multiple transfer events when multiple from addresses', async ()=>{
+                let tx = await ERC1155['makeEvents(address[],uint256[],address[],address[],uint256[])'](["0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5"],[1234],["0x0000000000000000000000000000000000000000","0x0000000000000000000000000000000000000001"], ["0x1684469EA0Ef1dB1dB91DA9524ba6022FDbd06E5"],[1])
+                let result = await tx.wait()
+                expect(result.events.length).to.equal(2)
+                expect(result.events[0].args.operator).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+                expect(result.events[0].args.from).to.equal("0x0000000000000000000000000000000000000000")
+                expect(result.events[0].args.to).to.equal("0x1684469EA0Ef1dB1dB91DA9524ba6022FDbd06E5")
+                expect(result.events[0].args.id).to.equal(1234)
+                expect(result.events[0].args.value).to.equal(1)
+                expect(result.events[1].args.operator).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+                expect(result.events[1].args.from).to.equal("0x0000000000000000000000000000000000000001")
+                expect(result.events[1].args.to).to.equal("0x1684469EA0Ef1dB1dB91DA9524ba6022FDbd06E5")
+                expect(result.events[1].args.id).to.equal(1234)
+                expect(result.events[1].args.value).to.equal(1)
+              })
+        
+              it('should emit multiple transfer events when multiple from addresses and multiple amounts', async ()=>{
+                let tx = await ERC1155['makeEvents(address[],uint256[],address[],address[],uint256[])'](["0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5"],[1234],["0x0000000000000000000000000000000000000000","0x0000000000000000000000000000000000000001"], ["0x1684469EA0Ef1dB1dB91DA9524ba6022FDbd06E5"],[1, 10])
+                let result = await tx.wait()
+                expect(result.events.length).to.equal(2)
+                expect(result.events[0].args.operator).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+                expect(result.events[0].args.from).to.equal("0x0000000000000000000000000000000000000000")
+                expect(result.events[0].args.to).to.equal("0x1684469EA0Ef1dB1dB91DA9524ba6022FDbd06E5")
+                expect(result.events[0].args.id).to.equal(1234)
+                expect(result.events[0].args.value).to.equal(1)
+                expect(result.events[1].args.operator).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+                expect(result.events[1].args.from).to.equal("0x0000000000000000000000000000000000000001")
+                expect(result.events[1].args.to).to.equal("0x1684469EA0Ef1dB1dB91DA9524ba6022FDbd06E5")
+                expect(result.events[1].args.id).to.equal(1234)
+                expect(result.events[1].args.value).to.equal(10)
+              })
+        
+              it('should emit multiple transfer events when multiple from addresses, multiple to addresses and multiple amounts', async ()=>{
+                let tx = await ERC1155['makeEvents(address[],uint256[],address[],address[],uint256[])'](["0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5"],[1234],["0x0000000000000000000000000000000000000000","0x0000000000000000000000000000000000000001"], ["0x1684469EA0Ef1dB1dB91DA9524ba6022FDbd06E5", "0x2d922712f5e99428c65b44f09Ea389373d185bB3"],[1, 10])
+                let result = await tx.wait()
+                expect(result.events.length).to.equal(2)
+                expect(result.events[0].args.operator).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+                expect(result.events[0].args.from).to.equal("0x0000000000000000000000000000000000000000")
+                expect(result.events[0].args.to).to.equal("0x1684469EA0Ef1dB1dB91DA9524ba6022FDbd06E5")
+                expect(result.events[0].args.id).to.equal(1234)
+                expect(result.events[0].args.value).to.equal(1)
+                expect(result.events[1].args.operator).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+                expect(result.events[1].args.from).to.equal("0x0000000000000000000000000000000000000001")
+                expect(result.events[1].args.to).to.equal("0x2d922712f5e99428c65b44f09Ea389373d185bB3")
+                expect(result.events[1].args.id).to.equal(1234)
+                expect(result.events[1].args.value).to.equal(10)
+              })
+        
+              it('should emit multiple transfer events when multiple operators', async ()=>{
+                let tx = await ERC1155['makeEvents(address[],uint256[],address[],address[],uint256[])'](["0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5", "0x2d922712f5e99428c65b44f09Ea389373d185bB3"],[1234],["0x0000000000000000000000000000000000000000"], ["0x2d922712f5e99428c65b44f09Ea389373d185bB3"],[1])
+                let result = await tx.wait()
+                expect(result.events.length).to.equal(2)
+                expect(result.events[0].args.operator).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+                expect(result.events[0].args.from).to.equal("0x0000000000000000000000000000000000000000")
+                expect(result.events[0].args.to).to.equal("0x2d922712f5e99428c65b44f09Ea389373d185bB3")
+                expect(result.events[0].args.id).to.equal(1234)
+                expect(result.events[0].args.value).to.equal(1)
+                expect(result.events[1].args.operator).to.equal("0x2d922712f5e99428c65b44f09Ea389373d185bB3")
+                expect(result.events[1].args.from).to.equal("0x0000000000000000000000000000000000000000")
+                expect(result.events[1].args.to).to.equal("0x2d922712f5e99428c65b44f09Ea389373d185bB3")
+                expect(result.events[1].args.id).to.equal(1234)
+                expect(result.events[1].args.value).to.equal(1)
+              })
+              it('should emit multiple transfer events when multiple operators and multiple to', async ()=>{
+                let tx = await ERC1155['makeEvents(address[],uint256[],address[],address[],uint256[])'](["0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5", "0x2d922712f5e99428c65b44f09Ea389373d185bB3"],[1234, 1234],["0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000000"], ["0x2d922712f5e99428c65b44f09Ea389373d185bB3", "0x1684469EA0Ef1dB1dB91DA9524ba6022FDbd06E5"],[1, 10])
+                let result = await tx.wait()
+                expect(result.events.length).to.equal(2)
+                expect(result.events[0].args.operator).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+                expect(result.events[0].args.from).to.equal("0x0000000000000000000000000000000000000000")
+                expect(result.events[0].args.to).to.equal("0x2d922712f5e99428c65b44f09Ea389373d185bB3")
+                expect(result.events[0].args.id).to.equal(1234)
+                expect(result.events[0].args.value).to.equal(1)
+                expect(result.events[1].args.operator).to.equal("0x2d922712f5e99428c65b44f09Ea389373d185bB3")
+                expect(result.events[1].args.from).to.equal("0x0000000000000000000000000000000000000000")
+                expect(result.events[1].args.to).to.equal("0x1684469EA0Ef1dB1dB91DA9524ba6022FDbd06E5")
+                expect(result.events[1].args.id).to.equal(1234)
+                expect(result.events[1].args.value).to.equal(10)
+              })
+        })
+        describe('Upgrade', ()=>{
+            it('Should not be an upgrade by default', async ()=>{
+              let upgraded = await ERC1155.isUpgrade()
+              expect(upgraded).to.be.false
+            })
+            it('Should have 2 unique contracts', async()=>{
+                expect(ERC1155V1.address).to.not.equals(ERC1155.address)
+            })
+            it('non admin can not set upgrade', async ()=>{
+                ERC1155 = await util.getERC1155(ERC1155.address, util.bob)
+                let tx = ERC1155.upgradeFrom(ERC1155.address)
+                await expect(tx).to.be.revertedWith("Not owner or able to bypass")
+                let upgraded = await ERC1155.isUpgrade()
+                expect(upgraded).to.be.false
+            })
+            it('admin can set upgrade', async ()=>{
+                await ERC1155.upgradeFrom(ERC1155V1.address)
+                console.log("tired")
+                let upgraded = await ERC1155.isUpgrade()
+                let upgradeAddress = await ERC1155.upgradedFrom()
+                expect(upgraded).to.be.true
+                expect(upgradeAddress).to.equal(ERC1155V1.address)
+            })
+        
+            it('admin can not set upgrade twice', async ()=>{
+                await ERC1155.upgradeFrom(ERC1155V1.address)
+                let tx = ERC1155.upgradeFrom(ERC1155V1.address)
+                await expect(tx).to.be.revertedWith("Contract already an upgrade")
+            })
+        
+            it('upgraded checks balance of old contract if not seen', async ()=>{
+                await ERC1155V1.toggleSerialization()
+                await ERC1155V1.mint(util.bob.address, 1337, 1)
+                let oldBalance = await ERC1155V1.balanceOf(util.bob.address, 1337)
+                let newBalance = await ERC1155.balanceOf(util.bob.address, 1337)
+                expect(oldBalance).to.equal(1)
+                expect(newBalance).to.equal(0)
+                await ERC1155.upgradeFrom(ERC1155V1.address)
+                newBalance = await ERC1155.balanceOf(util.bob.address, 1337)
+                expect(newBalance).to.equal(1)
+            })
+        
+            it('upgraded checks allowance of new contract if not seen', async ()=>{
+                await ERC1155V1.toggleSerialization()
+                await ERC1155V1.mint(util.bob.address, 1337, 1)
+                ERC1155V1 = util.getERC1155(ERC1155V1.address, util.bob)
+                await ERC1155V1.setApprovalForAll(util.deployer.address, true)
+                let oldAllowance = await ERC1155V1.isApprovedForAll(util.bob.address, util.deployer.address)
+                let newAllowance = await ERC1155.isApprovedForAll(util.bob.address, util.deployer.address)
+                expect(oldAllowance).to.be.true
+                expect(newAllowance).to.be.false
+                await ERC1155.upgradeFrom(ERC1155V1.address)
+                newBalance = await ERC1155.isApprovedForAll(util.bob.address, util.deployer.address)
+                expect(newBalance).to.equal(false)
+            })
+        
+            it('minting marks address seen', async ()=>{
+                await ERC1155.toggleSerialization()
+                let seen = await ERC1155.seen(util.bob.address)
+                expect(seen).to.be.false
+                await ERC1155.mint(util.bob.address, 1337, 1)
+                seen = await ERC1155.seen(util.bob.address)
+                expect(seen).to.be.true
+            })
+        
+            it('minting combines old and new balances', async ()=>{
+                await ERC1155V1.toggleSerialization()
+                await ERC1155.toggleSerialization()
+                await ERC1155V1.mint(util.bob.address, 1337, 1)
+                let oldBalance = await ERC1155V1.balanceOf(util.bob.address, 1337)
+                let newBalance = await ERC1155.balanceOf(util.bob.address, 1337)
+                expect(oldBalance).to.equal(1)
+                expect(newBalance).to.equal(0)
+                await ERC1155.upgradeFrom(ERC1155V1.address)
+                await ERC1155.mint(util.bob.address, 1337, 1)
+                newBalance = await ERC1155.balanceOf(util.bob.address, 1337)
+                expect(newBalance).to.equal(2)
+            })
+            
+            it('minting to old after minting on new does not effect new contract balance', async ()=>{
+                await ERC1155V1.toggleSerialization()
+                await ERC1155.toggleSerialization()
+                await ERC1155V1.mint(util.bob.address, 1337, 1)
+                await ERC1155.upgradeFrom(ERC1155V1.address)
+                await ERC1155.mint(util.bob.address, 1337, 1)
+                newBalance = await ERC1155.balanceOf(util.bob.address, 1337)
+                expect(newBalance).to.equal(2)
+                await ERC1155V1.mint(util.bob.address, 1337, 1)
+                newBalance = await ERC1155.balanceOf(util.bob.address, 1337)
+                expect(newBalance).to.equal(2)
+                oldBalance = await ERC1155V1.balanceOf(util.bob.address, 1337)
+                expect(oldBalance).to.equal(2)
+            })
+            it('transfering 2 unseen addresses makes both seen', async ()=>{
+                await ERC1155V1.toggleSerialization()
+                await ERC1155.toggleSerialization()
+                await ERC1155V1.mint(util.bob.address, 1337, 1)
+                await ERC1155V1.mint(util.alice.address, 1337, 1)
+                await ERC1155.upgradeFrom(ERC1155V1.address)
+                let seenBob = await ERC1155.seen(util.bob.address)
+                let seenAlice = await ERC1155.seen(util.alice.address)
+                expect(seenBob).to.be.false
+                expect(seenAlice).to.be.false
+                ERC1155 = await util.getERC1155(ERC1155.address, util.bob)
+                await ERC1155.safeTransferFrom(util.bob.address, util.alice.address, 1337, 1, 0x0)
+                seenBob = await ERC1155.seen(util.bob.address)
+                seenAlice = await ERC1155.seen(util.alice.address)
+                expect(seenBob).to.be.true
+                expect(seenAlice).to.be.true
+                let bobBalance = await ERC1155.balanceOf(util.bob.address, 1337)
+                let aliceBalance = await ERC1155.balanceOf(util.alice.address, 1337)
+                expect(bobBalance).to.equal(0)
+                expect(aliceBalance).to.equal(2)
+            })
+        
+            it('transfering from 1 unseen address makes it seen', async ()=>{
+                await ERC1155V1.toggleSerialization()
+                await ERC1155.toggleSerialization()
+                await ERC1155V1.mint(util.deployer.address, 1337, 10)
+                await ERC1155V1.mint(util.bob.address, 1337, 1)
+                await ERC1155.upgradeFrom(ERC1155V1.address)
+                await ERC1155.mint(util.alice.address, 1337, 1)
+                let aliceBalance = await ERC1155.balanceOf(util.alice.address, 1337)
+                expect(aliceBalance).to.equal(1)
+                let seenBob = await ERC1155.seen(util.bob.address)
+                let seenAlice = await ERC1155.seen(util.alice.address)
+                expect(seenBob).to.be.false
+                expect(seenAlice).to.be.true
+                ERC1155 = await util.getERC1155(ERC1155.address, util.alice)
+                await ERC1155.safeTransferFrom(util.alice.address, util.bob.address, 1337, 1, 0x0)
+                seenBob = await ERC1155.seen(util.bob.address)
+                seenAlice = await ERC1155.seen(util.alice.address)
+                expect(seenBob).to.be.true
+                expect(seenAlice).to.be.true
+                let bobBalance = await ERC1155.balanceOf(util.bob.address, 1337)
+                aliceBalance = await ERC1155.balanceOf(util.alice.address, 1337)
+                expect(bobBalance).to.equal(2)
+                expect(aliceBalance).to.equal(0)
+            })
+        })
         describe('Burn', ()=>{
             it('should burn', async()=>{
                 await ERC1155.toggleSerialization()
@@ -89,7 +381,7 @@ describe('ERC1155', () => {
                 console.log("serialized", serialized)
                 await ERC1155.toggleSerialization()
                 await ERC1155.transferOwnership(util.handler.address)
-                let covalAddress = util.erc20.address
+                let covalAddress = util.ERC1155.address
                 await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
                 var provider = util.selectProvider("mainnet")
                 var web3 = new Web3(provider)
@@ -215,6 +507,8 @@ describe('ERC1155', () => {
                 await util.handler.registerContract(ERC1155.address, 1)
                 await ERC1155.mintWithSerial(util.deployer.address, 789, 1, util.serializeUintToBytes(789))
                 let serialNumber = await ERC1155.getSerial(789, 0)
+                let serialTokenId = await ERC1155.getTokenIdForSerialNumber(serialNumber)
+                expect(serialTokenId).to.equal(789)
                 await ERC1155.setApprovalForAll(util.handler.address, true)
                 let isClaimed = await util.claimedUpgradable.isClaimed(ERC1155.address, serialNumber, [])
                 expect(isClaimed).to.be.false
@@ -226,11 +520,12 @@ describe('ERC1155', () => {
                 let claimedBy = await util.claimedUpgradable.claimedBy(ERC1155.address, serialNumber)
                 expect(claimedBy[0]).to.equal(util.deployer.address)
                 expect(claimedBy[1]).to.equal('record')
-                let serialTokenId = await ERC1155.getTokenIdForSerialNumber(serialNumber)
+                serialTokenId = await ERC1155.getTokenIdForSerialNumber(serialNumber)
                 expect(serialTokenId).to.equal(789)
                 let newOwner = await ERC1155.getOwnerOfSerial(serialNumber)
                 expect(newOwner).to.equal("0x0000000000000000000000000000000000000000")
                 hasClaimed = await util.claimedUpgradable.getClaimsFor(util.deployer.address)
+                console.log('hasClaimed', hasClaimed)
                 expect(serialNumber).to.equal(hasClaimed[0])
               })
             it('should get correct serialNumber for owner and tokenId after claims', async()=>{
@@ -246,10 +541,10 @@ describe('ERC1155', () => {
                 await ERC1155.transferOwnership(util.handler.address)
                 await util.handler.claim(ERC1155.address, 789)
                 firstSerialByOwner = await ERC1155.getFirstSerialByOwner(util.deployer.address, 789)
-                expect(firstSerialByOwner).to.equal(3)
+                expect(firstSerialByOwner).to.equal(4)
                 await util.handler.claim(ERC1155.address, 789)
                 firstSerialByOwner = await ERC1155.getFirstSerialByOwner(util.deployer.address, 789)
-                expect(firstSerialByOwner).to.equal(4)
+                expect(firstSerialByOwner).to.equal(3)
                 await util.handler.claim(ERC1155.address, 789)
                 firstSerialByOwner = await ERC1155.getFirstSerialByOwner(util.deployer.address, 789)
                 expect(firstSerialByOwner).to.equal(0)

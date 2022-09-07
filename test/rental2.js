@@ -165,7 +165,7 @@ describe('Rentals V2', () => {
       await util.rentalV2.AddInventory(erc1155Nft.address, 789, 1, erc721Nft.address, 123, 1, true)
       let inventoryId = util.getWeb3().utils.soliditySha3(erc1155Nft.address, 789, 1)
       let inventory = await util.rentalV2.GetInventory(inventoryId)
-      expect(inventory[0]).to.equal("0x8802659d9f6b42a85514a0fe61bffc71c240953500b55106131b1a07726c7a47")
+      expect(inventory[0]).to.equal("0x82852e874c9749d4acd22d0208ea155d827f1577a3937ecf9259205820b3248e")
       await util.rentalV2.DeleteInventory(erc1155Nft.address, 789, 1, erc721Nft.address, 123, 1, true)
       inventory = await util.rentalV2.GetInventory(inventoryId)
       expect(inventory[0]).to.equal("0x0000000000000000000000000000000000000000000000000000000000000000")
@@ -434,7 +434,7 @@ describe('Rentals V2', () => {
       await util.rentalV2.AddInventory(erc1155Nft.address, 789, 1, erc1155Nft.address, 123, 2, true)
       let tx = util.rentalV2.AddInventory(erc1155Nft.address, 789, 1, erc1155Nft.address, 123, 2, true)
       await expect(tx).to.be.revertedWith("inventory already exists")
-      tx = util.rentalV2.AddInventory(erc1155Nft.address, 123, 1, erc1155Nft.address, 789, 2, true)
+      tx = util.rentalV2.AddInventory(erc1155Nft.address, 123, 2, erc1155Nft.address, 789, 1, true)
       await expect(tx).to.be.revertedWith("inventory already exists")
     })
 
@@ -444,7 +444,7 @@ describe('Rentals V2', () => {
       let assets = await util.rentalV2.GetAssetIds()
       expect(assets.length).to.equal(3)
       let rentalInventory = await Inventory()
-      console.log(JSON.stringify(rentalInventory, null, 4))
+      // console.log(JSON.stringify(rentalInventory, null, 4))
       expect(JSON.stringify(rentalInventory)).equal(JSON.stringify(MOCKS.simple3))
     })
 
@@ -452,15 +452,15 @@ describe('Rentals V2', () => {
       let assets = await util.rentalV2.GetAssetIds()
       console.log(assets)
       expect(assets.length).to.equal(0)
-      let rentalInventory = await Inventory()//await getInventoryFromAssetIdentifiers(assets)
+      let rentalInventory = await Inventory() //await getInventoryFromAssetIdentifiers(assets)
       expect(JSON.stringify(rentalInventory)).equal(JSON.stringify({"asks":{}}))
     })
 
-    it('can get inventory when same erc1155', async () => { 
+    it('can get inventory when same erc1155', async () => {
       await util.rentalV2.AddInventory(erc1155Nft.address, 789, 1, erc1155Nft.address, 123, 2, true)
       let assets = await util.rentalV2.GetAssetIds()
       expect(assets.length).to.equal(2)
-      let rentalInventory = await Inventory()//await getInventoryFromAssetIdentifiers(assets)
+      let rentalInventory = await Inventory() //await getInventoryFromAssetIdentifiers(assets)
       expect(JSON.stringify(rentalInventory)).equal(JSON.stringify(MOCKS.simple1))
     })
 
@@ -469,7 +469,7 @@ describe('Rentals V2', () => {
       await util.rentalV2.AddInventory(erc1155Nft.address, 789, 1, erc1155Nft.address, 555, 2, true)
       let assets = await util.rentalV2.GetAssetIds()
       expect(assets.length).to.equal(3)
-      let rentalInventory = await Inventory()//await getInventoryFromAssetIdentifiers(assets)
+      let rentalInventory = await Inventory() //await getInventoryFromAssetIdentifiers(assets)
       expect(JSON.stringify(rentalInventory)).equal(JSON.stringify(MOCKS.simple2))
       // console.log(JSON.stringify(rentalInventory))
     })
@@ -480,7 +480,7 @@ describe('Rentals V2', () => {
       await util.rentalV2.AddInventory(erc1155Nft.address, 555, 1, erc1155Nft.address, 789, 2, true)
       let assets = await util.rentalV2.GetAssetIds()
       expect(assets.length).to.equal(4)
-      let rentalInventory = await Inventory()//await getInventoryFromAssetIdentifiers(assets)
+      let rentalInventory = await Inventory() //await getInventoryFromAssetIdentifiers(assets)
       expect(JSON.stringify(rentalInventory)).equal(JSON.stringify(MOCKS.complex))
       // console.log(JSON.stringify(rentalInventory))
     })
@@ -490,7 +490,7 @@ describe('Rentals V2', () => {
       await util.rentalV2.DeleteInventory(erc1155Nft.address, 789, 1, erc1155Nft.address, 123, 2, true)
       let assets = await util.rentalV2.GetAssetIds()
       expect(assets.length).to.equal(2)
-      let rentalInventory = await Inventory()//await getInventoryFromAssetIdentifiers(assets)
+      let rentalInventory = await Inventory() //await getInventoryFromAssetIdentifiers(assets)
       expect(JSON.stringify(rentalInventory)).equal(JSON.stringify({"asks":{}}))
       // console.log(JSON.stringify(rentalInventory))
     })
@@ -499,9 +499,9 @@ describe('Rentals V2', () => {
       await util.rentalV2.AddInventory(erc1155Nft.address, 789, 1, erc1155Nft.address, 123, 2, true)
       await util.rentalV2.AddInventory(erc1155Nft.address, 789, 1, erc1155Nft.address, 555, 2, true)
       await util.rentalV2.DeleteInventory(erc1155Nft.address, 789, 1, erc1155Nft.address, 123, 2, true)
-      let assets = await util.rentalV2.GetAssetIds()
-      expect(assets.length).to.equal(2)
-      let rentalInventory = await Inventory()//await getInventoryFromAssetIdentifiers(assets)
+      let inventory = await util.rentalV2.GetInventoryIds()
+      expect(inventory.length).to.equal(1)
+      let rentalInventory = await Inventory() //await getInventoryFromAssetIdentifiers(assets)
       expect(JSON.stringify(rentalInventory)).equal(JSON.stringify(MOCKS.delete1))
       // console.log(JSON.stringify(rentalInventory))
     })
@@ -509,12 +509,11 @@ describe('Rentals V2', () => {
     it('can get inventory after multiple add and multiple delete', async () => {
       await util.rentalV2.AddInventory(erc1155Nft.address, 789, 1, erc1155Nft.address, 123, 2, true)
       await util.rentalV2.AddInventory(erc1155Nft.address, 789, 1, erc1155Nft.address, 555, 2, true)
-      // await util.rentalV2.DeleteInventory(erc1155Nft.address, 789, 1, erc1155Nft.address, 123, 2, true)
+      await util.rentalV2.DeleteInventory(erc1155Nft.address, 789, 1, erc1155Nft.address, 123, 2, true)
       await util.rentalV2.DeleteInventory(erc1155Nft.address, 789, 1, erc1155Nft.address, 555, 2, true)
       let assets = await util.rentalV2.GetInventoryIds()
-      console.log(assets)
-      expect(assets.length).to.equal(0)
-      let rentalInventory = await Inventory()//await getInventoryFromAssetIdentifiers(assets)
+      expect(assets.length).to.equal(1)
+      let rentalInventory = await Inventory() //await getInventoryFromAssetIdentifiers(assets)
       expect(JSON.stringify(rentalInventory)).equal(JSON.stringify({"asks":{}}))
       // console.log(JSON.stringify(rentalInventory))
     })
@@ -569,13 +568,15 @@ async function Inventory() {
     let costAsset = await util.rentalV2.GetAsset(cost.assetId)
     let costObject = {askIdentifier: pair.costInventoryIds[0],'contractAddress': costAsset.contractAddress, 'tokenId': costAsset.tokenId.toNumber(), amount: cost.amount.toNumber(), assetType: costAsset.interfaceId == 0xd9b67a26? "ERC1155": costAsset.interfaceId == 0x80ac58cd? "ERC721": "ERC20" }
     
-    inventory.asks[pairId] = {
-      askIdentifier: pair.askInventoryIds[0],
-      amount: ask.amount.toNumber(), 
-      assetType: askAsset.interfaceId == 0xd9b67a26? "ERC1155": askAsset.interfaceId == 0x80ac58cd? "ERC721": "ERC20", 
-      contractAddress: askAsset.contractAddress, 
-      costs: [costObject], 
-      tokenId: askAsset.tokenId.toNumber()
+    if(askAsset.contractAddress != "0x0000000000000000000000000000000000000000") {
+      inventory.asks[pairId] = {
+        askIdentifier: pair.askInventoryIds[0],
+        amount: ask.amount.toNumber(), 
+        assetType: askAsset.interfaceId == 0xd9b67a26? "ERC1155": askAsset.interfaceId == 0x80ac58cd? "ERC721": "ERC20", 
+        contractAddress: askAsset.contractAddress, 
+        costs: [costObject], 
+        tokenId: askAsset.tokenId.toNumber()
+      }
     }
     if (ids.length > index+1) {
       return forEveryPair(inventory, ids, index +1, cb)
@@ -712,11 +713,11 @@ function removeDuplicates(originalArray, prop) {
 }
 
 let MOCKS = {
-  single: {"asks":{"0x919cb8c2fb269c4e927513d0cdc8d21d99ef690b747e4ddec2e366f9e37e79d1":{"askIdentifier":"0x58ddee29520c8aff0280a3ef42763be8324c3a4065e319dbf0920d240ce42315","amount":1,"assetType":"ERC1155","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","costs":[{"askIdentifier":"0x894d043c55bb1a174862bcb6ab4b9e5da32f95f180392cc9699b74f47b54ec76","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","tokenId":123,"amount":2,"assetType":"ERC1155"}],"tokenId":789}}},
-  simple1: {"asks":{"0x919cb8c2fb269c4e927513d0cdc8d21d99ef690b747e4ddec2e366f9e37e79d1":{"askIdentifier":"0x58ddee29520c8aff0280a3ef42763be8324c3a4065e319dbf0920d240ce42315","amount":1,"assetType":"ERC1155","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","costs":[{"askIdentifier":"0x894d043c55bb1a174862bcb6ab4b9e5da32f95f180392cc9699b74f47b54ec76","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","tokenId":123,"amount":2,"assetType":"ERC1155"}],"tokenId":789},"0xe8180deb159b48a85e7b73918bf663c2a7cc903970708b0000f577815be7ad54":{"askIdentifier":"0x894d043c55bb1a174862bcb6ab4b9e5da32f95f180392cc9699b74f47b54ec76","amount":2,"assetType":"ERC1155","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","costs":[{"askIdentifier":"0x58ddee29520c8aff0280a3ef42763be8324c3a4065e319dbf0920d240ce42315","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","tokenId":789,"amount":1,"assetType":"ERC1155"}],"tokenId":123}}},
-  simple2: {"asks":{"0x919cb8c2fb269c4e927513d0cdc8d21d99ef690b747e4ddec2e366f9e37e79d1":{"askIdentifier":"0x58ddee29520c8aff0280a3ef42763be8324c3a4065e319dbf0920d240ce42315","amount":1,"assetType":"ERC1155","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","costs":[{"askIdentifier":"0x894d043c55bb1a174862bcb6ab4b9e5da32f95f180392cc9699b74f47b54ec76","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","tokenId":123,"amount":2,"assetType":"ERC1155"}],"tokenId":789},"0xe8180deb159b48a85e7b73918bf663c2a7cc903970708b0000f577815be7ad54":{"askIdentifier":"0x894d043c55bb1a174862bcb6ab4b9e5da32f95f180392cc9699b74f47b54ec76","amount":2,"assetType":"ERC1155","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","costs":[{"askIdentifier":"0x58ddee29520c8aff0280a3ef42763be8324c3a4065e319dbf0920d240ce42315","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","tokenId":789,"amount":1,"assetType":"ERC1155"}],"tokenId":123},"0x747721efe60e8fdbcbfe0db5cd91a188e7ee3c83bef3d996bc9e3795cc9af5c8":{"askIdentifier":"0x58ddee29520c8aff0280a3ef42763be8324c3a4065e319dbf0920d240ce42315","amount":1,"assetType":"ERC1155","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","costs":[{"askIdentifier":"0x8d3bdcabb7e4d7c661c15941a3018dc08eec8baf7c502a14fcb34d3f984c2c47","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","tokenId":555,"amount":2,"assetType":"ERC1155"}],"tokenId":789},"0x45a8d4ea71c0640b1a53ada0f9ba5b32e6f242911161a96c9831848f47576daf":{"askIdentifier":"0x8d3bdcabb7e4d7c661c15941a3018dc08eec8baf7c502a14fcb34d3f984c2c47","amount":2,"assetType":"ERC1155","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","costs":[{"askIdentifier":"0x58ddee29520c8aff0280a3ef42763be8324c3a4065e319dbf0920d240ce42315","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","tokenId":789,"amount":1,"assetType":"ERC1155"}],"tokenId":555}}},
-  simple3: {"asks":{"0x919cb8c2fb269c4e927513d0cdc8d21d99ef690b747e4ddec2e366f9e37e79d1":{"askIdentifier":"0x58ddee29520c8aff0280a3ef42763be8324c3a4065e319dbf0920d240ce42315","amount":1,"assetType":"ERC1155","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","costs":[{"askIdentifier":"0x894d043c55bb1a174862bcb6ab4b9e5da32f95f180392cc9699b74f47b54ec76","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","tokenId":123,"amount":2,"assetType":"ERC1155"}],"tokenId":789},"0xe8180deb159b48a85e7b73918bf663c2a7cc903970708b0000f577815be7ad54":{"askIdentifier":"0x894d043c55bb1a174862bcb6ab4b9e5da32f95f180392cc9699b74f47b54ec76","amount":2,"assetType":"ERC1155","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","costs":[{"askIdentifier":"0x58ddee29520c8aff0280a3ef42763be8324c3a4065e319dbf0920d240ce42315","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","tokenId":789,"amount":1,"assetType":"ERC1155"}],"tokenId":123},"0x0af0d6065dbd8254b7d090db5df26bfe61dd9d6a52b1a633b112b684dc41208a":{"askIdentifier":"0x58ddee29520c8aff0280a3ef42763be8324c3a4065e319dbf0920d240ce42315","amount":1,"assetType":"ERC1155","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","costs":[{"askIdentifier":"0x29a2ea95fbea224607c1aef5b1687f3f1b680569cb71d6b487f83862b3ba1e35","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","tokenId":456,"amount":1,"assetType":"ERC1155"}],"tokenId":789},"0xbf6ae6d7bd3aaee24e52681ed26fcae849c839c0569acb43e25c799fa6923a78":{"askIdentifier":"0x29a2ea95fbea224607c1aef5b1687f3f1b680569cb71d6b487f83862b3ba1e35","amount":1,"assetType":"ERC1155","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","costs":[{"askIdentifier":"0x58ddee29520c8aff0280a3ef42763be8324c3a4065e319dbf0920d240ce42315","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","tokenId":789,"amount":1,"assetType":"ERC1155"}],"tokenId":456}}},
-  complex: {"asks":{"0x919cb8c2fb269c4e927513d0cdc8d21d99ef690b747e4ddec2e366f9e37e79d1":{"askIdentifier":"0x58ddee29520c8aff0280a3ef42763be8324c3a4065e319dbf0920d240ce42315","amount":1,"assetType":"ERC1155","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","costs":[{"askIdentifier":"0x894d043c55bb1a174862bcb6ab4b9e5da32f95f180392cc9699b74f47b54ec76","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","tokenId":123,"amount":2,"assetType":"ERC1155"}],"tokenId":789},"0xe8180deb159b48a85e7b73918bf663c2a7cc903970708b0000f577815be7ad54":{"askIdentifier":"0x894d043c55bb1a174862bcb6ab4b9e5da32f95f180392cc9699b74f47b54ec76","amount":2,"assetType":"ERC1155","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","costs":[{"askIdentifier":"0x58ddee29520c8aff0280a3ef42763be8324c3a4065e319dbf0920d240ce42315","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","tokenId":789,"amount":1,"assetType":"ERC1155"}],"tokenId":123},"0x9d36cd6122916555e948fc364e2642b14a3ec4b53c7bdab344625665a9c0af8a":{"askIdentifier":"0x58ddee29520c8aff0280a3ef42763be8324c3a4065e319dbf0920d240ce42315","amount":1,"assetType":"ERC1155","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","costs":[{"askIdentifier":"0x4916f8a7c3bcd0f2c2ec38fdc136e5d1d68ac0467a9115fd018f54b02eb8f4da","contractAddress":"0xbD89b434dD59562756ED9B14B0bec5E71f3c6876","tokenId":456,"amount":1,"assetType":"ERC721"}],"tokenId":789},"0x93d9ea9a5427765fbdc6829e57d18a2a6a84f9b548cc48cb2607750bbd13fbcd":{"askIdentifier":"0x4916f8a7c3bcd0f2c2ec38fdc136e5d1d68ac0467a9115fd018f54b02eb8f4da","amount":1,"assetType":"ERC721","contractAddress":"0xbD89b434dD59562756ED9B14B0bec5E71f3c6876","costs":[{"askIdentifier":"0x58ddee29520c8aff0280a3ef42763be8324c3a4065e319dbf0920d240ce42315","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","tokenId":789,"amount":1,"assetType":"ERC1155"}],"tokenId":456},"0x45a8d4ea71c0640b1a53ada0f9ba5b32e6f242911161a96c9831848f47576daf":{"askIdentifier":"0x7f1b05ccdb0256d2ad1999d4b8c94e451587ce2b13b6aeb9ee48a7c6198ec2b1","amount":1,"assetType":"ERC1155","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","costs":[{"askIdentifier":"0x532563c8a7394000011e8ba1fc6fa3a8d22db0544fbcc301f3933a267834aac5","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","tokenId":789,"amount":2,"assetType":"ERC1155"}],"tokenId":555},"0x747721efe60e8fdbcbfe0db5cd91a188e7ee3c83bef3d996bc9e3795cc9af5c8":{"askIdentifier":"0x532563c8a7394000011e8ba1fc6fa3a8d22db0544fbcc301f3933a267834aac5","amount":2,"assetType":"ERC1155","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","costs":[{"askIdentifier":"0x7f1b05ccdb0256d2ad1999d4b8c94e451587ce2b13b6aeb9ee48a7c6198ec2b1","contractAddress":"0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c","tokenId":555,"amount":1,"assetType":"ERC1155"}],"tokenId":789}}},
+  single: {"asks":{"0xf69c586e335001507d8d32a7cdd4962e1d7c35507a17691c925b769af8cbe29b":{"askIdentifier":"0x65b46bd469cde530a0404caeff7e144002293c29d9cffd64ae2a195307cc1992","amount":1,"assetType":"ERC1155","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","costs":[{"askIdentifier":"0x6f3eec4acff72588318e756328221b9d0944ea69732100af72f75d996c13a107","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","tokenId":123,"amount":2,"assetType":"ERC1155"}],"tokenId":789}}},
+  simple1: {"asks":{"0xf69c586e335001507d8d32a7cdd4962e1d7c35507a17691c925b769af8cbe29b":{"askIdentifier":"0x65b46bd469cde530a0404caeff7e144002293c29d9cffd64ae2a195307cc1992","amount":1,"assetType":"ERC1155","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","costs":[{"askIdentifier":"0x6f3eec4acff72588318e756328221b9d0944ea69732100af72f75d996c13a107","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","tokenId":123,"amount":2,"assetType":"ERC1155"}],"tokenId":789},"0x20ad0fc5612d5322a36ec1c1cf247393b886ce8c6dabc92ed2d26ef9fb6be089":{"askIdentifier":"0x6f3eec4acff72588318e756328221b9d0944ea69732100af72f75d996c13a107","amount":2,"assetType":"ERC1155","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","costs":[{"askIdentifier":"0x65b46bd469cde530a0404caeff7e144002293c29d9cffd64ae2a195307cc1992","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","tokenId":789,"amount":1,"assetType":"ERC1155"}],"tokenId":123}}},
+  simple2: {"asks":{"0xf69c586e335001507d8d32a7cdd4962e1d7c35507a17691c925b769af8cbe29b":{"askIdentifier":"0x65b46bd469cde530a0404caeff7e144002293c29d9cffd64ae2a195307cc1992","amount":1,"assetType":"ERC1155","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","costs":[{"askIdentifier":"0x6f3eec4acff72588318e756328221b9d0944ea69732100af72f75d996c13a107","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","tokenId":123,"amount":2,"assetType":"ERC1155"}],"tokenId":789},"0x20ad0fc5612d5322a36ec1c1cf247393b886ce8c6dabc92ed2d26ef9fb6be089":{"askIdentifier":"0x6f3eec4acff72588318e756328221b9d0944ea69732100af72f75d996c13a107","amount":2,"assetType":"ERC1155","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","costs":[{"askIdentifier":"0x65b46bd469cde530a0404caeff7e144002293c29d9cffd64ae2a195307cc1992","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","tokenId":789,"amount":1,"assetType":"ERC1155"}],"tokenId":123},"0x4ef76ca86ea392f6038562d7561902668267977ccf79fe0b1b2bbeda9f6e780a":{"askIdentifier":"0x65b46bd469cde530a0404caeff7e144002293c29d9cffd64ae2a195307cc1992","amount":1,"assetType":"ERC1155","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","costs":[{"askIdentifier":"0xfc78b391b44f61ddd27889da744c9b739b4c857470c40fffa589c489c89fe750","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","tokenId":555,"amount":2,"assetType":"ERC1155"}],"tokenId":789},"0x2527a713d4073a50e3e2b252464bf2dab7e49102b86b0f5634475e4340f383ed":{"askIdentifier":"0xfc78b391b44f61ddd27889da744c9b739b4c857470c40fffa589c489c89fe750","amount":2,"assetType":"ERC1155","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","costs":[{"askIdentifier":"0x65b46bd469cde530a0404caeff7e144002293c29d9cffd64ae2a195307cc1992","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","tokenId":789,"amount":1,"assetType":"ERC1155"}],"tokenId":555}}},
+  simple3: {"asks":{"0xf69c586e335001507d8d32a7cdd4962e1d7c35507a17691c925b769af8cbe29b":{"askIdentifier":"0x65b46bd469cde530a0404caeff7e144002293c29d9cffd64ae2a195307cc1992","amount":1,"assetType":"ERC1155","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","costs":[{"askIdentifier":"0x6f3eec4acff72588318e756328221b9d0944ea69732100af72f75d996c13a107","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","tokenId":123,"amount":2,"assetType":"ERC1155"}],"tokenId":789},"0x20ad0fc5612d5322a36ec1c1cf247393b886ce8c6dabc92ed2d26ef9fb6be089":{"askIdentifier":"0x6f3eec4acff72588318e756328221b9d0944ea69732100af72f75d996c13a107","amount":2,"assetType":"ERC1155","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","costs":[{"askIdentifier":"0x65b46bd469cde530a0404caeff7e144002293c29d9cffd64ae2a195307cc1992","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","tokenId":789,"amount":1,"assetType":"ERC1155"}],"tokenId":123},"0x8b46ae96d232c15ae57016652dac7bb18b80500896b388c60b818810d823e44c":{"askIdentifier":"0x65b46bd469cde530a0404caeff7e144002293c29d9cffd64ae2a195307cc1992","amount":1,"assetType":"ERC1155","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","costs":[{"askIdentifier":"0x0df380aaf67f6cacfa943a1ee83403f25f399de40e2a17cd36d8d9e86c2513cb","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","tokenId":456,"amount":1,"assetType":"ERC1155"}],"tokenId":789},"0x1ada69b818097107b3bdba98413cd4fbb4eb705826d37f5af564a33e8fe12be8":{"askIdentifier":"0x0df380aaf67f6cacfa943a1ee83403f25f399de40e2a17cd36d8d9e86c2513cb","amount":1,"assetType":"ERC1155","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","costs":[{"askIdentifier":"0x65b46bd469cde530a0404caeff7e144002293c29d9cffd64ae2a195307cc1992","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","tokenId":789,"amount":1,"assetType":"ERC1155"}],"tokenId":456}}},
+  complex: {"asks":{"0xf69c586e335001507d8d32a7cdd4962e1d7c35507a17691c925b769af8cbe29b":{"askIdentifier":"0x65b46bd469cde530a0404caeff7e144002293c29d9cffd64ae2a195307cc1992","amount":1,"assetType":"ERC1155","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","costs":[{"askIdentifier":"0x6f3eec4acff72588318e756328221b9d0944ea69732100af72f75d996c13a107","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","tokenId":123,"amount":2,"assetType":"ERC1155"}],"tokenId":789},"0x20ad0fc5612d5322a36ec1c1cf247393b886ce8c6dabc92ed2d26ef9fb6be089":{"askIdentifier":"0x6f3eec4acff72588318e756328221b9d0944ea69732100af72f75d996c13a107","amount":2,"assetType":"ERC1155","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","costs":[{"askIdentifier":"0x65b46bd469cde530a0404caeff7e144002293c29d9cffd64ae2a195307cc1992","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","tokenId":789,"amount":1,"assetType":"ERC1155"}],"tokenId":123},"0x41a8d8728e34eb6fba035a1c730633b8133aa0510e6abf6a83db8079b1baf899":{"askIdentifier":"0x65b46bd469cde530a0404caeff7e144002293c29d9cffd64ae2a195307cc1992","amount":1,"assetType":"ERC1155","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","costs":[{"askIdentifier":"0x5b8f70c489d9d2291b2185c1f2cc9ca130508da572f24b24c8befa2c65d9e9ed","contractAddress":"0x9E02f3a8567587D27d7EB1D087408D062b4c6a1c","tokenId":456,"amount":1,"assetType":"ERC721"}],"tokenId":789},"0x65e0bdc5ac1db8e64f53a940a73f6f20fe5112bc6ee4af0724fa484f42feb946":{"askIdentifier":"0x5b8f70c489d9d2291b2185c1f2cc9ca130508da572f24b24c8befa2c65d9e9ed","amount":1,"assetType":"ERC721","contractAddress":"0x9E02f3a8567587D27d7EB1D087408D062b4c6a1c","costs":[{"askIdentifier":"0x65b46bd469cde530a0404caeff7e144002293c29d9cffd64ae2a195307cc1992","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","tokenId":789,"amount":1,"assetType":"ERC1155"}],"tokenId":456},"0x2527a713d4073a50e3e2b252464bf2dab7e49102b86b0f5634475e4340f383ed":{"askIdentifier":"0xefd80378ee29fb65ad6a23ffcb12ede8a4642f93fbfa2eb1ec257c11c1db640c","amount":1,"assetType":"ERC1155","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","costs":[{"askIdentifier":"0x9c1bc355771b7d7bc85c6bcd369a7b3c263309002b941bcd6b11b0641fa121e2","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","tokenId":789,"amount":2,"assetType":"ERC1155"}],"tokenId":555},"0x4ef76ca86ea392f6038562d7561902668267977ccf79fe0b1b2bbeda9f6e780a":{"askIdentifier":"0x9c1bc355771b7d7bc85c6bcd369a7b3c263309002b941bcd6b11b0641fa121e2","amount":2,"assetType":"ERC1155","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","costs":[{"askIdentifier":"0xefd80378ee29fb65ad6a23ffcb12ede8a4642f93fbfa2eb1ec257c11c1db640c","contractAddress":"0x4fBd2B1681897666FCc9E953839f3F49cA16bf20","tokenId":555,"amount":1,"assetType":"ERC1155"}],"tokenId":789}}},
   delete1: { "asks": { "0x8802659d9f6b42a85514a0fe61bffc71c240953500b55106131b1a07726c7a47": { "costs": [{ "askIdentifier": "0xbbb346ae59edabe06231bdc589ce2a9bc26e7642a735821d44d665ecfa200793", "contractAddress": "0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c", "tokenId": 555, "amount": 2, "assetType": "ERC1155" }], "contractAddress": "0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c", "tokenId": 789, "amount": 1, "assetType": "ERC1155" }, "0xbbb346ae59edabe06231bdc589ce2a9bc26e7642a735821d44d665ecfa200793": { "costs": [{ "askIdentifier": "0x8802659d9f6b42a85514a0fe61bffc71c240953500b55106131b1a07726c7a47", "contractAddress": "0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c", "tokenId": 789, "amount": 1, "assetType": "ERC1155" }], "contractAddress": "0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c", "tokenId": 555, "amount": 2, "assetType": "ERC1155" } } },
   fees1: { "asks": { "0x8802659d9f6b42a85514a0fe61bffc71c240953500b55106131b1a07726c7a47": { "costs": [{ "askIdentifier": "0x4738c40165d98a16cbfc22542bc355b8b29df8de5dba25e01a7a084205f5b210", "contractAddress": "0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c", "tokenId": 123, "amount": 2, "assetType": "ERC1155", "fee": { "contractAddress": "0xdEB0Ba412852a0b4e2191f3DedE0Fc585fcd72Ea", "amount": 1, "feeType": 1 } }], "contractAddress": "0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c", "tokenId": 789, "amount": 1, "assetType": "ERC1155" }, "0x4738c40165d98a16cbfc22542bc355b8b29df8de5dba25e01a7a084205f5b210": { "costs": [{ "askIdentifier": "0x8802659d9f6b42a85514a0fe61bffc71c240953500b55106131b1a07726c7a47", "contractAddress": "0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c", "tokenId": 789, "amount": 1, "assetType": "ERC1155" }], "contractAddress": "0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c", "tokenId": 123, "amount": 2, "assetType": "ERC1155", "fee": { "contractAddress": "0xdEB0Ba412852a0b4e2191f3DedE0Fc585fcd72Ea", "amount": 1, "feeType": 1 } } } },
   fees2: { "asks": { "0x8802659d9f6b42a85514a0fe61bffc71c240953500b55106131b1a07726c7a47": { "costs": [{ "askIdentifier": "0x4738c40165d98a16cbfc22542bc355b8b29df8de5dba25e01a7a084205f5b210", "contractAddress": "0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c", "tokenId": 123, "amount": 2, "assetType": "ERC1155" }, { "askIdentifier": "0xbbb346ae59edabe06231bdc589ce2a9bc26e7642a735821d44d665ecfa200793", "contractAddress": "0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c", "tokenId": 555, "amount": 2, "assetType": "ERC1155", "fee": { "contractAddress": "0xdEB0Ba412852a0b4e2191f3DedE0Fc585fcd72Ea", "amount": 1, "feeType": 1 } }], "contractAddress": "0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c", "tokenId": 789, "amount": 1, "assetType": "ERC1155" }, "0x4738c40165d98a16cbfc22542bc355b8b29df8de5dba25e01a7a084205f5b210": { "costs": [{ "askIdentifier": "0x8802659d9f6b42a85514a0fe61bffc71c240953500b55106131b1a07726c7a47", "contractAddress": "0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c", "tokenId": 789, "amount": 1, "assetType": "ERC1155" }], "contractAddress": "0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c", "tokenId": 123, "amount": 2, "assetType": "ERC1155" }, "0xbbb346ae59edabe06231bdc589ce2a9bc26e7642a735821d44d665ecfa200793": { "costs": [{ "askIdentifier": "0x8802659d9f6b42a85514a0fe61bffc71c240953500b55106131b1a07726c7a47", "contractAddress": "0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c", "tokenId": 789, "amount": 1, "assetType": "ERC1155" }], "contractAddress": "0x37B37064d97eADAcc4d7A0cbC673b5C2932b673c", "tokenId": 555, "amount": 2, "assetType": "ERC1155", "fee": { "contractAddress": "0xdEB0Ba412852a0b4e2191f3DedE0Fc585fcd72Ea", "amount": 1, "feeType": 1 } } } },

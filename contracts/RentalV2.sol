@@ -195,10 +195,6 @@ contract RentalV2 is ReentrancyGuardUpgradable, OwnableUpgradeable {
     function DeleteInventory(address askAddress, uint256 askTokenId, uint256 askAmount, address costAddress, uint256 costTokenId, uint256 costAmount, bool returnable) public onlyOwner {
         bytes32 costInventoryId = CalculateInventoryId(costAddress, costTokenId, costAmount);
         bytes32 askInventoryId = CalculateInventoryId(askAddress, askTokenId, askAmount);
-        // bytes32 askInventoryIdentifier = keccak256(abi.encodePacked(askAddress, askTokenId, costAddress, costTokenId));
-        // bytes32 askTokenIdentifier = keccak256(abi.encodePacked(askAddress, askTokenId));
-        // bytes32 costInventoryIdentifier = keccak256(abi.encodePacked(costAddress, costTokenId, askAddress, askTokenId));
-        // bytes32 costTokenIdentifier = keccak256(abi.encodePacked(costAddress, costTokenId));
         require(inventoryUsed[costInventoryId] && inventoryUsed[askInventoryId], 'inventory does not exist');
         _removeFromInventory(askAddress, askTokenId, askAmount);
         _removeFromInventory(costAddress, costTokenId, costAmount);
@@ -208,33 +204,24 @@ contract RentalV2 is ReentrancyGuardUpgradable, OwnableUpgradeable {
         bytes32 inventoryId = CalculateInventoryId(_address, tokenId, amount);
         bool assetTokenUsed = false;
         for(uint i=0; i< assetIds.length; i++) {
-            // bytes32 tokenIdentifier = keccak256(abi.encodePacked(Inventory[_Identifiers[i]].asset.contractAddress, Inventory[_Identifiers[i]].asset.tokenId));
             if (assetIds[i] == inventoryId) {
                 assetIds[i] = assetIds[assetIds.length - 1];
                 assetIds.pop();
             }
-            // if (assetTokenIdentifier == tokenIdentifier) {
-            //     assetTokenUsed = true;
-            // }
         }
-        // if (!assetTokenUsed || _Identifiers.length == 1 ) {
-        //     _deleteFromArray(_Assets, assetTokenIdentifier);
-        // }
-        // _deleteFromArray(_AssetToAssetInventory[assetTokenIdentifier], assetInventoryIdentifier);
-        // delete Inventory[assetInventoryIdentifier];
-        // delete inventoryUsed[assetInventoryIdentifier];
         inventoryUsed[inventoryId] = false;
         delete inventory[inventoryId];
+        _deleteFromArray(inventoryIds, inventoryId);
     }
 
-    // function _deleteFromArray(bytes32[] storage arr, bytes32 assetIdentifier) private {
-    //     for(uint i=0; i<arr.length; i++) {
-    //         if (arr[i] == assetIdentifier) {
-    //             arr[i] = arr[arr.length - 1];
-    //             arr.pop();
-    //         }
-    //     }
-    // }
+    function _deleteFromArray(bytes32[] storage arr, bytes32 assetIdentifier) private {
+        for(uint i=0; i<arr.length; i++) {
+            if (arr[i] == assetIdentifier) {
+                arr[i] = arr[arr.length - 1];
+                arr.pop();
+            }
+        }
+    }
 
     // function _containsAsset(bytes32 assetIdentifier) private view returns (bool seen) {
     //     seen = false;

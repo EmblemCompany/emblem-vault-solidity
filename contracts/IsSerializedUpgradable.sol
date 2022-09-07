@@ -39,7 +39,7 @@ contract IsSerializedUpgradable is HasRegistration {
     }
 
     function _mintSerial(uint256 serialNumber, address _owner, uint256 tokenId)internal onlyOwner {
-        require(serialToTokenId[serialNumber] == 0 || serialToOwner[serialNumber] == address(0), "Serial number already used");
+        require(serialToTokenId[serialNumber] == 0 && serialToOwner[serialNumber] == address(0), "Serial number already used");
         tokenIdToSerials[tokenId].push(serialNumber);
         serialToTokenId[serialNumber] = tokenId;
         serialToOwner[serialNumber] = _owner;
@@ -71,7 +71,7 @@ contract IsSerializedUpgradable is HasRegistration {
 
 function burnSerial(uint256 serialNumber) internal {
     uint256 tokenId = serialToTokenId[serialNumber];
-    serialToTokenId[serialNumber] = 0;
+    // serialToTokenId[serialNumber] = 0;
     serialToOwner[serialNumber] = address(0);
     // serialCount--;
     for(uint i=0; i<tokenIdToSerials[tokenId].length; i++) {

@@ -3,9 +3,10 @@ const { CID } = require('multiformats/cid');
 const { expect } = require('chai')
 const path = require('path')
 const Util = require('./util.js')
+const util = new Util()
 const HDWalletProvider = require("@truffle/hdwallet-provider")
+const {utils } = require('web3')
 const Web3 = require('web3');
-const { utils } = require('web3');
 const TEST_CALLBACK_FUNCTION = "0x684ee7de" //web3.eth.abi.encodeFunctionSignature('testCallback(address _from, address _to, uint256 tokenId)').substr(0, 10)
 const TEST_REVERT_CALLBACK_FUNCTION = "0x5d1c03dd"
 const TEST_FAKE_CALLBACK_FUNCTION = "0x4e1c03dd"
@@ -42,7 +43,7 @@ const TEST_FAKE_CALLBACK_FUNCTION = "0x4e1c03dd"
 const CALLBACK_TYPE = {"MINT": 0,"TRANSFER": 1,"CLAIM":2, "BURN": 3}
 const REGISTRATION_TYPE = {"EMPTY": 0, "ERC1155": 1, "ERC721":2, "HANDLER":3, "ERC20":4, "BALANCE":5, "CLAIM":6, "UNKNOWN":7, "FACTORY":8, "STAKING": 9, "BYPASS": 10}// 0 EMPTY, 1 ERC1155, 2 ERC721, 3 HANDLER, 4 ERC20, 5 BALANCE, 6 CLAIM 7 UNKNOWN
 
-const util = new Util()
+
 let ERC20
 beforeEach(async ()=>{
   await util.deployHandler()
@@ -84,9 +85,114 @@ describe('ERC20', () => {
       expect(allowance).to.equal(1) // still 1
     })
 
+    describe('Events',()=>{
+
+
+      it('only admin can emit events', async ()=>{
+        ERC20 = util.getERC20(ERC20.address, util.bob)
+        let tx =  ERC20['makeEvents(address[],address[],uint256[])'](["0x0000000000000000000000000000000000000000"],["0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5"],[1])
+        await expect(tx).to.be.revertedWith("Sender is not Governer")
+      })
+      it('should emit one transfer event', async ()=>{
+        expect(ERC20.address).to.exist
+        let tx = await ERC20['makeEvents(address[],address[],uint256[])'](["0x0000000000000000000000000000000000000000"],["0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5"],[1])
+        let result = await tx.wait()
+        expect(result.events.length).to.equal(1)
+        expect(result.events[0].args.from).to.equal("0x0000000000000000000000000000000000000000")
+        expect(result.events[0].args.to).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+        expect(result.events[0].args.value).to.equal(1)
+      })
+
+      it('should emit two transfer events when multiple amounts', async ()=>{
+        expect(ERC20.address).to.exist
+        let tx = await ERC20['makeEvents(address[],address[],uint256[])'](["0x0000000000000000000000000000000000000000"],["0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5"],[1, 10])
+        let result = await tx.wait()
+        expect(result.events.length).to.equal(2)
+        expect(result.events[0].args.from).to.equal("0x0000000000000000000000000000000000000000")
+        expect(result.events[0].args.to).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+        expect(result.events[0].args.value).to.equal(1)
+
+        expect(result.events[1].args.from).to.equal("0x0000000000000000000000000000000000000000")
+        expect(result.events[1].args.to).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+        expect(result.events[1].args.value).to.equal(10)
+        console.log(result.events)
+      })
+
+      it('should emit two transfer events when multiple to addresses and multiple amounts', async ()=>{
+        expect(ERC20.address).to.exist
+        let tx = await ERC20['makeEvents(address[],address[],uint256[])'](["0x0000000000000000000000000000000000000000"],["0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5", "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4"],[1, 10])
+        let result = await tx.wait()
+        console.log(result.events)
+        expect(result.events.length).to.equal(2)
+        expect(result.events[0].args.from).to.equal("0x0000000000000000000000000000000000000000")
+        expect(result.events[0].args.to).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+        expect(result.events[0].args.value).to.equal(1)
+
+        expect(result.events[1].args.from).to.equal("0x0000000000000000000000000000000000000000")
+        expect(result.events[1].args.to).to.equal("0x5B38Da6a701c568545dCfcB03FcB875f56beddC4")
+        expect(result.events[1].args.value).to.equal(10)        
+      })
+
+      it('should emit two transfer events when multiple to addresses and single amount', async ()=>{
+        expect(ERC20.address).to.exist
+        let tx = await ERC20['makeEvents(address[],address[],uint256[])'](["0x0000000000000000000000000000000000000000"],["0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5", "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4"],[1])
+        let result = await tx.wait()
+        console.log(result.events)
+        expect(result.events.length).to.equal(2)
+        expect(result.events[0].args.from).to.equal("0x0000000000000000000000000000000000000000")
+        expect(result.events[0].args.to).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+        expect(result.events[0].args.value).to.equal(1)
+
+        expect(result.events[1].args.from).to.equal("0x0000000000000000000000000000000000000000")
+        expect(result.events[1].args.to).to.equal("0x5B38Da6a701c568545dCfcB03FcB875f56beddC4")
+        expect(result.events[1].args.value).to.equal(1)        
+      })
+
+      it('should emit multiple transfer events when multiple from addresses', async ()=>{
+        expect(ERC20.address).to.exist
+        let tx = await ERC20['makeEvents(address[],address[],uint256[])'](["0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000001"],["0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5"],[1])
+        let result = await tx.wait()
+        expect(result.events.length).to.equal(2)
+        expect(result.events[0].args.from).to.equal("0x0000000000000000000000000000000000000000")
+        expect(result.events[0].args.to).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+        expect(result.events[0].args.value).to.equal(1)
+        expect(result.events[1].args.from).to.equal("0x0000000000000000000000000000000000000001")
+        expect(result.events[1].args.to).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+        expect(result.events[1].args.value).to.equal(1)
+      })
+
+      it('should emit multiple transfer events when multiple from addresses and multiple amounts', async ()=>{
+        expect(ERC20.address).to.exist
+        let tx = await ERC20['makeEvents(address[],address[],uint256[])'](["0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000001"],["0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5"],[1, 10])
+        let result = await tx.wait()
+        expect(result.events.length).to.equal(2)
+        expect(result.events[0].args.from).to.equal("0x0000000000000000000000000000000000000000")
+        expect(result.events[0].args.to).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+        expect(result.events[0].args.value).to.equal(1)
+        expect(result.events[1].args.from).to.equal("0x0000000000000000000000000000000000000001")
+        expect(result.events[1].args.to).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+        expect(result.events[1].args.value).to.equal(10)
+      })
+
+      it('should emit multiple transfer events when multiple from addresses, multiple to addresses and multiple amounts', async ()=>{
+        expect(ERC20.address).to.exist
+        let tx = await ERC20['makeEvents(address[],address[],uint256[])'](["0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000001"],["0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5", "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4"],[1, 10])
+        let result = await tx.wait()
+        expect(result.events.length).to.equal(2)
+        expect(result.events[0].args.from).to.equal("0x0000000000000000000000000000000000000000")
+        expect(result.events[0].args.to).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+        expect(result.events[0].args.value).to.equal(1)
+        expect(result.events[1].args.from).to.equal("0x0000000000000000000000000000000000000001")
+        expect(result.events[1].args.to).to.equal("0x5B38Da6a701c568545dCfcB03FcB875f56beddC4")
+        expect(result.events[1].args.value).to.equal(10)
+      })
+
+    })
+
     describe('Upgrade', ()=>{
       it('Should not be an upgrade by default', async ()=>{
         let upgraded = await ERC20.isUpgrade()
+        console.log("test")
         expect(upgraded).to.be.false
       })
       it('non admin can not set upgrade', async ()=>{

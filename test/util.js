@@ -249,7 +249,7 @@ class Util {
       await this.contractNFTFactory.initialize()
     }
     
-    await this.contractNFTFactory.createClone(this.deployer.address, 789)
+    await this.contractNFTFactory.createClone(this.deployer.address, 789, 'base_uri')
     let clones = await this.contractNFTFactory.getClones()
     this.contractNFTFactory.clone = this.getContract(clones[0], 'ContractNFT', _deployer)
     this.contractNFT = this.contractNFTFactory.clone // temporary till I clean up tests
