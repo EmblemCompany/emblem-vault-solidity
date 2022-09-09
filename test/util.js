@@ -70,7 +70,7 @@ class Util {
     await this.erc721Factory.createClone(this.deployer.address)
     let clones = await this.erc721Factory.getClones()
     this.erc721Factory.clone = this.getContract(clones[0], 'EmblemVault', _deployer)
-    await this.handler.registerContract(this.erc721Factory.address, 2)
+    await this.handler.registerContract(this.erc721Factory.clone.address, 2)
     this.emblem = this.erc721Factory.clone // temporary till I clean up tests
     await fs.promises.mkdir(path.resolve(__dirname, "../artifacts"), { recursive: true }).catch((e) => {})
     await fs.promises.writeFile(path.resolve(__dirname, "../artifacts/Deployed.json"), JSON.stringify({ address: this.erc721Factory.address }))

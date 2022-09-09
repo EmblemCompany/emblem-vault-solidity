@@ -256,7 +256,7 @@ describe('ERC1155', () => {
                 expect(seen).to.be.true
             })
         
-            it('minting combines old and new balances', async ()=>{
+            it('minting combines old and new balances of single asset', async ()=>{
                 await ERC1155V1.toggleSerialization()
                 await ERC1155.toggleSerialization()
                 await ERC1155V1.mint(util.bob.address, 1337, 1)
@@ -268,6 +268,29 @@ describe('ERC1155', () => {
                 await ERC1155.mint(util.bob.address, 1337, 1)
                 newBalance = await ERC1155.balanceOf(util.bob.address, 1337)
                 expect(newBalance).to.equal(2)
+            })
+            it('minting combines old and new balances only', async ()=>{
+                await ERC1155V1.toggleSerialization()
+                await ERC1155.toggleSerialization()
+                await ERC1155V1.mint(util.bob.address, 1337, 1)
+                await ERC1155V1.mint(util.bob.address, 6666, 1)
+                let oldBalance = await ERC1155V1.balanceOf(util.bob.address, 1337)
+                let oldBalance2 = await ERC1155V1.balanceOf(util.bob.address, 6666)
+                let newBalance = await ERC1155.balanceOf(util.bob.address, 1337)
+                let newBalance2 = await ERC1155.balanceOf(util.bob.address, 6666)
+                expect(oldBalance).to.equal(1)
+                expect(oldBalance2).to.equal(1)
+                expect(newBalance).to.equal(0)
+                expect(newBalance2).to.equal(0)
+                await ERC1155.upgradeFrom(ERC1155V1.address)
+                await ERC1155.mint(util.bob.address, 1337, 1)
+                newBalance = await ERC1155.balanceOf(util.bob.address, 1337)
+                newBalance2 = await ERC1155.balanceOf(util.bob.address, 6666)
+                expect(newBalance).to.equal(2)
+                await ERC1155.mint(util.bob.address, 6666, 2)
+                newBalance2 = await ERC1155.balanceOf(util.bob.address, 6666)
+                expect(newBalance2).to.equal(3)
+
             })
             
             it('minting to old after minting on new does not effect new contract balance', async ()=>{
@@ -381,7 +404,7 @@ describe('ERC1155', () => {
                 console.log("serialized", serialized)
                 await ERC1155.toggleSerialization()
                 await ERC1155.transferOwnership(util.handler.address)
-                let covalAddress = util.ERC1155.address
+                let covalAddress = util.erc20.address
                 await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
                 var provider = util.selectProvider("mainnet")
                 var web3 = new Web3(provider)

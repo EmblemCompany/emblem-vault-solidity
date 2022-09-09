@@ -21,6 +21,10 @@ describe('ERC721', () => {
     await util.deployClaimedUpgradable();
     await util.deployERC721Factory()
     await util.deployERC20Factory()
+    ERC721 = util.emblem
+    await util.erc721Factory.createClone(util.deployer.address)
+    let clones = await util.erc721Factory.getClones()
+    ERC721V1 = util.getEmblemVault(clones[1], util.deployer)
   })
   it('should deploy vault', async ()=>{
     let emblemAddress = util.emblem.address
@@ -37,7 +41,99 @@ describe('ERC721', () => {
     expect(await util.emblem.owner()).to.equal(util.deployer.address)
     expect(await stream.owner()).to.equal(util.deployer.address)
   })
+  describe('Events',()=>{
+    it('only admin can emit events', async ()=>{
+      let emblemContract = await util.getEmblemVault(util.emblem.address, util.bob)
+      let tx =  emblemContract['makeEvents(address[],address[],uint256[])'](["0x0000000000000000000000000000000000000000"],["0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5"],[1])
+      await expect(tx).to.be.revertedWith("Not owner or able to bypass")
+    })
+    it('should emit one transfer event', async ()=>{
+      let tx = await ERC721['makeEvents(address[],address[],uint256[])'](["0x0000000000000000000000000000000000000000"],["0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5"],[1])
+      let result = await tx.wait()
+      console.log('result', result.events[0].args)
+      expect(result.events.length).to.equal(1)
+      expect(result.events[0].args._from).to.equal("0x0000000000000000000000000000000000000000")
+      expect(result.events[0].args._to).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+      expect(result.events[0].args._tokenId).to.equal(1)
+    })
 
+    it('should emit two transfer events when multiple amounts', async ()=>{
+      let tx = await ERC721['makeEvents(address[],address[],uint256[])'](["0x0000000000000000000000000000000000000000"],["0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5"],[1, 10])
+      let result = await tx.wait()
+      expect(result.events.length).to.equal(2)
+      expect(result.events[0].args._from).to.equal("0x0000000000000000000000000000000000000000")
+      expect(result.events[0].args._to).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+      expect(result.events[0].args._tokenId).to.equal(1)
+
+      expect(result.events[1].args._from).to.equal("0x0000000000000000000000000000000000000000")
+      expect(result.events[1].args._to).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+      expect(result.events[1].args._tokenId).to.equal(10)
+    })
+
+    it('should emit two transfer events when multiple to addresses and multiple amounts', async ()=>{
+      let tx = await ERC721['makeEvents(address[],address[],uint256[])'](["0x0000000000000000000000000000000000000000"],["0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5", "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4"],[1, 10])
+      let result = await tx.wait()
+      console.log(result.events)
+      expect(result.events.length).to.equal(2)
+      expect(result.events[0].args._from).to.equal("0x0000000000000000000000000000000000000000")
+      expect(result.events[0].args._to).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+      expect(result.events[0].args._tokenId).to.equal(1)
+
+      expect(result.events[1].args._from).to.equal("0x0000000000000000000000000000000000000000")
+      expect(result.events[1].args._to).to.equal("0x5B38Da6a701c568545dCfcB03FcB875f56beddC4")
+      expect(result.events[1].args._tokenId).to.equal(10)        
+    })
+
+    it('should emit two transfer events when multiple to addresses and single amount', async ()=>{
+      let tx = await ERC721['makeEvents(address[],address[],uint256[])'](["0x0000000000000000000000000000000000000000"],["0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5", "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4"],[1])
+      let result = await tx.wait()
+      console.log(result.events)
+      expect(result.events.length).to.equal(2)
+      expect(result.events[0].args._from).to.equal("0x0000000000000000000000000000000000000000")
+      expect(result.events[0].args._to).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+      expect(result.events[0].args._tokenId).to.equal(1)
+
+      expect(result.events[1].args._from).to.equal("0x0000000000000000000000000000000000000000")
+      expect(result.events[1].args._to).to.equal("0x5B38Da6a701c568545dCfcB03FcB875f56beddC4")
+      expect(result.events[1].args._tokenId).to.equal(1)        
+    })
+
+    it('should emit multiple transfer events when multiple from addresses', async ()=>{
+      let tx = await ERC721['makeEvents(address[],address[],uint256[])'](["0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000001"],["0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5"],[1])
+      let result = await tx.wait()
+      expect(result.events.length).to.equal(2)
+      expect(result.events[0].args._from).to.equal("0x0000000000000000000000000000000000000000")
+      expect(result.events[0].args._to).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+      expect(result.events[0].args._tokenId).to.equal(1)
+      expect(result.events[1].args._from).to.equal("0x0000000000000000000000000000000000000001")
+      expect(result.events[1].args._to).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+      expect(result.events[1].args._tokenId).to.equal(1)
+    })
+
+    it('should emit multiple transfer events when multiple from addresses and multiple amounts', async ()=>{
+      let tx = await ERC721['makeEvents(address[],address[],uint256[])'](["0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000001"],["0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5"],[1, 10])
+      let result = await tx.wait()
+      expect(result.events.length).to.equal(2)
+      expect(result.events[0].args._from).to.equal("0x0000000000000000000000000000000000000000")
+      expect(result.events[0].args._to).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+      expect(result.events[0].args._tokenId).to.equal(1)
+      expect(result.events[1].args._from).to.equal("0x0000000000000000000000000000000000000001")
+      expect(result.events[1].args._to).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+      expect(result.events[1].args._tokenId).to.equal(10)
+    })
+
+    it('should emit multiple transfer events when multiple from addresses, multiple to addresses and multiple amounts', async ()=>{
+      let tx = await ERC721['makeEvents(address[],address[],uint256[])'](["0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000001"],["0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5", "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4"],[1, 10])
+      let result = await tx.wait()
+      expect(result.events.length).to.equal(2)
+      expect(result.events[0].args._from).to.equal("0x0000000000000000000000000000000000000000")
+      expect(result.events[0].args._to).to.equal("0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5")
+      expect(result.events[0].args._tokenId).to.equal(1)
+      expect(result.events[1].args._from).to.equal("0x0000000000000000000000000000000000000001")
+      expect(result.events[1].args._to).to.equal("0x5B38Da6a701c568545dCfcB03FcB875f56beddC4")
+      expect(result.events[1].args._tokenId).to.equal(10)
+    })
+  })
   describe('Mint', ()=>{
     it('should allow minting if owned', async ()=>{
       await util.emblem.mint(util.deployer.address, 100, "test", 0x0)

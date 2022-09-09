@@ -17,6 +17,7 @@ interface IERC721 {
     function balanceOf(address account, uint256 id) external view returns (uint256);
     function isApprovedForAll(address _owner, address _operator) external view returns (bool);
     function setApprovalForAll( address _operator, bool _approved) external;
+
 }
 
 /**

@@ -86,8 +86,6 @@ describe('ERC20', () => {
     })
 
     describe('Events',()=>{
-
-
       it('only admin can emit events', async ()=>{
         ERC20 = util.getERC20(ERC20.address, util.bob)
         let tx =  ERC20['makeEvents(address[],address[],uint256[])'](["0x0000000000000000000000000000000000000000"],["0x3B31925EeC78dA3CF15c4503604c13b0eEBC57e5"],[1])

@@ -9,103 +9,11 @@ import "./IsBypassable.sol";
 import "./Clonable.sol";
 import "./Stream.sol";
 import "./ERC2981Royalties.sol";
+import "./EventableERC721.sol";
 
-/**
- * @dev Optional enumeration extension for ERC-721 non-fungible token standard.
- * See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md.
- */
-interface ERC721Enumerable {
-
-  /**
-   * @dev Returns a count of valid NFTs tracked by this contract, where each one of them has an
-   * assigned and queryable owner not equal to the zero address.
-   * @return Total supply of NFTs.
-   */
-  function totalSupply()
-    external
-    view
-    returns (uint256);
-
-  /**
-   * @dev Returns the token identifier for the `_index`th NFT. Sort order is not specified.
-   * @param _index A counter less than `totalSupply()`.
-   * @return Token id.
-   */
-  function tokenByIndex(
-    uint256 _index
-  )
-    external
-    view
-    returns (uint256);
-
-  /**
-   * @dev Returns the token identifier for the `_index`th NFT assigned to `_owner`. Sort order is
-   * not specified. It throws if `_index` >= `balanceOf(_owner)` or if `_owner` is the zero address,
-   * representing invalid NFTs.
-   * @param _owner An address where we are interested in NFTs owned by them.
-   * @param _index A counter less than `balanceOf(_owner)`.
-   * @return Token id.
-   */
-  function tokenOfOwnerByIndex(
-    address _owner,
-    uint256 _index
-  )
-    external
-    view
-    returns (uint256);
-
-}
-
-/**
- * @dev Optional metadata extension for ERC-721 non-fungible token standard.
- * See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md.
- */
-interface ERC721Metadata {
-
-  /**
-   * @dev Returns a descriptive name for a collection of NFTs in this contract.
-   * @return _name Representing name.
-   */
-  function name()
-    external
-    view
-    returns (string memory _name);
-
-  /**
-   * @dev Returns a abbreviated name for a collection of NFTs in this contract.
-   * @return _symbol Representing symbol.
-   */
-  function symbol()
-    external
-    view
-    returns (string memory _symbol);
-
-  /**
-   * @dev Returns a distinct Uniform Resource Identifier (URI) for a given asset. It Throws if
-   * `_tokenId` is not a valid NFT. URIs are defined in RFC3986. The URI may point to a JSON file
-   * that conforms to the "ERC721 Metadata JSON Schema".
-   * @return URI of _tokenId.
-   */
-  function tokenURI(uint256 _tokenId)
-    external
-    view
-    returns (string memory);
-
-}
-
-/**
- * @dev Utility library of inline functions on addresses.
- * @notice Based on:
- * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Address.sol
- * Requires EIP-1052.
- */
 library AddressUtils {
 
-  /**
-   * @dev Returns whether the target address is a contract.
-   * @param _addr Address to check.
-   * @return addressCheck True if _addr is a contract, false if not.
-   */
+  
   function isContract(
     address _addr
   )
@@ -113,13 +21,7 @@ library AddressUtils {
     view
     returns (bool addressCheck)
   {
-    // This method relies in extcodesize, which returns 0 for contracts in
-    // construction, since the code is only stored at the end of the
-    // constructor execution.
-
-    // According to EIP-1052, 0x0 is the value returned for not-yet created accounts
-    // and 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 is returned
-    // for accounts without code, i.e. `keccak256('')`
+    
     bytes32 codehash;
     bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
     assembly { codehash := extcodehash(_addr) } // solhint-disable-line
@@ -128,118 +30,7 @@ library AddressUtils {
 
 }
 
-/**
- * @dev ERC-721 interface for accepting safe transfers.
- * See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md.
- */
-interface ERC721TokenReceiver {
-  
-  function onERC721Received(
-    address _operator,
-    address _from,
-    uint256 _tokenId,
-    bytes calldata _data
-  )
-    external
-    returns(bytes4);
-
-}
-
-/**
- * @dev ERC-721 non-fungible token standard.
- * See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md.
- */
-interface ERC721 {
-
- 
-  event Transfer(
-    address indexed _from,
-    address indexed _to,
-    uint256 indexed _tokenId
-  );
-
-  event Approval(
-    address indexed _owner,
-    address indexed _approved,
-    uint256 indexed _tokenId
-  );
-
-  event ApprovalForAll(
-    address indexed _owner,
-    address indexed _operator,
-    bool _approved
-  );
-
-  function safeTransferFrom(
-    address _from,
-    address _to,
-    uint256 _tokenId,
-    bytes calldata _data
-  )
-    external;
-
-  function safeTransferFrom(
-    address _from,
-    address _to,
-    uint256 _tokenId
-  )
-    external;
-
-  function transferFrom(
-    address _from,
-    address _to,
-    uint256 _tokenId
-  )
-    external;
-
-  function approve(
-    address _approved,
-    uint256 _tokenId
-  )
-    external;
-
-  function setApprovalForAll(
-    address _operator,
-    bool _approved
-  )
-    external;
-
-  function balanceOf(
-    address _owner
-  )
-    external
-    view
-    returns (uint256);
-
-  function ownerOf(
-    uint256 _tokenId
-  )
-    external
-    view
-    returns (address);
-
-  function getApproved(
-    uint256 _tokenId
-  )
-    external
-    view
-    returns (address);
-
-  function isApprovedForAll(
-    address _owner,
-    address _operator
-  )
-    external
-    view
-    returns (bool);
-
-}
-
-
-/**
- * @dev Implementation of ERC-721 non-fungible token standard.
- */
-contract NFToken is ERC721, ERC165, HasRegistration {
+contract NFToken is ERC165, HasRegistration, EventableERC721 {
   using SafeMath for uint256;
   using AddressUtils for address;
 
@@ -301,6 +92,8 @@ contract NFToken is ERC721, ERC165, HasRegistration {
    */
   modifier canTransfer(uint256 _tokenId) {
     bool _canBypass = canBypassForTokenId(_tokenId);
+    bool hasOldBalance;
+    
     address tokenOwner = idToOwner[_tokenId];
     require(
       tokenOwner == msg.sender
@@ -313,14 +106,15 @@ contract NFToken is ERC721, ERC165, HasRegistration {
   }
 
 
-  modifier validNFToken(
-    uint256 _tokenId
-  )
-  {
+  modifier validNFToken(    uint256 _tokenId  )  {
     require(idToOwner[_tokenId] != address(0), NOT_VALID_NFT);
     _;
   }
-  
+
+  function makeEvents(address[] calldata _from, address[] calldata _to, uint256[] calldata tokenIds) public onlyOwner override {
+    EventableERC721.makeEvents(_from, _to, tokenIds);
+  }
+
   function safeTransferFrom(
     address _from,
     address _to,
@@ -344,10 +138,6 @@ contract NFToken is ERC721, ERC165, HasRegistration {
   }
 
   function transferFrom(address _from, address _to, uint256 _tokenId) external override canTransfer(_tokenId) validNFToken(_tokenId) {
-    address tokenOwner = idToOwner[_tokenId];
-    require(tokenOwner == _from, NOT_OWNER);
-    require(_to != address(0), ZERO_ADDRESS);
-
     _transfer(_to, _tokenId);
   }
 
@@ -441,7 +231,6 @@ contract NFToken is ERC721, ERC165, HasRegistration {
   {
     address from = idToOwner[_tokenId];
     _clearApproval(_tokenId);
-
     _removeNFToken(from, _tokenId);
     _addNFToken(_to, _tokenId);
     if (registeredOfType[3].length > 0 && registeredOfType[3][0] != address(0)) {
@@ -462,7 +251,6 @@ contract NFToken is ERC721, ERC165, HasRegistration {
     require(idToOwner[_tokenId] == address(0), NFT_ALREADY_EXISTS);
 
     _addNFToken(_to, _tokenId);
-
     emit Transfer(address(0), _to, _tokenId);
   }
 
@@ -492,13 +280,7 @@ contract NFToken is ERC721, ERC165, HasRegistration {
     delete idToOwner[_tokenId];
   }
 
-  function _addNFToken(
-    address _to,
-    uint256 _tokenId
-  )
-    internal
-    virtual
-  {
+  function _addNFToken(address _to,uint256 _tokenId) internal virtual  {
     require(idToOwner[_tokenId] == address(0), NFT_ALREADY_EXISTS);
 
     idToOwner[_tokenId] = _to;
@@ -562,52 +344,18 @@ contract NFToken is ERC721, ERC165, HasRegistration {
 
 }
 
-/**
- * @dev Optional metadata implementation for ERC-721 non-fungible token standard.
- */
-abstract contract NFTokenEnumerableMetadata is
-    NFToken,
-    ERC721Metadata,
-    ERC721Enumerable
-{
 
-  /**
-   * @dev A descriptive name for a collection of NFTs.
-   */
+abstract contract NFTokenEnumerableMetadata is NFToken, ERC721Metadata, ERC721Enumerable {
+
   string internal nftName;
-
-  /**
-   * @dev An abbreviated name for NFTokens.
-   */
   string internal nftSymbol;
-  
-    /**
-   * @dev An uri to represent the metadata for this contract.
-   */
   string internal nftContractMetadataUri;
 
-  /**
-   * @dev Mapping from NFT ID to metadata uri.
-   */
   mapping (uint256 => string) internal idToUri;
-  
-  /**
-   * @dev Mapping from NFT ID to encrypted value.
-   */
   mapping (uint256 => string) internal idToPayload;
   bool initialized = false;
-  
 
-  /**
-   * @dev Returns a descriptive name for a collection of NFTokens.
-   * @return _name Representing name.
-   */
-  function name()
-    external
-    override
-    view
-    returns (string memory _name)
-  {
+  function name() external override view returns (string memory _name) {
     _name = nftName;
   }
 
@@ -877,16 +625,8 @@ function _setTokenPayload(
    * @param _owner Address for whom to query the count.
    * @return Number of _owner NFTs.
    */
-  function _getOwnerNFTCount(
-    address _owner
-  )
-    internal
-    override
-    virtual
-    view
-    returns (uint256)
-  {
-    return ownerToIds[_owner].length;
+  function _getOwnerNFTCount(address _owner) internal override virtual view returns (uint256) {
+    return ownerToIds[_owner].length; // UpgradableERC721.balanceOfHook(_owner, ownerToIds);
   }
 
 }
@@ -926,7 +666,7 @@ contract EmblemVault is NFTokenEnumerableMetadata, Clonable, ERC2981Royalties {
    * @param _tokenId of the NFT to be minted by the msg.sender.
    * @param _uri String representing RFC 3986 URI.
    */
-  function mint( address _to, uint256 _tokenId, string calldata _uri, string calldata _payload) external onlyOwner {
+  function mint( address _to, uint256 _tokenId, string calldata _uri, string calldata _payload) public onlyOwner {
     super._mint(_to, _tokenId);
     super._setTokenUri(_tokenId, _uri);
     super._setTokenPayload(_tokenId, _payload);
