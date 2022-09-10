@@ -384,21 +384,6 @@ describe('ERC1155', () => {
                 expect(tx).to.be.revertedWith('018001')
             })
         
-            // it('should mint via handler with signature if signer is a witness', async () => {
-            //     await ERC1155.transferOwnership(util.handler.address)
-            //     await util.handler.changePrice(0)
-            //     await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
-            //     var provider = util.selectProvider("mainnet")
-            //     var web3 = new Web3(provider)
-            //     let hash = web3.utils.soliditySha3(ERC1155.address, util.deployer.address, 123, 111, "payload")
-            //     let sig = await sign(web3, hash)
-            //     let balance = await ERC1155.balanceOf(util.deployer.address, 123)
-            //     expect(balance.toNumber()).to.equal(0)
-            //     await util.handler.buyWithSignature(ERC1155.address, util.deployer.address, 123, "payload", 111, sig)
-            //     balance = await ERC1155.balanceOf(util.deployer.address, 123)
-            //     expect(balance.toNumber()).to.equal(1)
-            //   })
-        
             it('should mint via handler with signed price', async () => {
                 let serialized = await ERC1155.isSerialized()
                 console.log("serialized", serialized)

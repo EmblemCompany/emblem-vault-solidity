@@ -45,8 +45,8 @@ contract RentalV2 is ReentrancyGuardUpgradable, OwnableUpgradeable {
     }
 
     struct Pair {
-        bytes32[] askInventoryIds;
-        bytes32[] costInventoryIds;
+        bytes32 askInventoryId;
+        bytes32 costInventoryId;
         bool visible;
     }
 
@@ -79,7 +79,7 @@ contract RentalV2 is ReentrancyGuardUpgradable, OwnableUpgradeable {
         bytes32 askInventoryId = CalculateInventoryId(askAddress, askTokenId, askAmount);
         bytes32 costInventoryId = CalculateInventoryId(costAddress, costTokenId, costAmount);
         require(askInventoryId != costInventoryId, "ask and cost should not be the same");
-        require(!inventoryUsed[askInventoryId] || !inventoryUsed[costInventoryId], 'inventory already exists');
+        require(!inventoryUsed[askInventoryId] || !inventoryUsed[costInventoryId], 'pair already exists');
         _addInventory(askAddress, askTokenId, askAmount);
         _addInventory(costAddress, costTokenId, costAmount);
         _addPair(askAddress, askTokenId, costAddress, costTokenId, askInventoryId, costInventoryId);
@@ -105,11 +105,7 @@ contract RentalV2 is ReentrancyGuardUpgradable, OwnableUpgradeable {
         if (!pairUsed[pairId]) {
             pairUsed[pairId] = true;
             pairIds.push(pairId);
-            bytes32[] memory asks = new bytes32[](1);
-            asks[0] = askInventoryId;
-            bytes32[] memory costs = new bytes32[](1);
-            costs[0] = costInventoryId;
-            pair[pairId] = Pair(asks, costs, true);
+            pair[pairId] = Pair(askInventoryId, costInventoryId, true);
         }
         return pairId;
     }
@@ -196,23 +192,60 @@ contract RentalV2 is ReentrancyGuardUpgradable, OwnableUpgradeable {
         bytes32 costInventoryId = CalculateInventoryId(costAddress, costTokenId, costAmount);
         bytes32 askInventoryId = CalculateInventoryId(askAddress, askTokenId, askAmount);
         require(inventoryUsed[costInventoryId] && inventoryUsed[askInventoryId], 'inventory does not exist');
-        _removeFromInventory(askAddress, askTokenId, askAmount);
-        _removeFromInventory(costAddress, costTokenId, costAmount);
+        _removePair(askAddress, askTokenId, costAddress, costTokenId, askInventoryId, costInventoryId);
+        if (returnable) {
+            _removePair(costAddress, costTokenId, askAddress, askTokenId, costInventoryId, askInventoryId);
+        }
+    }
+    
+    function _removePair(address askAddress, uint256 askTokenId, address costAddress, uint256 costTokenId, bytes32 askInventoryId, bytes32 costInventoryId) internal returns (bytes32){
+        bytes32 pairId = keccak256(abi.encodePacked(askAddress, askTokenId, costAddress, costTokenId));
+        require(pairUsed[pairId], 'Pair does not exist');
+        bool askSeen;
+        bool costSeen;
+        for(uint i=0; i< pairIds.length; i++) {
+            if (pairIds[i] == pairId) {
+                pairIds[i] = pairIds[pairIds.length - 1];
+                pairIds.pop();
+            }
+        }
+        for (uint i = 0; i < pairIds.length; i++) {
+            if (pair[pairIds[i]].askInventoryId == askInventoryId) {
+                askSeen = true;
+            }
+            if (pair[pairIds[i]].costInventoryId == costInventoryId) {
+                costSeen = true;
+            }
+        }
+        if (!askSeen) { _removeFromInventory(askInventoryId);}
+        if (!costSeen) { _removeFromInventory(costInventoryId);}
+        pairUsed[pairId] = false;
+        delete pair[pairId];
     }
 
-    function _removeFromInventory(address _address, uint256 tokenId, uint256 amount) private {
-        bytes32 inventoryId = CalculateInventoryId(_address, tokenId, amount);
-        bool assetTokenUsed = false;
+    function _removeFromInventory(bytes32 inventoryId) private {
+        bytes32 assetId = inventory[inventoryId].assetId;
+        bool assetSeen;
         for(uint i=0; i< assetIds.length; i++) {
             if (assetIds[i] == inventoryId) {
                 assetIds[i] = assetIds[assetIds.length - 1];
                 assetIds.pop();
             }
         }
+        for (uint i = 0; i < assetIds.length; i++) {
+            if (assetIds[i] == assetId) {
+                assetSeen = true;
+            }
+        }
+        if (!assetSeen) { 
+            assetUsed[assetId] = false;
+            delete asset[assetId];
+        }
         inventoryUsed[inventoryId] = false;
         delete inventory[inventoryId];
         _deleteFromArray(inventoryIds, inventoryId);
     }
+
 
     function _deleteFromArray(bytes32[] storage arr, bytes32 assetIdentifier) private {
         for(uint i=0; i<arr.length; i++) {
