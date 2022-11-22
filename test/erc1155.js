@@ -518,7 +518,7 @@ describe('ERC1155', () => {
                 let serialTokenId = await ERC1155.getTokenIdForSerialNumber(serialNumber)
                 expect(serialTokenId).to.equal(789)
                 await ERC1155.setApprovalForAll(util.handler.address, true)
-                let isClaimed = await util.claimedUpgradable.isClaimed(ERC1155.address, serialNumber, [])
+                let isClaimed =  await util.claimedUpgradable.isClaimed(ERC1155.address, serialNumber, [])
                 expect(isClaimed).to.be.false
                 let hasClaimed = await util.claimedUpgradable.getClaimsFor(util.deployer.address)
                 expect(hasClaimed.length).to.equal(0)

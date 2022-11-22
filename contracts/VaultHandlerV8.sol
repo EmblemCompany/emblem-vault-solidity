@@ -109,6 +109,14 @@ contract VaultHandlerV8 is ReentrancyGuard, HasCallbacks, ERC165 {
         }        
     }
 
+    function mintBatch(address _nftAddress, address to, uint256[] memory ids, uint256[] memory amounts, bytes[] memory serialNumbers) public onlyOwner {
+        if (IERC165(_nftAddress).supportsInterface(_INTERFACE_ID_ERC1155)) {
+            IERC1155(_nftAddress).mintBatch(to, ids, amounts, serialNumbers);
+        } else {
+           
+        }        
+    }
+
     function moveVault(address _from, address _to, uint256 tokenId, uint256 newTokenId, uint256 nonce, bytes calldata signature, bytes memory serialNumber) external nonReentrant isRegisteredContract(_from) isRegisteredContract(_to)  {
         require(_from != _to, 'Cannot move vault to same address');
         require(witnesses[getAddressFromSignatureHash(keccak256(abi.encodePacked(_from, _to, tokenId, newTokenId, serialNumber, nonce)), signature)], 'Not Witnessed');

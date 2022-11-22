@@ -53,6 +53,11 @@ module.exports = {
       timeout: 1000 * 60 * 60 * 24, // 1 day
       accounts: [process.env.ETHKEY || 'a819fcd7afa2c39a7f9baf70273a128875b6c9f03001b218824559ccad6ef11c'],
     },
+    goerli: {
+      url: process.env.GOERLI || "https://goerli.infura.io/v3/6112845322b74decbf08005aea176252",
+      timeout: 1000 * 60 * 60 * 24, // 1 day
+      accounts: [process.env.ETHKEY || 'a819fcd7afa2c39a7f9baf70273a128875b6c9f03001b218824559ccad6ef11c'],
+    },
     mainnet: {
       //gasPrice: 80000000000,
       //gasPrice: 96000000000,

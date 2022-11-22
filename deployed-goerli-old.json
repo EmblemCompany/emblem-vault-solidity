@@ -1,0 +1,49 @@
+{
+    "handler": {
+        "address": "0x622F84DDac0DB945f430E3acBCFb2bdA9Eb49D96",
+        "delegation": null,
+        "verified": false,
+        "registrations": [
+            {
+                "registered": "0x622F84DDac0DB945f430E3acBCFb2bdA9Eb49D96",
+                "asType": 3
+            },
+            {
+                "registered": "0x5005bAFe8FaE72111c518da11b517543A5C7D511",
+                "asType": 6
+            },
+            {
+                "registered": "0xDcc075aA41Bbc7c519ab969E2D19A0dB1b56F7A7",
+                "asType": 8
+            }
+        ],
+        "contractType": 3
+    },
+    "upgradableClaim": {
+        "address": "0x5005bAFe8FaE72111c518da11b517543A5C7D511",
+        "delegation": "0x48ec87f708d8a0fa7fff709a3efa81da88844c23",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x622F84DDac0DB945f430E3acBCFb2bdA9Eb49D96",
+                "asType": 3
+            }
+        ],
+        "contractType": 6
+    },
+    "erc1155Factory": {
+        "address": "0xDcc075aA41Bbc7c519ab969E2D19A0dB1b56F7A7",
+        "delegation": "0x25755a1a4cae2c5118c8bf5916e174b92b06441c",
+        "verified": true,
+        "registrations": [],
+        "contractType": 8,
+        "clones": []
+    },
+    "upgradableERC1155-old": {
+        "address": "0x4cC23296863A5ceAE180a03Fb4b640f5495a7Eb4",
+        "delegation": "0x79a89268799d2a25f9106f2e04f7d29b2b40f29c",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    }
+}

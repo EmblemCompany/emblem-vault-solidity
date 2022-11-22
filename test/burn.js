@@ -23,6 +23,7 @@ describe('Burn tokens', () => {
     await expect(owner).to.equal(util.deployer.address)
     await emblemContract.burn(1)
     owner = emblemContract.ownerOf(1)
+    console.log('emblemContract', emblemContract)
     expect(owner).to.be.revertedWith("003002")    
   })  
   it('unminted should not return claimed', async()=>{

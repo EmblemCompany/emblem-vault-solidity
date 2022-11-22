@@ -37,9 +37,9 @@ contract ERC1155Factory is ClonableFactory {
       IHasRegistration(handlerAddress).registerContract(clone, 1);
     }
     IHasRegistration(clone).registerContract(handlerAddress, 3); // register handler on erc1155
-    Stream(ERC1155Upgradable(clone).streamAddress()).addMember(Stream.Member(newOwner, 1, 1)); // add owner as stream recipient
-    IERC2981Royalties(clone).setTokenRoyalty(0, ERC1155Upgradable(clone).streamAddress(), 10000); // set contract wide royalties to stream
-    OwnableUpgradeable(ERC1155Upgradable(clone).streamAddress()).transferOwnership(newOwner); // transfer stream, to new owner
+    // Stream(ERC1155Upgradable(clone).streamAddress()).addMember(Stream.Member(newOwner, 1, 1)); // add owner as stream recipient
+    // IERC2981Royalties(clone).setTokenRoyalty(0, ERC1155Upgradable(clone).streamAddress(), 10000); // set contract wide royalties to stream
+    // OwnableUpgradeable(ERC1155Upgradable(clone).streamAddress()).transferOwnership(newOwner); // transfer stream, to new owner
     OwnableUpgradeable(clone).transferOwnership(newOwner); // transfer clone to newOwner
   }
 

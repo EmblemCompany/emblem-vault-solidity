@@ -6,7 +6,8 @@ import "./ERC165.sol";
 import "./IHandlerCallback.sol";
 import "./IsSerializedUpgradable.sol";
 import "./Clonable.sol";
-import "./Stream.sol";
+// import "./Stream.sol";
+// import "./EventableERC1155.sol";
 import "./ERC2981Royalties.sol";
 import "./UpgradableERC1155.sol";
 
@@ -19,8 +20,8 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
     mapping (uint256 => bool) private usedTokenId;
     // uint256[] public tokenIds;
 
-    string public name;
-    string public symbol;
+    string private name;
+    string private symbol;
 
     string private _uri;
 
@@ -32,9 +33,9 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
        UpgradableERC1155.upgradeFrom(oldContract);
     }
 
-    function  makeEvents(address[] calldata operators, uint256[] calldata tokenIds, address[] calldata _from, address[] calldata _to, uint256[] calldata amounts) public onlyOwner override {
-        EventableERC1155.makeEvents(operators, tokenIds, _from, _to, amounts);
-    }
+    // function  makeEvents(address[] calldata operators, uint256[] calldata tokenIds, address[] calldata _from, address[] calldata _to, uint256[] calldata amounts) public onlyOwner override {
+    //     EventableERC1155.makeEvents(operators, tokenIds, _from, _to, amounts);
+    // }
 
     function initialize() public override initializer {
         __Ownable_init();
@@ -45,11 +46,21 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
         _uri = "https://api.emblemvault.io/s:evmetadata/meta/"; 
         serialized = true;
         overloadSerial = true;
-        streamAddress = payable(address(new Stream()));
-        Stream(streamAddress).initialize();
-        OwnableUpgradeable(streamAddress).transferOwnership(_msgSender());
         isClaimable = true;
+        // initStream();
     }
+
+    // function initStream() private onlyOwner {
+    //     streamAddress = payable(address(new Stream()));
+    //     Stream(streamAddress).initialize();
+    //     OwnableUpgradeable(streamAddress).transferOwnership(_msgSender());
+    //     Stream(streamAddress).addMember(Stream.Member(owner(), 1, 1)); // add owner as stream recipient
+    //     IERC2981Royalties(this).setTokenRoyalty(0, streamAddress, 10000); // set contract wide royalties to stream
+    // }
+
+    // function version() public pure override returns(uint256) {
+    //     return 2;
+    // }
 
     function changeName(string calldata _name, string calldata _symbol) public onlyOwner {
       name = _name;
@@ -275,4 +286,8 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
 
         return tempUint;
     }
+
+    // fallback (bytes calldata input) external returns (bytes memory) {
+    //     // should allow registration of fallback functions
+    // }
 }

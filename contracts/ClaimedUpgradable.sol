@@ -22,7 +22,7 @@ contract ClaimedUpgradable is ReentrancyGuardUpgradable, HasRegistration {
     }
 
     function version() public pure returns (uint256) {
-        return 2;
+        return 3;
     }
     
     function isBurnAddress(address needle) public view returns (bool) {

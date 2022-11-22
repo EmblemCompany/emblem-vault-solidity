@@ -1,7 +1,7 @@
 const { ethers, upgrades} = require("hardhat");
 const REGISTRATION_TYPE = {"EMPTY": 0, "ERC1155": 1, "ERC721":2, "HANDLER":3, "ERC20":4, "BALANCE":5, "CLAIM":6, "UNKNOWN":7, "FACTORY":8, "STAKING":9}
 
-async function deploy(name, ContractClass, constructorArgs = null) {
+async function deploy(name, ContractClass, constructorArgs = []) {
     console.log("Deploying", name)
     let contract = await ContractClass.deploy(...constructorArgs)
     await contract.deployed()
