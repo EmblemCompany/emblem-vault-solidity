@@ -10,8 +10,9 @@ import "./Clonable.sol";
 // import "./EventableERC1155.sol";
 import "./ERC2981Royalties.sol";
 import "./UpgradableERC1155.sol";
+import "operator-filter-registry/src/upgradeable/OperatorFiltererUpgradeable.sol";
 
-contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradable, Clonable, ERC2981Royalties, UpgradableERC1155 {
+contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradable, Clonable, ERC2981Royalties, UpgradableERC1155, OperatorFiltererUpgradeable {
     using SafeMath for uint256;
     address payable public streamAddress;
 
@@ -25,8 +26,16 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
 
     string private _uri;
 
+    mapping (address => mapping (uint => bool)) seenInBlock;
+    
+
     constructor () {
         // __Ownable_init();
+    }
+
+    modifier oncePerBlock(address to) {
+        require(!seenInBlock[to][block.number], 'already seen this block');
+        _;
     }
 
     function upgradeFrom(address oldContract) public onlyOwner virtual override {
@@ -45,38 +54,30 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
         _registerInterface(0x2a55205a); // ERC2981
         _uri = "https://api.emblemvault.io/s:evmetadata/meta/"; 
         serialized = true;
-        overloadSerial = true;
+        overloadSerial = false;
         isClaimable = true;
-        // initStream();
     }
 
-    // function initStream() private onlyOwner {
-    //     streamAddress = payable(address(new Stream()));
-    //     Stream(streamAddress).initialize();
-    //     OwnableUpgradeable(streamAddress).transferOwnership(_msgSender());
-    //     Stream(streamAddress).addMember(Stream.Member(owner(), 1, 1)); // add owner as stream recipient
-    //     IERC2981Royalties(this).setTokenRoyalty(0, streamAddress, 10000); // set contract wide royalties to stream
-    // }
-
-    // function version() public pure override returns(uint256) {
-    //     return 2;
-    // }
+    function version() public pure override returns(uint256) {
+        return 8;
+    }
 
     function changeName(string calldata _name, string calldata _symbol) public onlyOwner {
       name = _name;
       symbol = _symbol;
     }
 
-    function mint(address _to, uint256 _tokenId, uint256 _amount) public onlyOwner {
+    function mint(address _to, uint256 _tokenId, uint256 _amount) public onlyOwner oncePerBlock(_to) {
         bytes memory empty = abi.encodePacked(uint256(0));
+        
         mintWithSerial(_to, _tokenId, _amount, empty);
     }
 
-    function mintWithSerial(address _to, uint256 _tokenId, uint256 _amount, bytes memory serialNumber) public onlyOwner {
+    function mintWithSerial(address _to, uint256 _tokenId, uint256 _amount, bytes memory serialNumber) public onlyOwner oncePerBlock(_to) {
         _mint(_to, _tokenId, _amount, serialNumber);
     }
 
-    function mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes[] memory serialNumbers) public onlyOwner {
+    function mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes[] memory serialNumbers) public onlyOwner oncePerBlock(to) {
         _mintBatch(to, ids, amounts, serialNumbers);
     }
 
@@ -127,11 +128,10 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
             require(accounts[i] != address(0), "ERC1155: batch balance query for the zero address");
             batchBalances[i] = UpgradableERC1155.balanceOfHook(accounts[i], ids[i], _balances);
         }
-
         return batchBalances;
     }
     
-    function setApprovalForAll(address operator, bool approved) public virtual {
+    function setApprovalForAll(address operator, bool approved) public virtual onlyAllowedOperatorApproval(operator) {
         require(_msgSender() != operator, "ERC1155: setting approval status for self");
 
         _operatorApprovals[_msgSender()][operator] = approved;
@@ -142,7 +142,7 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
         return _operatorApprovals[account][operator];
     }
     
-    function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes memory) public virtual {
+    function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes memory) public virtual onlyAllowedOperatorApproval(from) {
         bool _canBypass = canBypassForTokenId(id);
         uint256 pastSenderBalance = 0;
         uint256 pastRecipientBalance = 0;
@@ -176,8 +176,21 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
             }
         }
     }
+
+    function safeBatchTransferIdFrom(address from, address[] calldata tos, uint256 id, uint256 amount, bytes memory data) public virtual onlyAllowedOperator(from) {
+        require(
+            from == _msgSender() || isApprovedForAll(from, _msgSender()),
+            "ERC1155: transfer caller is not owner nor approved"
+        );
+
+        for (uint256 i = 0; i < tos.length; ++i) {
+            address to = tos[i];
+            require(to != address(0), "ERC1155: transfer to the zero address");
+            safeTransferFrom(from, to, id, amount, data);
+        }
+    }
     
-    function safeBatchTransferFrom(address from, address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data) public virtual {
+    function safeBatchTransferFrom(address from, address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data) public virtual onlyAllowedOperator(from) {
         require(ids.length == amounts.length, "ERC1155: ids and amounts length mismatch");
         require(to != address(0), "ERC1155: transfer to the zero address");
         require(
@@ -220,7 +233,7 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
                 IHandlerCallback(_msgSender()).executeCallbacks(address(0), account, id, IHandlerCallback.CallbackType.MINT);
             }
         }
-        usedTokenId[id] = true;
+        // usedTokenId[id] = true;
         _balances[id][account] = _balances[id][account].add(amount);
         emit TransferSingle(operator, address(0), account, id, amount);
     }

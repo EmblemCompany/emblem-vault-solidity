@@ -78,7 +78,7 @@ contract VaultHandlerV8 is ReentrancyGuard, HasCallbacks, ERC165 {
         executeCallbacksInternal(_nftAddress, _msgSender(), address(0), tokenId, IHandlerCallback.CallbackType.CLAIM);
     }
 
-    function buyWithSignedPrice(address _nftAddress, address _payment, uint _price, address _to, uint256 _tokenId, string calldata _payload, uint256 _nonce, bytes calldata _signature, bytes calldata serialNumber) public nonReentrant {
+    function buyWithSignedPrice(address _nftAddress, address _payment, uint _price, address _to, uint256 _tokenId, uint256 _nonce, bytes calldata _signature, bytes calldata serialNumber, uint256 _amount) public nonReentrant {
         IERC20Token paymentToken = IERC20Token(_payment);
         if (shouldBurn) {
             require(paymentToken.transferFrom(msg.sender, address(this), _price), 'Transfer ERROR'); // Payment sent to recipient
@@ -86,18 +86,18 @@ contract VaultHandlerV8 is ReentrancyGuard, HasCallbacks, ERC165 {
         } else {
             require(paymentToken.transferFrom(msg.sender, address(recipientAddress), _price), 'Transfer ERROR'); // Payment sent to recipient
         }
-        address signer = getAddressFromSignature(_nftAddress, _payment, _price, _to, _tokenId, _nonce, _payload, _signature);
+        address signer = getAddressFromSignature(_nftAddress, _payment, _price, _to, _tokenId, _nonce, _amount, _signature);
         require(witnesses[signer], 'Not Witnessed');
         usedNonces[_nonce] = true;
         string memory _uri = concat(metadataBaseUri, uintToStr(_tokenId));
         if (IERC165(_nftAddress).supportsInterface(_INTERFACE_ID_ERC1155)) {
             if (IIsSerialized(_nftAddress).isOverloadSerial()) {
-                IERC1155(_nftAddress).mintWithSerial(_to, _tokenId, 1, serialNumber);
+                IERC1155(_nftAddress).mintWithSerial(_to, _tokenId, _amount, serialNumber);
             } else {
-                IERC1155(_nftAddress).mint(_to, _tokenId, 1);
-            }            
+                IERC1155(_nftAddress).mint(_to, _tokenId, _amount);
+            }
         } else {
-            IERC721(_nftAddress).mint(_to, _tokenId, _uri, _payload);
+            IERC721(_nftAddress).mint(_to, _tokenId, _uri, '');
         }
     }
 
@@ -159,15 +159,15 @@ contract VaultHandlerV8 is ReentrancyGuard, HasCallbacks, ERC165 {
         return addressFromSig;
     }
 
-    function getAddressFromSignature(address _nftAddress, address _payment, uint _price, address _to, uint256 _tokenId, uint256 _nonce, string calldata _payload, bytes calldata signature) public view returns (address) {
+    function getAddressFromSignature(address _nftAddress, address _payment, uint _price, address _to, uint256 _tokenId, uint256 _nonce, uint256 _amount, bytes calldata signature) public view returns (address) {
         require(!usedNonces[_nonce], 'Nonce already used');
-        return getAddressFromSignatureHash(keccak256(abi.encodePacked(_nftAddress, _payment, _price, _to, _tokenId, _nonce, _payload)), signature);
+        return getAddressFromSignatureHash(keccak256(abi.encodePacked(_nftAddress, _payment, _price, _to, _tokenId, _nonce, _amount)), signature);
     }
 
-    function getAddressFromSignature(address _to, uint256 _tokenId, uint256 _nonce, bytes calldata signature) public view returns (address) {
-        require(!usedNonces[_nonce], 'Nonce already used');
-        return getAddressFromSignatureHash(keccak256(abi.encodePacked(_to, _tokenId, _nonce)), signature);
-    }
+    // function getAddressFromSignature(address _to, uint256 _tokenId, uint256 _nonce, bytes calldata signature) public view returns (address) {
+    //     require(!usedNonces[_nonce], 'Nonce already used');
+    //     return getAddressFromSignatureHash(keccak256(abi.encodePacked(_to, _tokenId, _nonce)), signature);
+    // }
 
     function getAddressFromSignatureMint(address _nftAddress, address _to, uint256 _tokenId, uint256 _nonce, string calldata payload, bytes calldata signature) public view returns (address) {
         require(!usedNonces[_nonce]);

@@ -58,12 +58,19 @@ module.exports = {
       timeout: 1000 * 60 * 60 * 24, // 1 day
       accounts: [process.env.ETHKEY || 'a819fcd7afa2c39a7f9baf70273a128875b6c9f03001b218824559ccad6ef11c'],
     },
+    polygon: {
+      //gasPrice: 80000000000,
+      //gasPrice: 96000000000,
+      timeout: 1000 * 60 * 60 * 24, // 1 day
+      url: process.env.MAINNET || "https://polygon-mainnet.infura.io/v3/2e2998d61b0644fe8174bca015096245",
+      accounts: process.env.ETHKEY ? [process.env.ETHKEY]: [],
+    },
     mainnet: {
       //gasPrice: 80000000000,
       //gasPrice: 96000000000,
       timeout: 1000 * 60 * 60 * 24, // 1 day
-      url: process.env.MAINNET || "",
-      accounts: process.env.MAINNET_PRIVATE_KEY ? [process.env.MAINNET_PRIVATE_KEY]: [],
+      url: process.env.MAINNET || "https://mainnet.infura.io/v3/6112845322b74decbf08005aea176252",
+      accounts: process.env.ETHKEY ? [process.env.ETHKEY]: [],
     },
     ganache: {
       timeout: 1000 * 60 * 60 * 24, // 1 day

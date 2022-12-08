@@ -384,7 +384,7 @@ describe('ERC1155', () => {
                 expect(tx).to.be.revertedWith('018001')
             })
         
-            it('should mint via handler with signed price', async () => {
+            it('should mint 1 via handler with signed price', async () => {
                 let serialized = await ERC1155.isSerialized()
                 console.log("serialized", serialized)
                 await ERC1155.toggleSerialization()
@@ -393,13 +393,35 @@ describe('ERC1155', () => {
                 await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
                 var provider = util.selectProvider("mainnet")
                 var web3 = new Web3(provider)
-                let hash = web3.utils.soliditySha3(ERC1155.address, covalAddress, 0, util.deployer.address, 123, 111, "payload")
+                let hash = web3.utils.soliditySha3(ERC1155.address, covalAddress, 0, util.deployer.address, 123, 111, 1)
                 let sig = await sign(web3, hash)
                 let balance = await ERC1155.balanceOf(util.deployer.address, 123)
                 expect(balance.toNumber()).to.equal(0)
-                await util.handler.buyWithSignedPrice(ERC1155.address, covalAddress, 0, util.deployer.address, 123, "payload", 111, sig, util.serializeUintToBytes(0))
+                await util.handler.buyWithSignedPrice(ERC1155.address, covalAddress, 0, util.deployer.address, 123, 111, sig, util.serializeUintToBytes(0), 1)
                 balance = await ERC1155.balanceOf(util.deployer.address, 123)
                 expect(balance.toNumber()).to.equal(1)
+              })
+
+              it('should mint many via handler with signed price', async () => {
+                await ERC1155.transferOwnership(util.handler.address)
+                let covalAddress = util.erc20.address
+                await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
+                var provider = util.selectProvider("mainnet")
+                var web3 = new Web3(provider)
+                let hash = web3.utils.soliditySha3(ERC1155.address, covalAddress, 0, util.deployer.address, 123, 111, 3)
+                let sig = await sign(web3, hash)
+                let balance = await ERC1155.balanceOf(util.deployer.address, 123)
+                expect(balance.toNumber()).to.equal(0)
+                await util.handler.buyWithSignedPrice(ERC1155.address, covalAddress, 0, util.deployer.address, 123, 111, sig, util.serializeUintToBytes(0), 3)
+                balance = await ERC1155.balanceOf(util.deployer.address, 123)
+                expect(balance.toNumber()).to.equal(3)
+                let serial1 = await ERC1155.getSerialByOwnerAtIndex(util.deployer.address, 123, 0)
+                let serial2 = await ERC1155.getSerialByOwnerAtIndex(util.deployer.address, 123, 1)
+                let serial3 = await ERC1155.getSerialByOwnerAtIndex(util.deployer.address, 123, 2)
+                expect(serial1 != serial2 != serial3).to.be.true
+                console.log(serial1)
+                console.log(serial2)
+                console.log(serial3)
               })
     
               it('MINT sig: for testing purposes only', async () => {
@@ -541,6 +563,7 @@ describe('ERC1155', () => {
                 await util.handler.registerContract(util.claimedUpgradable.address, 6)
                 await claimedContract.registerContract(util.handler.address, 3)
                 await util.handler.registerContract(ERC1155.address, 1)
+                await ERC1155.toggleOverloadSerial()
                 await ERC1155.mintWithSerial(util.deployer.address, 789, 2, util.serializeUintArrayToBytes([2,3]))
                 await ERC1155.mintWithSerial(util.deployer.address, 789, 1, util.serializeUintToBytes(4))
                 await ERC1155.setApprovalForAll(util.handler.address, true)

@@ -1,43 +1,50 @@
 {
-    "handler": {
-        "address": "0x0349E72c3BFc6232B12FD546a9f9CD1851dD5bDD",
+    "legacycoval": {
+        "address": "0x44aA2ae6a29A1434942EB88cB2eD0Fd1De30de83",
         "delegation": null,
         "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "handler": {
+        "address": "0xc15235d210c1b1CdA8643a5eA37687E241B031b0",
+        "delegation": null,
+        "verified": false,
         "registrations": [
             {
-                "registered": "0x0349E72c3BFc6232B12FD546a9f9CD1851dD5bDD",
+                "registered": "0xc15235d210c1b1CdA8643a5eA37687E241B031b0",
                 "asType": 3
             },
             {
-                "registered": "0x41c5ecba82dBef2952471B870F5efd9C758Da71a",
+                "registered": "0xa7428f3b7752F006890E12F055b0A816F0F18CdD",
                 "asType": 1
             },
             {
-                "registered": "0x973144305f159bf93C22e6Fb93E12c482220C583",
+                "registered": "0x1342F91DC53B6D222614Ad1f981b5683d4653116",
                 "asType": 6
             }
         ],
         "contractType": 3
     },
     "upgradableERC1155": {
-        "address": "0x41c5ecba82dBef2952471B870F5efd9C758Da71a",
-        "delegation": "0x79a89268799d2a25f9106f2e04f7d29b2b40f29c",
+        "address": "0xa7428f3b7752F006890E12F055b0A816F0F18CdD",
+        "delegation": "0x3bb0a79b53bcd92c054954b78a169c73d25a1d2a",
         "verified": true,
         "registrations": [
             {
-                "registered": "0x0349E72c3BFc6232B12FD546a9f9CD1851dD5bDD",
+                "registered": "0xc15235d210c1b1CdA8643a5eA37687E241B031b0",
                 "asType": 3
             }
         ],
         "contractType": 1
     },
     "upgradableClaim": {
-        "address": "0x973144305f159bf93C22e6Fb93E12c482220C583",
+        "address": "0x1342F91DC53B6D222614Ad1f981b5683d4653116",
         "delegation": "0x48ec87f708d8a0fa7fff709a3efa81da88844c23",
         "verified": true,
         "registrations": [
             {
-                "registered": "0x0349E72c3BFc6232B12FD546a9f9CD1851dD5bDD",
+                "registered": "0xc15235d210c1b1CdA8643a5eA37687E241B031b0",
                 "asType": 3
             }
         ],

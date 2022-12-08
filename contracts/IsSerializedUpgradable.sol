@@ -101,6 +101,21 @@ function burnSerial(uint256 serialNumber) internal {
         return 0;
     }
 
+    function getSerialByOwnerAtIndex(address _owner, uint256 tokenId, uint256 index) public view returns (uint256) {
+        uint seen = 0;
+        for (uint256 i = 0; i < tokenIdToSerials[tokenId].length; ++i) {
+            uint256 serialNumber = tokenIdToSerials[tokenId][i];
+            if (serialToOwner[serialNumber] == _owner) {
+                if (seen == index) {
+                    return serialNumber;
+                } else {
+                    seen++;
+                }
+            }
+        }
+        return 0;
+    }
+
     function getOwnerOfSerial(uint256 serialNumber) public view returns (address) {
         return serialToOwner[serialNumber];
     }

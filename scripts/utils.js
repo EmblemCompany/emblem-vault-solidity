@@ -1,5 +1,8 @@
 const { ethers, upgrades} = require("hardhat");
 const REGISTRATION_TYPE = {"EMPTY": 0, "ERC1155": 1, "ERC721":2, "HANDLER":3, "ERC20":4, "BALANCE":5, "CLAIM":6, "UNKNOWN":7, "FACTORY":8, "STAKING":9}
+// import { utils, BigNumber } from "ethers"
+const utils = require("ethers").utils
+const BigNumber = require("ethers").BigNumber
 
 async function deploy(name, ContractClass, constructorArgs = []) {
     console.log("Deploying", name)
@@ -137,6 +140,60 @@ async function perform(deployment, method, args = []) {
     }
 }
 
+async function calculateTokenId(contractAddress, contractName, assetName, chainId) {
+    let tokenId_hash = utils.keccak256(utils.toUtf8Bytes(contractAddress + ":" + contractName + ":" + assetName)) //generate tokenId from targetAsset
+    let tokenId = await hash2Uint(tokenId_hash, chainId)
+    return BigNumber.from(tokenId)
+}
+
+const Web3 = require('web3');
+const bytes2UintAbi = [{ "inputs": [{ "internalType": "bytes32", "name": "inputBytes", "type": "bytes32" }], "name": "calculate", "outputs": [{ "internalType": "uint256", "name": "id", "type": "uint256" }], "stateMutability": "pure", "type": "function" }]
+
+async function hash2Uint(hash, chainId) {
+    var provider = selectProvider("goerli")
+    var web3 = new Web3(provider)
+    var bytes2UintContract = new web3.eth.Contract(bytes2UintAbi, "0xe2204272a51226ce360E9088D8Bee1DF1Ad0153b")
+    let id = await bytes2UintContract.methods.calculate(hash).call({ from: '0x0000000000000000000000000000000000000000' })
+    return id
+}
+
+function selectProvider(network) {
+    return new HDWalletProvider(process.env.ETHKEY || "c1fc1fe3db1e71bb457c5f8f10de8ff349d24f30f56a1e6a92e55ef90d961328", selectProviderEndpoint(network), 0, 1)
+}
+
+function getRandom(myArray) {
+    let selected = myArray[Math.floor(Math.random() * myArray.length)];
+    return selected
+}
+const INFURA_IDS = [
+    "2017cae14f974b539295c3311f58186e"
+]
+
+const INFURA_ID = "4c2abfee28a6441ca74bf82c2d2bccc3"
+const MATIC_IDS = [
+    "41f5f3cbf83536b2bf235d2be67a16bf6e5647dd"
+]
+
+const infuraEndpoints = [
+    { network: "rinkeby", address: "https://rinkeby.infura.io/v3/" + getRandom(INFURA_IDS) || INFURA_ID },
+    { network: "mainnet", address: "https://mainnet.infura.io/v3/" + getRandom(INFURA_IDS) || INFURA_ID },
+    { network: "goerli", address: "https://goerli.infura.io/v3/" + getRandom(INFURA_IDS) || INFURA_ID },
+    { network: "mumbai", address: "https://rpc-mumbai.maticvigil.com/v1/" + getRandom(MATIC_IDS) },
+    { network: "matic", address: "https://rpc-mainnet.maticvigil.com/v1/" + getRandom(MATIC_IDS) },
+    { network: "xdai", address: " https://rpc.gnosischain.com" }, //     https://rpc.xdaichain.com/
+    { network: "bsc", address: "https://bsc-dataseed.binance.org/" },
+    { network: "fantom", address: "https://rpcapi.fantom.network" },
+    { network: "ganache", address: "http://127.0.0.1:7545" },
+    { network: "aurora", address: "https://mainnet.aurora.dev/" }
+]
+
+function selectProviderEndpoint(network) {
+    let endpoint = infuraEndpoints.filter(item => { return item.network == network })[0].address
+    return endpoint
+}
+
+const HDWalletProvider = require("@truffle/hdwallet-provider")
+
 module.exports = {
     deploy,
     verify,
@@ -151,5 +208,6 @@ module.exports = {
     getOrDeploy,
     getOrDeployProxy,
     perform,
-    REGISTRATION_TYPE
+    REGISTRATION_TYPE,
+    calculateTokenId
 }

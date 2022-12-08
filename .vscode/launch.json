@@ -5,6 +5,21 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "command": "npm run deploy:mainnet",
+            "name": "Mainnet Deploy script",
+            "request": "launch",
+            "type": "node-terminal",
+            "env": {
+                "ETHKEY": ""
+            }
+        },
+        {
+            "command": "npm run deploy:polygon",
+            "name": "Polygon Deploy script",
+            "request": "launch",
+            "type": "node-terminal"
+        },
+        {
             "command": "npm run deploy:rinkeby",
             "name": "Rinkeby Deploy script",
             "request": "launch",
