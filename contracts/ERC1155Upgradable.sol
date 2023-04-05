@@ -27,6 +27,8 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
     string private _uri;
 
     mapping (address => mapping (uint => bool)) seenInBlock;
+
+    mapping(uint256 => mapping(address => uint256[])) internal tokenIdToOwnerToSerialNumbers;
     
 
     constructor () {
@@ -59,7 +61,7 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
     }
 
     function version() public pure override returns(uint256) {
-        return 8;
+        return 10;
     }
 
     function changeName(string calldata _name, string calldata _symbol) public onlyOwner {
@@ -274,6 +276,124 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
 
         emit TransferSingle(operator, account, address(0), id, amount);
     }
+
+    function isSerialized() public view returns (bool) {
+        return serialized;
+    }
+
+    function isOverloadSerial() public view returns (bool) {
+        return overloadSerial;
+    }
+
+    function toggleSerialization() public onlyOwner {
+        require(!hasSerialized, "Already has serialized items");
+        serialized = !serialized;
+    }
+
+    // function migrate(uint256[] calldata tokenIds) public onlyOwner {
+    //     for(uint _i=0; _i<tokenIds.length; _i++){
+    //         uint256 tokenId = tokenIds[_i];
+    //         uint256[] memory serialNumbers = tokenIdToSerials[tokenId];
+    //         for (uint i=0; i<serialNumbers.length; i++){
+    //             uint256 serialNumber = serialNumbers[i];
+    //             address owner = serialToOwner[serialNumber];
+    //             tokenIdToOwnerToSerialNumbers[tokenId][owner].push(serialNumber);
+    //         }
+    //     }
+    // }
+
+    function toggleOverloadSerial() public onlyOwner {
+        overloadSerial = !overloadSerial;
+    }
+
+    function mintSerial(uint256 tokenId, address _owner) internal onlyOwner {
+        uint256 serialNumber = uint256(keccak256(abi.encode(tokenId, _owner, serialCount)));
+        _mintSerial(serialNumber, _owner, tokenId);
+    }
+
+    function mintSerial(uint256 serialNumber, address _owner, uint256 tokenId) internal onlyOwner {
+        _mintSerial(serialNumber, _owner, tokenId);
+    }
+
+    function _mintSerial(uint256 serialNumber, address _owner, uint256 tokenId)internal onlyOwner {
+        require(serialToTokenId[serialNumber] == 0 && serialToOwner[serialNumber] == address(0), "Serial number already used");
+        tokenIdToSerials[tokenId].push(serialNumber);
+        serialToTokenId[serialNumber] = tokenId;
+        serialToOwner[serialNumber] = _owner;
+        tokenIdToOwnerToSerialNumbers[tokenId][_owner].push(serialNumber);
+        hasSerialized = true;
+        serialCount++;
+    }
+
+    function transferSerial(uint256 serialNumber, address from, address to) internal {
+        require(serialToOwner[serialNumber] == from, 'Not correct owner of serialnumber');
+        uint256 tokenId = serialToTokenId[serialNumber];
+        serialToOwner[serialNumber] = to;
+        uint256[] storage serialNumbersTo = tokenIdToOwnerToSerialNumbers[tokenId][to];
+        uint256[] storage serialNumbersFrom = tokenIdToOwnerToSerialNumbers[tokenId][from];
+        for(uint i=0; i<serialNumbersFrom.length; i++) {
+            if (serialNumbersFrom[i] == serialNumber) {
+                serialNumbersFrom[i] = serialNumbersFrom[serialNumbersFrom.length-1];
+                serialNumbersFrom.pop();
+                serialNumbersTo.push(serialNumber);
+                break;
+            }
+        }
+    }
+
+    function burnSerial(uint256 serialNumber) internal {
+        uint256[] storage serialNumbersFrom = tokenIdToOwnerToSerialNumbers[serialToTokenId[serialNumber]][serialToOwner[serialNumber]];
+        uint256 tokenId = serialToTokenId[serialNumber];
+        serialToOwner[serialNumber] = address(0);
+        for(uint i=0; i<serialNumbersFrom.length; i++) {
+            if (serialNumbersFrom[i] == serialNumber) {
+                serialNumbersFrom[i] = serialNumbersFrom[serialNumbersFrom.length-1];
+                serialNumbersFrom.pop();
+                break;
+            }
+        }
+        for(uint i=0; i<tokenIdToSerials[tokenId].length; i++) {
+            if (tokenIdToSerials[tokenId][i] == serialNumber) {
+                tokenIdToSerials[tokenId][i] = tokenIdToSerials[tokenId][tokenIdToSerials[tokenId].length - 1];
+                tokenIdToSerials[tokenId].pop();
+                break;
+            }
+        }
+    }
+
+
+    function getSerial(uint256 tokenId, uint256 index) public view returns (uint256) {
+        if(tokenIdToSerials[tokenId].length == 0) {
+            return 0;
+        } else {
+            return tokenIdToSerials[tokenId][index];
+        }
+    }
+
+    function getFirstSerialByOwner(address _owner, uint256 tokenId) public view returns (uint256) {
+        return tokenIdToOwnerToSerialNumbers[tokenId][_owner].length == 0? 0: tokenIdToOwnerToSerialNumbers[tokenId][_owner][0];
+    }
+
+    function getSerialByOwnerAtIndex(address _owner, uint256 tokenId, uint256 index) public view returns (uint256) {
+        return (tokenIdToOwnerToSerialNumbers[tokenId][_owner].length == 0 || index > tokenIdToOwnerToSerialNumbers[tokenId][_owner].length-1) ? 0: tokenIdToOwnerToSerialNumbers[tokenId][_owner][index];
+    }
+
+    function getOwnerOfSerial(uint256 serialNumber) public view returns (address) {
+        return serialToOwner[serialNumber];
+    }
+
+    function getTokenIdForSerialNumber(uint256 serialNumber) public view returns (uint256) {
+        return serialToTokenId[serialNumber];
+    }
+
+    function decodeUintArray(bytes memory encoded) internal pure returns(uint256[] memory ids){
+        ids = abi.decode(encoded, (uint256[]));
+    }
+
+    function decodeSingle(bytes memory encoded) internal pure returns(uint256 id) {
+        id = abi.decode(encoded, (uint));
+    }
+
     function isContract(address account) internal view returns (bool) {
         uint256 size;
         assembly {

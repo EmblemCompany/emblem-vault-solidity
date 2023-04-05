@@ -11,8 +11,9 @@ let results = {time: Date.now()}
 
 async function main() {
   const [_deployer] = await hre.ethers.getSigners();
+  const BulkMinter = await hre.ethers.getContractFactory("BulkMinter");
   const VaultHandlerV8 = await hre.ethers.getContractFactory("VaultHandlerV8");
-  const VaultHandlerV7 = await hre.ethers.getContractFactory("VaultHandlerV7");
+  const VaultHandlerV7a = await hre.ethers.getContractFactory("VaultHandlerV7a");
   // const EmblemVaultV2 = await hre.ethers.getContractFactory("EmblemVaultV2");
   const ERC1155Factory = await ethers.getContractFactory("ERC1155Factory");
   const ERC721Factory = await ethers.getContractFactory("ERC721Factory");
@@ -54,8 +55,17 @@ async function main() {
   // results.legacyhandler = await verifyContract(await getOrDeploy(results.legacyhandler, "VaultHandlerV8", VaultHandlerV7, deployArgs), deployArgs)
   // // save()
 
+  // /* LEGACY HANDLER a  */
+  // let deployArgs = ["0x82c7a8f707110f5fbb16184a5933e9f78a34c6ab", "0x3d658390460295fb963f54dc0899cfb1c30776df", _deployer.address, 250 ]
+  // results.legacyhandler_a = await verifyContract(await getOrDeploy(results.legacyhandler_a, "VaultHandlerV7a", VaultHandlerV7a, deployArgs), deployArgs)
+  // save()
+
+  // /* Bulk Minter */
+  results.bulk_minter = await verifyContract(await getOrDeployProxy(results.bulk_minter, "BulkMinter", BulkMinter))
+  save()
+
   // /* HANDLER */
-  results.handler = await verifyContract(await getOrDeploy(results.handler, "VaultHandlerV8", VaultHandlerV8))
+  // results.handler = await verifyContract(await getOrDeploy(results.handler, "VaultHandlerV8", VaultHandlerV8))
   // results.handler.action != "get"? await utils.perform(results.handler, "initialize"): null
   // results.handler.action != "get"? await utils.registerWithContract(utils.REGISTRATION_TYPE.HANDLER, results.handler, results.handler) : null // register handler with self to allow callbacks
   // save()
@@ -65,14 +75,14 @@ async function main() {
   // save()
 
   /* UPGRADABLE ERC1155 NO Factory */
-  // results.upgradableERC1155 = await verifyContract(await getOrDeployProxy(results.upgradableERC1155, "ERC1155Upgradable", ERC1155Upgradable))
+  // results.upgradableERC1155_CURATED = await verifyContract(await getOrDeployProxy(results.upgradableERC1155_CURATED, "ERC1155Upgradable", ERC1155Upgradable))
   // save()
   /* UPGRADE */
-  await verifyContract(await utils.upgradeProxy(results.upgradableERC1155.address, "ERC1155Upgradable", ERC1155Upgradable))
+  // await verifyContract(await utils.upgradeProxy(results.upgradableERC1155.address, "ERC1155Upgradable", ERC1155Upgradable))
   /* Register */
-  // results.upgradableERC1155.action != "get"? await utils.registerWithContract(utils.REGISTRATION_TYPE.ERC1155, results.handler, results.upgradableERC1155): null
-  // results.upgradableERC1155.action != "get"? await utils.registerWithContract(utils.REGISTRATION_TYPE.HANDLER, results.upgradableERC1155, results.handler): null
-  save()
+  // results.upgradableERC1155_CURATED.action != "get"? await utils.registerWithContract(utils.REGISTRATION_TYPE.ERC1155, results.handler, results.upgradableERC1155_CURATED): null
+  // results.upgradableERC1155_CURATED.action != "get"? await utils.registerWithContract(utils.REGISTRATION_TYPE.HANDLER, results.upgradableERC1155_CURATED, results.handler): null
+  // save()
 
   // // /* BALANCE UPGRADABLE */
   // results.upgradableBalances = await verifyContract(await getOrDeployProxy(results.upgradableBalances, "BalanceUpgradable", BalanceUpgradable))

@@ -88,12 +88,5 @@
         "verified": true,
         "registrations": [],
         "contractType": 7
-    },
-    "bulk_minter": {
-        "address": "0x11a6513318D54cA9cdcEc6a7b26c82C598252615",
-        "delegation": "0xb71535b994f6c4adc8b624ed7718b168a17ba500",
-        "verified": true,
-        "registrations": [],
-        "contractType": 7
     }
 }

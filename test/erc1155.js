@@ -580,6 +580,19 @@ describe('ERC1155', () => {
                 firstSerialByOwner = await ERC1155.getFirstSerialByOwner(util.deployer.address, 789)
                 expect(firstSerialByOwner).to.equal(0)
             })
+            it('should not be expensive', async()=>{
+                let claimedContract = util.claimedUpgradable
+                await util.handler.registerContract(util.claimedUpgradable.address, 6)
+                await claimedContract.registerContract(util.handler.address, 3)
+                await util.handler.registerContract(ERC1155.address, 1)
+                await ERC1155.mint(util.deployer.address, 789, 30)
+                await ERC1155.setApprovalForAll(util.handler.address, true)
+                let serial1 = await ERC1155.getSerial(789, 0)
+                await util.handler.claim(ERC1155.address, 789)
+                let serial2 = await ERC1155.getSerial(789, 0)
+                expect(serial1).to.not.equal(serial2)
+                await ERC1155.migrate([789])
+            })
         })
         describe('Handler Callbacks', ()=>{        
             it('should not allow callback registration in handler without witness')
@@ -1048,14 +1061,18 @@ describe('ERC1155', () => {
             })
         })
         describe('Serialization', async()=>{
+            it('serialize helper', ()=>{
+                console.log(util.serializeUintToBytes(8049344972516151))
+            })
             it('should mint with overloadSerial off', async ()=>{
-                await ERC1155.toggleOverloadSerial()
+                // await ERC1155.toggleOverloadSerial()
                 await ERC1155.mint(util.deployer.address, 789, 1)
                 let currentBalance = await ERC1155.balanceOf(util.deployer.address, 789)
                 expect(currentBalance).to.equal(1)
             })
             it('can mint with provided serial', async ()=>{
                 // await util.deployERC1155Factory(util.handler)
+                await ERC1155.toggleOverloadSerial()
                 await ERC1155.mintWithSerial(util.deployer.address, 789, 1, util.serializeUintToBytes(123))
                 let currentBalance = await ERC1155.balanceOf(util.deployer.address, 789)
                 expect(currentBalance).to.equal(1)
@@ -1064,22 +1081,23 @@ describe('ERC1155', () => {
             })
             it('should not mint with duplicate serial', async ()=>{
                 // await util.deployERC1155Factory(util.handler)
+                await ERC1155.toggleOverloadSerial()
                 await ERC1155.mintWithSerial(util.deployer.address, 789, 1, util.serializeUintToBytes(123))
                 let tx = ERC1155.mintWithSerial(util.deployer.address, 789, 1, util.serializeUintToBytes(123))
                 await expect(tx).to.be.revertedWith("Serial number already used")
             })
             it('should not standard mint when overridable', async ()=>{
-                // await util.deployERC1155Factory(util.handler)
+                await ERC1155.toggleOverloadSerial()
                 let tx = ERC1155.mint(util.deployer.address, 789, 1)
                 await expect(tx).to.be.revertedWith("Must provide serial number")
             })
             it('should not mint amounts over 1 with duplicate encoded serials', async ()=>{
-                // await util.deployERC1155Factory(util.handler)
+                await ERC1155.toggleOverloadSerial()
                 let tx = ERC1155.mintWithSerial(util.deployer.address, 789, 2, util.serializeUintArrayToBytes([123, 123]))
                 await expect(tx).to.be.revertedWith("Serial number already used")
             })
             it('should mint amounts over 1 with encoded serials', async ()=>{
-                // await util.deployERC1155Factory(util.handler)
+                await ERC1155.toggleOverloadSerial()
                 await ERC1155.mintWithSerial(util.deployer.address, 789, 2, util.serializeUintArrayToBytes([123, 456]))
                 let serial1 = await ERC1155.getSerial(789, 0)
                 let serial2 = await ERC1155.getSerial(789, 1)
@@ -1087,12 +1105,12 @@ describe('ERC1155', () => {
                 expect(serial2).to.equal(456)
             })
             it('should not mint batch with duplicate encoded serials', async ()=>{
-                // await util.deployERC1155Factory(util.handler)
+                await ERC1155.toggleOverloadSerial()
                 let tx = ERC1155.mintBatch(util.deployer.address, [789, 543], [1,1], util.serializeToByteArray([123, 123]))
                 await expect(tx).to.be.revertedWith("Serial number already used")
             })
             it('should mint batch with encoded serials', async ()=>{
-                // await util.deployERC1155Factory(util.handler)
+                await ERC1155.toggleOverloadSerial()
                 await ERC1155.mintBatch(util.deployer.address, [789, 543], [1,1], util.serializeToByteArray([123, 456]))
                 let serial1 = await ERC1155.getSerial(789, 0)
                 let serial2 = await ERC1155.getSerial(543, 0)
@@ -1100,7 +1118,7 @@ describe('ERC1155', () => {
                 expect(serial2).to.equal(456)
             })
             it('should mint batch with encoded serials and amounts', async ()=>{
-                // await util.deployERC1155Factory(util.handler)
+                await ERC1155.toggleOverloadSerial()
                 await ERC1155.mintBatch(util.deployer.address, [789, 543], [1,2], util.serializeToByteArray([789, [123, 456]]))
                 let serial1 = await ERC1155.getSerial(789, 0)
                 let serial2 = await ERC1155.getSerial(543, 0)
@@ -1110,7 +1128,7 @@ describe('ERC1155', () => {
                 expect(serial3).to.equal(456)
             })
             it('should burn', async ()=>{
-                // await util.deployERC1155Factory(util.handler)
+                await ERC1155.toggleOverloadSerial()
                 await ERC1155.toggleOverloadSerial()
                 await ERC1155.mint(util.deployer.address, 789, 1)
                 await ERC1155.burn(util.deployer.address, 789, 1)
@@ -1118,8 +1136,7 @@ describe('ERC1155', () => {
                 expect(currentBalance).to.equal(0)
             })
             it('should claim', async ()=>{
-                // await util.deployERC1155Factory(util.handler)
-                await ERC1155.toggleOverloadSerial()
+                // await ERC1155.toggleOverloadSerial()
                 await util.deployClaimedUpgradable()
                 await ERC1155.mint(util.deployer.address, 789, 1)
                 await ERC1155.setApprovalForAll(util.handler.address, true)

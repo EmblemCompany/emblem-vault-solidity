@@ -61,7 +61,7 @@ describe('Vault Handler', () => {
 
   it('can move from ERC721 to ERC1155 with registered contracts', async ()=>{
     await ERC721.mint(util.deployer.address, 1, "uri", "payload")
-    await ERC1155.toggleOverloadSerial()
+    // await ERC1155.toggleOverloadSerial()
     await ERC1155.transferOwnership(util.handler.address)
     await ERC721.transferOwnership(util.handler.address)
     await ERC721.setApprovalForAll(util.handler.address, true)
@@ -83,7 +83,7 @@ describe('Vault Handler', () => {
   })
 
   it('can move from ERC1155 to ERC721 with registered contracts', async ()=>{
-    await ERC1155.toggleOverloadSerial()
+    // await ERC1155.toggleOverloadSerial()
     await ERC1155.registerContract(util.handler.address, 3)
     await ERC1155.mint(util.deployer.address, 123, 2)
     await ERC1155.transferOwnership(util.deployer.address)
@@ -109,7 +109,7 @@ describe('Vault Handler', () => {
 
   it('can not move ERC1155 to ERC721 when new tokenId already exists', async ()=>{
     await ERC721.mint(util.deployer.address, 1, "test", 0x0)
-    await ERC1155.toggleOverloadSerial()
+    // await ERC1155.toggleOverloadSerial()
     await ERC1155.mint(util.deployer.address, 123, 2)
     await ERC1155.transferOwnership(util.handler.address)
     
@@ -135,15 +135,17 @@ describe('Vault Handler', () => {
     await ERC721.mint(util.deployer.address, 1, "test", 0x0)
     await ERC1155.transferOwnership(util.handler.address)
     await ERC721.setApprovalForAll(util.handler.address, true)
+    
     let balanceERC721 = await ERC721.balanceOf(util.deployer.address)
     let balanceERC1155 = await ERC1155.balanceOf(util.deployer.address, 1337)
     expect(balanceERC1155).to.equal(0)
     expect(balanceERC721).to.equal(1)
     var provider = util.selectProvider("mainnet")
     var web3 = new Web3(provider)
-    let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 1, 1337, 0, 111)
+    let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 1, 1337, util.serializeUintToBytes(0), 111)
     let sig = await sign(web3, hash)
     await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
+    
     let tx = util.handler.moveVault(ERC721.address, ERC1155.address, 1, 1337, 111, sig, util.serializeUintToBytes(0))
     await expect(tx).to.be.revertedWith("Handler: must provide serial number")
   })

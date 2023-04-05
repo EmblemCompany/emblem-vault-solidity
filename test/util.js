@@ -50,6 +50,25 @@ class Util {
       return s.address
     })
   }
+  async deployBulkMinter(deployType = null) {
+    const [_deployer, u1, u2] = await ethers.getSigners();
+    this.deployer = _deployer;
+    let BulkMinter = await ethers.getContractFactory('BulkMinter');
+    if (deployType && deployType == "upgradable") {
+      this.bulkMinter = await upgrades.deployProxy(BulkMinter)
+    } else {
+      this.bulkMinter = await BulkMinter.deploy()
+      await this.bulkMinter.initialize()
+    }
+    await this.bulkMinter.deployed();
+    await fs.promises.mkdir(path.resolve(__dirname, "../artifacts"), { recursive: true }).catch((e) => {})
+    await fs.promises.writeFile(path.resolve(__dirname, "../artifacts/Deployed.json"), JSON.stringify({ address: this.bulkMinter.address }))
+    let signers = await ethers.getSigners();
+    this.signers = signers
+    this.addresses = signers.map((s) => {
+      return s.address
+    })
+  }
   async deployERC721Factory(deployType = null) {
     const [_deployer, u1, u2] = await ethers.getSigners();
     this.alice = u1;
@@ -60,11 +79,14 @@ class Util {
       this.erc721Factory = await upgrades.deployProxy(ERC721Factory)
     } else {
       this.erc721Factory = await ERC721Factory.deploy()
-      await this.handler.registerContract(this.erc721Factory.address, 8)
-      await this.erc721Factory.deployed();
-      await this.erc721Factory.initialize()
+      if (await this.handler) {
+        await this.handler.registerContract(this.erc721Factory.address, 8)
+        await this.erc721Factory.deployed();
+        await this.erc721Factory.initialize()
       
-      await this.erc721Factory.initializeStage2(this.handler.address)
+        await this.erc721Factory.initializeStage2(this.handler.address)
+      }
+      
     }
     
     await this.erc721Factory.createClone(this.deployer.address)
@@ -122,6 +144,37 @@ class Util {
     await this.handler.initialize()
     await fs.promises.mkdir(path.resolve(__dirname, "../artifacts"), { recursive: true }).catch((e) => {})
     await fs.promises.writeFile(path.resolve(__dirname, "../artifacts/Deployed.json"), JSON.stringify({ address: this.handler.address }))
+    let signers = await ethers.getSigners();
+    this.signers = signers
+    this.addresses = signers.map((s) => {
+      return s.address
+    })
+  }
+
+  async deployLinker() {
+    const [_deployer, u1, u2] = await ethers.getSigners();
+    let EthBtcLinker = await ethers.getContractFactory('EthBtcLinker');
+    this.linker = await EthBtcLinker.deploy()
+    await this.linker.deployed()
+    await fs.promises.mkdir(path.resolve(__dirname, "../artifacts"), { recursive: true }).catch((e) => {})
+    await fs.promises.writeFile(path.resolve(__dirname, "../artifacts/Deployed.json"), JSON.stringify({ address: this.linker.address }))
+    let signers = await ethers.getSigners();
+    this.signers = signers
+    this.addresses = signers.map((s) => {
+      return s.address
+    })
+  }
+
+  async deployLegacyHandler(cost) {
+    const [_deployer, u1, u2] = await ethers.getSigners();
+    this.alice = u1;
+    this.bob = u2;
+    this.deployer = _deployer;
+    let VaultHandlerV7a = await ethers.getContractFactory('VaultHandlerV7a');
+    this.legacy_handler = await VaultHandlerV7a.deploy(this.emblem.address, this.erc20.address, this.deployer.address, cost || 0)
+    await this.legacy_handler.deployed()
+    await fs.promises.mkdir(path.resolve(__dirname, "../artifacts"), { recursive: true }).catch((e) => {})
+    await fs.promises.writeFile(path.resolve(__dirname, "../artifacts/Deployed.json"), JSON.stringify({ address: this.legacy_handler.address }))
     let signers = await ethers.getSigners();
     this.signers = signers
     this.addresses = signers.map((s) => {
@@ -349,6 +402,11 @@ class Util {
   getFactory (signer) {
     let ABI = require(path.resolve(__dirname, "../artifacts/contracts/Factory.sol/Factory.json"))
     let contract = new ethers.Contract(this.factory.address, ABI.abi, signer)
+    return contract;
+  }
+  getLegacyHandler (address, signer = this.deployer) {
+    let ABI = require(path.resolve(__dirname, "../artifacts/contracts/VaultHandlerV7a.sol/VaultHandlerV7a.json"))
+    let contract = new ethers.Contract(address, ABI.abi, signer)
     return contract;
   }
   getHandler (address, signer = this.deployer) {

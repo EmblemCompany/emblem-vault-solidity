@@ -11,7 +11,7 @@
             "type": "node-terminal",
             "env": {
                 "ETHKEY": ""
-            }
+            },
         },
         {
             "command": "npm run deploy:polygon",

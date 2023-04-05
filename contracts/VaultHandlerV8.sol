@@ -44,10 +44,6 @@ contract VaultHandlerV8 is ReentrancyGuard, HasCallbacks, ERC165 {
     mapping(address => bool) public witnesses;
     mapping(uint256 => bool) usedNonces;
 
-    // constructor() {
-    //     __Ownable_init();
-    // }
-
     function initialize() public initializer {
         __Ownable_init();
         addWitness(owner());
