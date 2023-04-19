@@ -2,7 +2,7 @@
     "handler": {
         "address": "0xeDb2AC2BfD8d026E4d6C75a04548423936512135",
         "delegation": null,
-        "verified": true,
+        "verified": true, 
         "registrations": [
             {
                 "registered": "0xeDb2AC2BfD8d026E4d6C75a04548423936512135",

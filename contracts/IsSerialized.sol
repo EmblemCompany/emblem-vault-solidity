@@ -38,7 +38,7 @@ contract IsSerialized is HasRegistration {
         _mintSerial(serialNumber, _owner, tokenId);
     }
 
-    function _mintSerial(uint256 serialNumber, address _owner, uint256 tokenId)internal onlyOwner {
+    function _mintSerial(uint256 serialNumber, address _owner, uint256 tokenId) internal onlyOwner {
         require(serialToTokenId[serialNumber] == 0, "Serial number already used");
         tokenIdToSerials[tokenId].push(serialNumber);
         serialToTokenId[serialNumber] = tokenId;

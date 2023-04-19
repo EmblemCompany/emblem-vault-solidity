@@ -56,13 +56,13 @@ async function main() {
   // // save()
 
   // /* LEGACY HANDLER a  */
-  // let deployArgs = ["0x82c7a8f707110f5fbb16184a5933e9f78a34c6ab", "0x3d658390460295fb963f54dc0899cfb1c30776df", _deployer.address, 250 ]
-  // results.legacyhandler_a = await verifyContract(await getOrDeploy(results.legacyhandler_a, "VaultHandlerV7a", VaultHandlerV7a, deployArgs), deployArgs)
-  // save()
+  let deployArgs = ["0x8b8407c6184f1f0Fd1082e83d6A3b8349cAcEd12", "0x4597c8A59Ab28B36840B82B3A674994A279593D0", _deployer.address, 250 ]
+  results.legacyhandler_a = await verifyContract(await getOrDeploy(results.legacyhandler_a, "VaultHandlerV7a", VaultHandlerV7a, deployArgs), deployArgs)
+  save()
 
   // /* Bulk Minter */
-  results.bulk_minter = await verifyContract(await getOrDeployProxy(results.bulk_minter, "BulkMinter", BulkMinter))
-  save()
+  // results.bulk_minter = await verifyContract(await getOrDeployProxy(results.bulk_minter, "BulkMinter", BulkMinter))
+  // save()
 
   // /* HANDLER */
   // results.handler = await verifyContract(await getOrDeploy(results.handler, "VaultHandlerV8", VaultHandlerV8))
