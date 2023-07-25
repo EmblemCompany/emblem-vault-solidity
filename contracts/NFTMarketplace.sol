@@ -11,11 +11,13 @@ import "./BasicERC20.sol";
 import "./ReentrancyGuard.sol";
 import "./OwnableUpgradeable.sol";
 
-contract NFTrade_v3 is OwnableUpgradeable, ReentrancyGuard {
+contract NFTMarketplace is OwnableUpgradeable, ReentrancyGuard {
     
     address resolver;
     bool public initialized;
-    bool public locked = false;
+    bool public locked;
+    uint256 public gasTaxRate;
+    uint256 public newApiKeyPrice;
     
     bytes4 private constant _INTERFACE_ID_ERC1155 = 0xd9b67a26;
     bytes4 private constant _INTERFACE_ID_ERC20 = 0x74a1476f;
@@ -40,39 +42,47 @@ contract NFTrade_v3 is OwnableUpgradeable, ReentrancyGuard {
         bool payToMakeOffer;
         bool canOfferERC20;
         bool takePercentageOfERC20;
-        bool Active;
-        bytes32 Parent;
-        uint ParentPercentage;
-    }
-    
-    // event for EVM logging
+    }    
+   
     mapping(uint256 => Config) configs;
+    mapping(uint256 => address) public apiKeyOwner;
     mapping(address => mapping(uint => Offer[])) offers;
     mapping(address => mapping(uint => Offer[])) rejected;
     mapping(address => mapping(address => mapping(uint => Offer[]))) offered;
     mapping(address => mapping(uint => Offer[])) accepted;
-    
+
     modifier notLocked() {
         require(!locked, "Contract is locked");
         _;
     }
-    
-    constructor(address _paymentAddress, address _recipientAddress) {
-        init(_paymentAddress, _recipientAddress);
+
+    modifier onlyApiKeyOwner(uint256 apiKey) {
+        require(apiKeyOwner[apiKey] == msg.sender, "Not the owner of the provided API key");
+        _;
     }
     
-    function init(address _paymentAddress, address _recipientAddress) public {
+    constructor() {
+        
+    }
+    
+    function initialize(address _paymentAddress, address _recipientAddress, uint256 _newApiKeyPrice) public initializer {
         require(!initialized, 'Already initialized');
+        __Ownable_init();
         initialized = true;
-        configs[1337] = Config(_recipientAddress, _paymentAddress, 0, 0, 0, false, false, false, false, true, 0, 0);
+        newApiKeyPrice = _newApiKeyPrice;
+        configs[1337] = Config(_recipientAddress, _paymentAddress, 0, 0, 0, false, false, false, false);
+        apiKeyOwner[1337] = msg.sender;
     }
-    
+
     function getVersion() public pure returns (uint) {
         return 1;
     }
     
     event OfferAccepted(address token, uint256 _tokenId, address _forNft, uint256 _for, uint256 _amount);
-    function acceptOffer(address token, uint _tokenId, uint index, uint apikey) public notLocked nonReentrant {
+    function acceptOffer(address token, uint _tokenId, uint index, uint apikey) public payable notLocked nonReentrant {
+
+        uint256 gasStart = gasleft(); // Get the initial gas left at the start of the function
+
         Config memory _config = configs[apikey];
         Offer memory _offer = offers[token][_tokenId][index];
         IERC721 nftToken1 = IERC721(token);
@@ -97,7 +107,15 @@ contract NFTrade_v3 is OwnableUpgradeable, ReentrancyGuard {
         } else {
             require(nftToken2.ownerOf(_offer.tokenId) == _offer._from, 'NFT not owned by offerer');
             require(nftToken2.isApprovedForAll(_offer._from, address(this)), 'Handler unable to transfer offer NFT');
-        }        
+        }
+
+        // uint256 gasEnd = gasleft(); // Get the gas left at the end of the function
+        // uint256 gasUsed = gasStart - gasEnd; // Calculate the gas used for the transaction
+        // uint256 gasPrice = tx.gasprice; // Get the gas price for the transaction
+        // uint256 transactionCost = gasUsed * gasPrice; // Calculate the transaction cost
+        // uint256 taxAmountInETH = fromPercent(transactionCost, gasTaxRate);
+        // require(msg.value >= taxAmountInETH, "ETH sent is not enough to cover the gas tax");
+
         if (_config.acceptOfferPrice > 0 && _config.payToAcceptOffer) {
             IERC20Token paymentToken = IERC20Token(_config.paymentAddress);
             require(paymentToken.allowance(msg.sender, address(this)) >= _config.acceptOfferPrice, 'Handler unable take payment for offer');
@@ -121,18 +139,23 @@ contract NFTrade_v3 is OwnableUpgradeable, ReentrancyGuard {
         }
 
         if (checkInterface(token, _INTERFACE_ID_ERC20)) {
-            // IERC20Token(token).transferFrom(msg.sender,  _offer._from, _offer.amount);
             revert('not allowed to make offers for erc20');
         } else if (checkInterface(token, _INTERFACE_ID_ERC1155)){
             IERC1155(token).safeTransferFrom(msg.sender, _offer._from, _tokenId, _offer.amount, "");
         } else {
             nftToken1.safeTransferFrom(msg.sender, _offer._from, _tokenId);
         }
-        
+        // if (gasTaxRate > 0) {
+        //     payable(owner()).transfer(taxAmountInETH);
+        // }
         delete offers[token][_tokenId];
         delete offered[_offer.token][_offer._from][_offer.tokenId];
         accepted[token][_tokenId].push(_offer);
         emit OfferAccepted(_offer.token, _offer.tokenId, token, _tokenId, _offer.amount);
+        // if (msg.value > taxAmountInETH) {
+        //     uint256 excessAmount = msg.value.sub(taxAmountInETH);
+        //     payable(msg.sender).transfer(excessAmount);
+        // }
     }
     
     event OfferAdded(address token, uint256 _tokenId, address _forNft, uint256 _for, uint256 amount);
@@ -140,8 +163,6 @@ contract NFTrade_v3 is OwnableUpgradeable, ReentrancyGuard {
         Config memory _config = configs[apikey];
         IERC721 nftToken1 = IERC721(token);
         IERC20Token paymentToken = IERC20Token(_config.paymentAddress);
-
-        // require(!checkInterface(_forNft, _INTERFACE_ID_ERC20), 'Not allowed to make offers for erc20');
 
         if (checkInterface(token, _INTERFACE_ID_ERC20) && _config.canOfferERC20) {
             require(IERC20Token(token).balanceOf(msg.sender) >= amount, 'Not Enough Balance');
@@ -186,20 +207,12 @@ contract NFTrade_v3 is OwnableUpgradeable, ReentrancyGuard {
         delete offered[_offer.token][_offer._from][_offer.tokenId];
     }
     
-    // function togglePayToMakeOffer() public onlyOwner {
-    //     togglePayToMakeOffer(1337);
-    // }
-    
-    function togglePayToMakeOffer(uint apikey) public onlyOwner {
+    function togglePayToMakeOffer(uint apikey) public onlyApiKeyOwner(apikey) {
         Config storage _config = configs[apikey];
         _config.payToMakeOffer = !_config.payToMakeOffer;
     }
     
-    // function togglePayToAcceptOffer() public onlyOwner {
-    //     togglePayToAcceptOffer(1337);
-    // }
-    
-    function togglePayToAcceptOffer(uint apikey) public onlyOwner {
+    function togglePayToAcceptOffer(uint apikey) public onlyApiKeyOwner(apikey) {
         Config storage _config = configs[apikey];
         _config.payToAcceptOffer = !_config.payToAcceptOffer;
     }
@@ -207,21 +220,18 @@ contract NFTrade_v3 is OwnableUpgradeable, ReentrancyGuard {
     function toggleLocked() public onlyOwner {
         locked = !locked;
     }
-
-    // function toggleCanOfferERC20() public onlyOwner {
-    //     toggleCanOfferERC20(1337);
-    // }
     
-    function toggleCanOfferERC20(uint256 apikey) public onlyOwner {
+    function toggleCanOfferERC20(uint256 apikey) public onlyApiKeyOwner(apikey) {
         Config storage _config = configs[apikey];
         _config.canOfferERC20 = !_config.canOfferERC20;
     }
 
-    // function toggleTakePercentageOfERC20() public onlyOwner {
-    //     toggleTakePercentageOfERC20(1337);
-    // }
+    function setGasTaxRate(uint256 _gasTaxRate) public onlyOwner {
+        require(_gasTaxRate <= 100, "Invalid tax rate");
+        gasTaxRate = _gasTaxRate;
+    }
     
-    function toggleTakePercentageOfERC20(uint apikey) public onlyOwner {
+    function toggleTakePercentageOfERC20(uint apikey) public onlyApiKeyOwner(apikey) {
         Config storage _config = configs[apikey];
         _config.takePercentageOfERC20 = !_config.takePercentageOfERC20;
     }
@@ -249,24 +259,55 @@ contract NFTrade_v3 is OwnableUpgradeable, ReentrancyGuard {
     function getRejectedOffers(address token, uint256 _tokenId) public view returns (Offer[] memory) {
         return rejected[token][_tokenId];
     }
-    
-    // function changeOfferPrices(uint256 _makeOfferPrice, uint256 _acceptOfferPrice, uint _percentageFee) public onlyOwner {
-    //     changeOfferPrices(_makeOfferPrice, _acceptOfferPrice, _percentageFee, 1337);
-    // }
-    function changeOfferPrices(uint256 _makeOfferPrice, uint256 _acceptOfferPrice, uint _percentageFee, uint apikey) public onlyOwner {
+
+    event NewAPIKeyCreated(uint256 apiKey, address creator);
+    function createNewAPIKey(uint256 _makeOfferPrice, uint256 _acceptOfferPrice, uint _percentageFee, bool _payToMakeOffer, bool _payToAcceptOffer, bool _canOfferERC20, bool _takePercentageOfERC20) public payable returns (uint256 newApiKey) {
+        require(msg.value >= newApiKeyPrice, "Not enough ETH to create new API key");
+
+        // Generate a new API key
+        newApiKey = uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender)));
+
+        // Create a new Config struct
+        Config memory newConfig = Config({
+            recipientAddress: msg.sender,
+            paymentAddress: address(this),
+            makeOfferPrice: _makeOfferPrice,
+            acceptOfferPrice: _acceptOfferPrice,
+            percentageFee: _percentageFee,
+            payToMakeOffer: _payToMakeOffer,
+            payToAcceptOffer: _payToAcceptOffer,
+            canOfferERC20: _canOfferERC20,
+            takePercentageOfERC20: _takePercentageOfERC20
+        });
+
+        // Add the new Config to the configs mapping
+        configs[newApiKey] = newConfig;
+        apiKeyOwner[newApiKey] = msg.sender;
+
+        // Transfer the fee to the contract owner
+        if (newApiKeyPrice > 0) {
+            payable(owner()).transfer(newApiKeyPrice);
+        }
+
+        // Emit the NewAPIKeyCreated event
+        emit NewAPIKeyCreated(newApiKey, msg.sender);
+        return newApiKey;
+    }
+
+    function changeOfferPrices(uint256 _makeOfferPrice, uint256 _acceptOfferPrice, uint _percentageFee, uint apikey) public onlyApiKeyOwner(apikey) {
         Config storage _config = configs[apikey];
         _config.makeOfferPrice = _makeOfferPrice;
         _config.acceptOfferPrice = _acceptOfferPrice;
         _config.percentageFee = _percentageFee;
     }
     
-    // function changeRecipientAddress(address _recipientAddress) public onlyOwner {
-    //     changeRecipientAddress(_recipientAddress, 1337);
-    // }
-    
-    function changeRecipientAddress(address _recipientAddress, uint apikey) public onlyOwner {
+    function changeRecipientAddress(address _recipientAddress, uint apikey) public onlyApiKeyOwner(apikey) {
         Config storage _config = configs[apikey];
         _config.recipientAddress = _recipientAddress;
+    }
+
+    function setNewApiKeyPrice(uint256 _newApiKeyPrice) public onlyOwner {
+        newApiKeyPrice = _newApiKeyPrice;
     }
 
     function checkInterface(address token, bytes4 _interface) public view returns (bool) {

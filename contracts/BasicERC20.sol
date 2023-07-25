@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.4;
+pragma solidity 0.8.13;
 interface BasicERC20 {
     function burn(uint256 value) external;
     function mint(address account, uint256 amount) external;

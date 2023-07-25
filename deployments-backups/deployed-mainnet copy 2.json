@@ -1,0 +1,204 @@
+{
+    "bytes2uint": {
+        "address": "0x119aCf8289941cB32D339E7D5B51ECa6d5C379ca",
+        "delegation": "0xbed1642696698f3f6330419cfa7d47d758f39240",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "handler": {
+        "address": "0xF314Fa957255AD6Ba189A641e6086C81385040fb",
+        "delegation": null,
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0xF314Fa957255AD6Ba189A641e6086C81385040fb",
+                "asType": 3
+            },
+            {
+                "registered": "0xdcFfa2b5cBf288932B009EBA01C8ca772ec6C993",
+                "asType": 1
+            },
+            {
+                "registered": "0xb8D6eB76dABea5b238e999B3145775E54412B2D2",
+                "asType": 6
+            },
+            {
+                "registered": "0x7E6027a6A84fC1F6Db6782c523EFe62c923e46ff",
+                "asType": 1
+            },
+            {
+                "registered": "0xDCA91409018ea80B71d21E818f00e76072969861",
+                "asType": 1
+            },
+            {
+                "registered": "0x769Fdf030A9e176EC8B6D66EFdCB63e8fA69885c",
+                "asType": 2
+            }
+        ],
+        "contractType": 3
+    },
+    "upgradableERC1155": {
+        "address": "0xdcFfa2b5cBf288932B009EBA01C8ca772ec6C993",
+        "delegation": "0x0938095e8b4dd192756ee581e8842b7b30e69c11",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0xF314Fa957255AD6Ba189A641e6086C81385040fb",
+                "asType": 3
+            },
+            {
+                "registered": "0xdcFfa2b5cBf288932B009EBA01C8ca772ec6C993",
+                "asType": 1
+            },
+            {
+                "registered": "0xb8D6eB76dABea5b238e999B3145775E54412B2D2",
+                "asType": 6
+            },
+            {
+                "registered": "0x7E6027a6A84fC1F6Db6782c523EFe62c923e46ff",
+                "asType": 1
+            },
+            {
+                "registered": "0xDCA91409018ea80B71d21E818f00e76072969861",
+                "asType": 1
+            },
+            {
+                "registered": "0x769Fdf030A9e176EC8B6D66EFdCB63e8fA69885c",
+                "asType": 2
+            },
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 3
+    },
+    "upgradableClaim": {
+        "address": "0xb8D6eB76dABea5b238e999B3145775E54412B2D2",
+        "delegation": "0xf2aa39676e30b76bb8a9ff01274758393c81fe52",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0xF314Fa957255AD6Ba189A641e6086C81385040fb",
+                "asType": 3
+            },
+            {
+                "registered": "0xa2aE7AD5EE7132C30900D0cdDF46F62c31072423",
+                "asType": 3
+            },
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 6
+    },
+    "upgradableERC1155_RP": {
+        "address": "0x7E6027a6A84fC1F6Db6782c523EFe62c923e46ff",
+        "delegation": "0xbd924dadd50b8af6fa0d0d53c069dc9d889f194e",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0xF314Fa957255AD6Ba189A641e6086C81385040fb",
+                "asType": 3
+            },
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 1
+    },
+    "upgradableERC1155_SOG": {
+        "address": "0xDCA91409018ea80B71d21E818f00e76072969861",
+        "delegation": "0xbd924dadd50b8af6fa0d0d53c069dc9d889f194e",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0xF314Fa957255AD6Ba189A641e6086C81385040fb",
+                "asType": 3
+            },
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 1
+    },
+    "legacyhandler_a": {
+        "address": "0xD0C7304156AF0a4be17352D8ce214222Ec66E8ba",
+        "delegation": null,
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "bulk_minter": {
+        "address": "0x11a6513318D54cA9cdcEc6a7b26c82C598252615",
+        "delegation": "0xb71535b994f6c4adc8b624ed7718b168a17ba500",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "quote": {
+        "address": "0xE5dec92911c78069d727a67C85936EDDbc9B02Cf",
+        "delegation": "0x0454fae13d7fe5e10cc12d193f0f5df968595aef",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableERC1155_Unassigned": {
+        "address": "0xd3a3CBc7983792172C13dcc4adf02CAf481d257f",
+        "delegation": "0xbd924dadd50b8af6fa0d0d53c069dc9d889f194e",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableERC721_Cursed": {
+        "address": "0x769Fdf030A9e176EC8B6D66EFdCB63e8fA69885c",
+        "delegation": "0x20db8237e76b160c3aa2030c07c8e6ca0d3f07e5",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "handler_upgradable": {
+        "address": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+        "delegation": "0xe6bdd446fbc402816fed650952eb31db3a0706a0",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x8C3c0274c33f263F0A55d129cFC8eaa3667A9E8b",
+                "asType": 2
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721_Ethscription": {
+        "address": "0x8C3c0274c33f263F0A55d129cFC8eaa3667A9E8b",
+        "delegation": "0x20db8237e76b160c3aa2030c07c8e6ca0d3f07e5",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableScribeMint-old": {
+        "address": "0xf29341b663C5eD5753bBBfFAC9D05400EC5226B8",
+        "delegation": "0xc551d13e6ec071eb6a6f5bfb3df428765ad8605a",
+        "verified": false,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableScribeMint-less-old": {
+        "address": "0x66C142e8029222c3701F27e19eA4753d619117e2",
+        "delegation": "0xf7733f60a2711ad4ddc820277d88f6ae6c49c1c5",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableScribeMint": {
+        "address": "0xe9466a615AD22E269d70d9C5c72C6dB4659b6a11",
+        "delegation": "0xc830c4312787831dbd345f58149bb60058189205",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    }
+}

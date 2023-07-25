@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: Unlicense
-pragma solidity 0.8.4;
+pragma solidity 0.8.13;
 
-import "hardhat/console.sol";
+// import "hardhat/console.sol";
 import "./SafeMath.sol";
 import "./IERC20.sol";
 import "./SafeERC20.sol";
@@ -101,7 +101,7 @@ contract TokenStaking is HasRegistration {
         PoolInfo storage pool = poolInfo[_poolId];
         UserInfo storage user = userInfo[_poolId][msg.sender];
         updatePool(0);
-        console.log('currentBlock', block.number, pool.accPerShare);
+        // console.log('currentBlock', block.number, pool.accPerShare);
         if (user.amount > 0) {
             uint256 pending = user.amount.mul(pool.accPerShare).div(1e12).sub(user.rewardDebt);
             safeTokenTransfer(msg.sender, pending);

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: CLOSED - Pending Licensing Audit
-pragma solidity 0.8.4;
+pragma solidity 0.8.13;
 
 import "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";

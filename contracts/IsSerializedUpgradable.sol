@@ -10,6 +10,6 @@ contract IsSerializedUpgradable is HasRegistration {
     mapping(uint256 => uint256[]) internal tokenIdToSerials;
     mapping(uint256 => uint256) internal serialToTokenId;
     mapping(uint256 => address) internal serialToOwner;
-
+    event TransferSerial(address indexed from, address indexed to, uint256 serial);
     
 }

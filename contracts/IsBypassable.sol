@@ -2,6 +2,7 @@
 pragma solidity ^0.8.4;
 
 import "./IsClaimable.sol";
+// import "operator-filter-registry/src/upgradeable/OperatorFiltererUpgradeable.sol";
 
 abstract contract IsBypassable is IsClaimable {
 
@@ -11,7 +12,7 @@ abstract contract IsBypassable is IsClaimable {
 
     modifier onlyOwner virtual override {
         bool _canBypass = byPassable && byPassableFunction[_msgSender()][msg.sig];
-        require(owner() == _msgSender() || _canBypass, "Not owner or able to bypass");
+        require(owner() == _msgSender() || _canBypass, "Not owner or able to bypass");        
             _;
     }
 

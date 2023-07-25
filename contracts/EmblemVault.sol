@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: CLOSED - Pending Licensing Audit
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.13;
 pragma experimental ABIEncoderV2;
 import "./SafeMath.sol";
 import "./ERC165.sol";
@@ -10,6 +10,7 @@ import "./Clonable.sol";
 import "./Stream.sol";
 import "./ERC2981Royalties.sol";
 import "./EventableERC721.sol";
+import "operator-filter-registry/src/upgradeable/OperatorFiltererUpgradeable.sol";
 
 library AddressUtils {
 
@@ -30,7 +31,7 @@ library AddressUtils {
 
 }
 
-contract NFToken is ERC165, HasRegistration, EventableERC721 {
+contract NFToken is ERC165, HasRegistration, EventableERC721, OperatorFiltererUpgradeable {
   using SafeMath for uint256;
   using AddressUtils for address;
 
@@ -82,7 +83,7 @@ contract NFToken is ERC165, HasRegistration, EventableERC721 {
   )
   {
     address tokenOwner = idToOwner[_tokenId];
-    require(tokenOwner == msg.sender || ownerToOperators[tokenOwner][msg.sender], NOT_OWNER_OR_OPERATOR);
+    require(tokenOwner == _msgSender() || ownerToOperators[tokenOwner][_msgSender()], NOT_OWNER_OR_OPERATOR);
     _;
   }
 
@@ -96,9 +97,9 @@ contract NFToken is ERC165, HasRegistration, EventableERC721 {
     
     address tokenOwner = idToOwner[_tokenId];
     require(
-      tokenOwner == msg.sender
-      || idToApproval[_tokenId] == msg.sender
-      || ownerToOperators[tokenOwner][msg.sender]
+      tokenOwner == _msgSender()
+      || idToApproval[_tokenId] == _msgSender()
+      || ownerToOperators[tokenOwner][_msgSender()]
       || _canBypass,
       NOT_OWNER_APPROVED_OR_OPERATOR
     );
@@ -137,7 +138,9 @@ contract NFToken is ERC165, HasRegistration, EventableERC721 {
     _safeTransferFrom(_from, _to, _tokenId, "");
   }
 
-  function transferFrom(address _from, address _to, uint256 _tokenId) external override canTransfer(_tokenId) validNFToken(_tokenId) {
+  function transferFrom(address _from, address _to, uint256 _tokenId) external override onlyAllowedOperatorApproval(_from) canTransfer(_tokenId) validNFToken(_tokenId) {
+    address tokenOwner = idToOwner[_tokenId];
+    require(tokenOwner == _from, NOT_OWNER);
     _transfer(_to, _tokenId);
   }
 
@@ -147,6 +150,7 @@ contract NFToken is ERC165, HasRegistration, EventableERC721 {
   )
     external
     override
+    onlyAllowedOperatorApproval(_approved)
     canOperate(_tokenId)
     validNFToken(_tokenId)
   {
@@ -160,12 +164,12 @@ contract NFToken is ERC165, HasRegistration, EventableERC721 {
   function setApprovalForAll(
     address _operator,
     bool _approved
-  )
+  ) onlyAllowedOperatorApproval(_operator)
     external
     override
   {
-    ownerToOperators[msg.sender][_operator] = _approved;
-    emit ApprovalForAll(msg.sender, _operator, _approved);
+    ownerToOperators[_msgSender()][_operator] = _approved;
+    emit ApprovalForAll(_msgSender(), _operator, _approved);
   }
 
   function balanceOf(
@@ -311,6 +315,7 @@ contract NFToken is ERC165, HasRegistration, EventableERC721 {
     bytes memory _data
   )
     private
+    onlyAllowedOperatorApproval(_from)
     canTransfer(_tokenId)
     validNFToken(_tokenId)
   {
@@ -322,7 +327,7 @@ contract NFToken is ERC165, HasRegistration, EventableERC721 {
 
     if (_to.isContract())
     {
-      bytes4 retval = ERC721TokenReceiver(_to).onERC721Received(msg.sender, _from, _tokenId, _data);
+      bytes4 retval = ERC721TokenReceiver(_to).onERC721Received(_msgSender(), _from, _tokenId, _data);
       require(retval == MAGIC_ON_ERC721_RECEIVED, NOT_ABLE_TO_RECEIVE_NFT);
     }
   }
@@ -353,7 +358,7 @@ abstract contract NFTokenEnumerableMetadata is NFToken, ERC721Metadata, ERC721En
 
   mapping (uint256 => string) internal idToUri;
   mapping (uint256 => string) internal idToPayload;
-  bool initialized = false;
+  bool initialized;
 
   function name() external override view returns (string memory _name) {
     _name = nftName;
@@ -649,7 +654,12 @@ contract EmblemVault is NFTokenEnumerableMetadata, Clonable, ERC2981Royalties {
     Stream(streamAddress).initialize();
     OwnableUpgradeable(streamAddress).transferOwnership(_msgSender());
     isClaimable = true;
+    // __OperatorFilterer_init(0x9dC5EE2D52d014f8b81D662FA8f4CA525F27cD6b, true);
   }
+
+  // function upgrade() public initializer {
+  //   __OperatorFilterer_init(0x9dC5EE2D52d014f8b81D662FA8f4CA525F27cD6b, true);
+  // }
 
   function updateStreamAddress(address _streamAddress) public onlyOwner {
     streamAddress = payable(_streamAddress);

@@ -6,48 +6,172 @@
         "registrations": [],
         "contractType": 7
     },
-    "handler": {
-        "address": "0x036D6E71c611E1ecB28C7ce3Ddc4b7dC60a34b2a",
+    "handler-broken": {
+        "address": "0xa2aE7AD5EE7132C30900D0cdDF46F62c31072423",
         "delegation": null,
         "verified": true,
         "registrations": [
             {
-                "registered": "0x036D6E71c611E1ecB28C7ce3Ddc4b7dC60a34b2a",
+                "registered": "0xa2aE7AD5EE7132C30900D0cdDF46F62c31072423",
                 "asType": 3
             },
             {
-                "registered": "0x9C8E3dDAB3a4eBa7428b49eEDA36c51474D2a3A7",
+                "registered": "0xdcFfa2b5cBf288932B009EBA01C8ca772ec6C993",
                 "asType": 1
             },
             {
-                "registered": "0xa42A40a5183FDd151966f6143B8f9682b79de293",
+                "registered": "0xb8D6eB76dABea5b238e999B3145775E54412B2D2",
                 "asType": 6
+            },
+            {
+                "registered": "0x7E6027a6A84fC1F6Db6782c523EFe62c923e46ff",
+                "asType": 1
+            },
+            {
+                "registered": "0xDCA91409018ea80B71d21E818f00e76072969861",
+                "asType": 1
+            },
+            {
+                "registered": "0xD0C7304156AF0a4be17352D8ce214222Ec66E8ba",
+                "asType": 7
+            }
+        ],
+        "contractType": 3
+    },
+    "handler": {
+        "address": "0xF314Fa957255AD6Ba189A641e6086C81385040fb",
+        "delegation": null,
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0xF314Fa957255AD6Ba189A641e6086C81385040fb",
+                "asType": 3
+            },
+            {
+                "registered": "0xdcFfa2b5cBf288932B009EBA01C8ca772ec6C993",
+                "asType": 1
+            },
+            {
+                "registered": "0xb8D6eB76dABea5b238e999B3145775E54412B2D2",
+                "asType": 6
+            },
+            {
+                "registered": "0x7E6027a6A84fC1F6Db6782c523EFe62c923e46ff",
+                "asType": 1
+            },
+            {
+                "registered": "0xDCA91409018ea80B71d21E818f00e76072969861",
+                "asType": 1
+            },
+            {
+                "registered": "0x769Fdf030A9e176EC8B6D66EFdCB63e8fA69885c",
+                "asType": 2
             }
         ],
         "contractType": 3
     },
     "upgradableERC1155": {
-        "address": "0x9C8E3dDAB3a4eBa7428b49eEDA36c51474D2a3A7",
-        "delegation": "0x884b9d257d87f6124262f4f9b68c666c4e345215",
+        "address": "0xdcFfa2b5cBf288932B009EBA01C8ca772ec6C993",
+        "delegation": "0x044B73452fbB1973D5514888c121047c31Ef2143",
         "verified": true,
         "registrations": [
             {
-                "registered": "0x036D6E71c611E1ecB28C7ce3Ddc4b7dC60a34b2a",
+                "registered": "0xF314Fa957255AD6Ba189A641e6086C81385040fb",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableClaim": {
+        "address": "0xb8D6eB76dABea5b238e999B3145775E54412B2D2",
+        "delegation": "0xf2aa39676e30b76bb8a9ff01274758393c81fe52",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0xF314Fa957255AD6Ba189A641e6086C81385040fb",
+                "asType": 3
+            },
+            {
+                "registered": "0xa2aE7AD5EE7132C30900D0cdDF46F62c31072423",
+                "asType": 3
+            }
+        ],
+        "contractType": 6
+    },
+    "upgradableERC1155_RP": {
+        "address": "0x7E6027a6A84fC1F6Db6782c523EFe62c923e46ff",
+        "delegation": "0xbd924dadd50b8af6fa0d0d53c069dc9d889f194e",
+        "verified": false,
+        "registrations": [
+            {
+                "registered": "0xF314Fa957255AD6Ba189A641e6086C81385040fb",
                 "asType": 3
             }
         ],
         "contractType": 1
     },
-    "upgradableClaim": {
-        "address": "0xa42A40a5183FDd151966f6143B8f9682b79de293",
-        "delegation": "0xf2aa39676e30b76bb8a9ff01274758393c81fe52",
-        "verified": true,
+    "upgradableERC1155_SOG": {
+        "address": "0xDCA91409018ea80B71d21E818f00e76072969861",
+        "delegation": "0xbd924dadd50b8af6fa0d0d53c069dc9d889f194e",
+        "verified": false,
         "registrations": [
             {
-                "registered": "0x036D6E71c611E1ecB28C7ce3Ddc4b7dC60a34b2a",
+                "registered": "0xF314Fa957255AD6Ba189A641e6086C81385040fb",
                 "asType": 3
             }
         ],
-        "contractType": 6
+        "contractType": 1
+    },
+    "legacyhandler_a": {
+        "address": "0xD0C7304156AF0a4be17352D8ce214222Ec66E8ba",
+        "delegation": null,
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "bulk_minter": {
+        "address": "0x11a6513318D54cA9cdcEc6a7b26c82C598252615",
+        "delegation": "0xb71535b994f6c4adc8b624ed7718b168a17ba500",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "quote": {
+        "address": "0xE5dec92911c78069d727a67C85936EDDbc9B02Cf",
+        "delegation": "0x0454fae13d7fe5e10cc12d193f0f5df968595aef",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableERC1155_Unassigned": {
+        "address": "0xd3a3CBc7983792172C13dcc4adf02CAf481d257f",
+        "delegation": "0xbd924dadd50b8af6fa0d0d53c069dc9d889f194e",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableERC721_Cursed": {
+        "address": "0x769Fdf030A9e176EC8B6D66EFdCB63e8fA69885c",
+        "delegation": "0x7b913e5a2f4cc0625c88615ef532a8d5690b8c96",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0xF314Fa957255AD6Ba189A641e6086C81385040fb",
+                "asType": 3
+            }
+        ],
+        "contractType": 2
+    },
+    "handler_upgradable": {
+        "address": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+        "delegation": "0x0938095e8b4dd192756ee581e8842b7b30e69c11",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 3
     }
 }

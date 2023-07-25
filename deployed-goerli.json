@@ -38,16 +38,32 @@
         ],
         "contractType": 1
     },
-    "upgradableClaim": {
-        "address": "0x1342F91DC53B6D222614Ad1f981b5683d4653116",
-        "delegation": "0x48ec87f708d8a0fa7fff709a3efa81da88844c23",
+    "handler_upgradable": {
+        "address": "0xfa0C5380c53d3428c66DbD8F09036D7b13FB7130",
+        "delegation": "0x9f3118a32d21b8e388704e00dadacc79b08805c1",
         "verified": true,
-        "registrations": [
-            {
-                "registered": "0xc15235d210c1b1CdA8643a5eA37687E241B031b0",
-                "asType": 3
-            }
-        ],
-        "contractType": 6
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradable721A": {
+        "address": "0xE24CaC4c8288D2F30297eD99E0Ae675001428F18",
+        "delegation": "0x9286a6f4e96745d78dc5f21567e283dfbbb85539",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableClaim": {
+        "address": "0xb03D438771478e22a177df6595b287b2D20f7c52",
+        "delegation": "0xe70abbc99d8eb32124bf022196c493db4fbc50fd",
+        "verified": false,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradable721A_Ordi": {
+        "address": "0x582699d2c58A38056Cf02875540705137f0bbbF7",
+        "delegation": "0x95764b56a6d4143ac35db0603dadded007a3a50a",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
     }
 }

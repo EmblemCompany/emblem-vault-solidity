@@ -51,6 +51,7 @@ contract ContractNFT is OwnableUpgradeable, ERC165 {
 
     event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
     event ERC721Created(address indexed newThingAddress, address indexed libraryAddress);
+    mapping(address => mapping(address => bool)) private _operatorApprovals;
 
     function version() virtual public view returns (uint256 _version) {
         return 2;
@@ -79,7 +80,11 @@ contract ContractNFT is OwnableUpgradeable, ERC165 {
         emit Transfer(address(0), newOwner, _tokenId);
         tokenName = "ContractNFT";
         tokenSymbol = "NFT";
+    }
 
+    function _isApprovedOrOwner(address spender, uint256 _tokenId) internal view returns (bool) {
+        require(ownerOf(_tokenId) != address(0), "Token does not exist");
+        return (spender == owner() || isApprovedForAll(owner(), spender));
     }
 
     function getClones() public view returns (address[] memory) {
@@ -94,25 +99,34 @@ contract ContractNFT is OwnableUpgradeable, ERC165 {
     function ownerOf(uint256 _tokenId) public view returns (address) {
         return _tokenId == tokenId ? owner(): address(0);
     }
+    
     function safeTransferFrom(address from, address to, uint256 _tokenId) public payable {
-        require(from == owner(), "Not Owner");
+        require(_isApprovedOrOwner(_msgSender(), _tokenId), "Caller is not owner nor approved");
+        require(from == owner(), "Not owner");
         transferOwnership(to);
         emit Transfer(from, to, _tokenId);
     }
+
     function safeTransferFrom(address from, address to, uint256 _tokenId, bytes calldata) public payable {
-        require(from == owner(), "Not Owner");
+        require(_isApprovedOrOwner(_msgSender(), _tokenId), "Caller is not owner nor approved");
+        require(from == owner(), "Not owner");
         transferOwnership(to);
         emit Transfer(from, to, _tokenId);
     }
-    function isApprovedForAll(address, address) public pure returns (bool) {
-        return false;
+    
+    function isApprovedForAll(address owner, address operator) public view returns (bool) {
+        return _operatorApprovals[owner][operator];
     }
+
+    function setApprovalForAll(address operator, bool approved) public {
+        require(operator != _msgSender(), "Cannot approve oneself");
+        _operatorApprovals[_msgSender()][operator] = approved;
+    }
+
     function getApproved(uint256) public view returns (address) {
         return owner();
     }
-    function setApprovalForAll(address _operator, bool _approved) public {
 
-    }
     function approve(address _approved, uint256 _tokenId) public payable {
 
     }

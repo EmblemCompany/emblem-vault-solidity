@@ -1,4 +1,5 @@
-pragma solidity 0.8.4;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.13;
 /**
  * @dev The contract has an owner address, and provides basic authorization control whitch
  * simplifies the implementation of user permissions. This contract is based on the source code at:

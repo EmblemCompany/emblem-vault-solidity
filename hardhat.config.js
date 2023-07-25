@@ -21,7 +21,7 @@ module.exports = {
     enabled: true,
   },
   solidity: {
-    version: "0.8.4",
+    version: "0.8.13",
     settings: {
       optimizer: {
         enabled: true,
@@ -69,7 +69,7 @@ module.exports = {
       //gasPrice: 80000000000,
       //gasPrice: 96000000000,
       timeout: 1000 * 60 * 60 * 24, // 1 day
-      url: process.env.MAINNET || "https://mainnet.infura.io/v3/6112845322b74decbf08005aea176252",
+      url: process.env.MAINNET || "https://mainnet.infura.io/v3/03104519b3554dabaf3259dfbfd0635a",
       accounts: process.env.ETHKEY ? [process.env.ETHKEY]: [],
     },
     ganache: {

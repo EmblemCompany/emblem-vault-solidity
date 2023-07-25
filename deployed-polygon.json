@@ -41,13 +41,20 @@
     "upgradableClaim": {
         "address": "0x62C505E51800901f4B44Ff1f6eD5348c36D37E28",
         "delegation": "0xd2b839249d5072590367206232518d2fc21fc982",
-        "verified": false,
+        "verified": true,
         "registrations": [
             {
                 "registered": "0x01f1eBC02e12C71A4f2b9e14fF31b3bE6365e9da",
                 "asType": 3
             }
         ],
-        "contractType": 6
+        "contractType": 7
+    },
+    "legacyhandler_a": {
+        "address": "0x322Ad0007FF961f253D3818c61d912c89752EC3E",
+        "delegation": null,
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
     }
 }

@@ -50,6 +50,27 @@ class Util {
       return s.address
     })
   }
+  async deployERC721A(deployType = null) {
+    const [_deployer, u1, u2] = await ethers.getSigners();
+    this.alice = u1;
+    this.bob = u2;
+    this.deployer = _deployer;
+    let EmblemVault721AUpgradeable = await ethers.getContractFactory('EmblemVault721AUpgradeable');
+    if (deployType && deployType == "upgradable") {
+      this.emblemVault721AUpgradeable = await upgrades.deployProxy(EmblemVault721AUpgradeable)
+    } else {
+      this.emblemVault721AUpgradeable = await EmblemVault721AUpgradeable.deploy()
+      await this.emblemVault721AUpgradeable.initialize("TestA","test")
+    }
+    await this.emblemVault721AUpgradeable.deployed();
+    await fs.promises.mkdir(path.resolve(__dirname, "../artifacts"), { recursive: true }).catch((e) => {})
+    await fs.promises.writeFile(path.resolve(__dirname, "../artifacts/Deployed.json"), JSON.stringify({ address: this.emblemVault721AUpgradeable.address }))
+    let signers = await ethers.getSigners();
+    this.signers = signers
+    this.addresses = signers.map((s) => {
+      return s.address
+    })
+  }
   async deployBulkMinter(deployType = null) {
     const [_deployer, u1, u2] = await ethers.getSigners();
     this.deployer = _deployer;
@@ -144,6 +165,24 @@ class Util {
     await this.handler.initialize()
     await fs.promises.mkdir(path.resolve(__dirname, "../artifacts"), { recursive: true }).catch((e) => {})
     await fs.promises.writeFile(path.resolve(__dirname, "../artifacts/Deployed.json"), JSON.stringify({ address: this.handler.address }))
+    let signers = await ethers.getSigners();
+    this.signers = signers
+    this.addresses = signers.map((s) => {
+      return s.address
+    })
+  }
+
+  async deployHandlerUpgradable() {
+    const [_deployer, u1, u2] = await ethers.getSigners();
+    this.alice = u1;
+    this.bob = u2;
+    this.deployer = _deployer;
+    let VaultHandlerV8Upgradable = await ethers.getContractFactory('VaultHandlerV8Upgradable');
+    this.handler_upgradable = await VaultHandlerV8Upgradable.deploy()
+    await this.handler_upgradable.deployed();
+    await this.handler_upgradable.initialize()
+    await fs.promises.mkdir(path.resolve(__dirname, "../artifacts"), { recursive: true }).catch((e) => {})
+    await fs.promises.writeFile(path.resolve(__dirname, "../artifacts/Deployed.json"), JSON.stringify({ address: this.handler_upgradable.address }))
     let signers = await ethers.getSigners();
     this.signers = signers
     this.addresses = signers.map((s) => {

@@ -2,7 +2,7 @@ const { ethers, upgrades} = require("hardhat");
 const spawn = require('await-spawn')
 
 let HANDLER_ADDRESS //= "0x6a042F1752EF3eaB5D7efBE25994f7c2D14E2a35"
-let ADDRESS = "0xCc4658E264024FeBff26aa19d2DBF2cdbD7576Ac"
+let ADDRESS = "0x5434ba8b4a37755cb3867c9fde39342c0d382857"
 async function main() {
   const [_deployer] = await hre.ethers.getSigners();
   console.log("Verifying", ADDRESS)
@@ -20,7 +20,7 @@ async function verify(address, constructor = []) {
       constructorArguments: constructor,
     });
   } catch (e) {
-    // console.log("error",e)
+    console.log("error",e)
     return console.log("Reason", e.toString().split("Reason: ")[1].split(" at ")[0])
   }
 }

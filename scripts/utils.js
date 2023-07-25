@@ -68,9 +68,15 @@ async function registerWithContract(registrationType, registerWhere, contractRes
     let results = {registered: contractResult.address, asType: registrationType}
     let found = registerWhere.registrations.filter(registration => { return registration.registered == contractResult.address && registration.asType == registrationType }).length > 0? true : false
     if (!found) {
-        await registerWhere.contract.registerContract(contractResult.address, registrationType)
-        contractResult.contractType = registrationType
-        registerWhere.registrations.push(results)
+        if (registerWhere.contract.signer.address == registerWhere.owner) {
+            await registerWhere.contract.registerContract(contractResult.address, registrationType)
+            contractResult.contractType = registrationType
+            registerWhere.registrations.push(results)
+        } else {
+            console.log("------- Can't register: Not owner of", registerWhere.address)
+        }
+    } else {
+        console.log("Can't register: Already registered")
     }
     return results
 }
@@ -133,7 +139,7 @@ async function getContract(address, _class, signer) {
 
 async function perform(deployment, method, args = []) {
     console.log("Attempting to perform", method, args, deployment.action)
-    if(deployment.contract && deployment.action == "deploy") {
+    if(deployment.contract /* && deployment.action == "deploy"*/) {
         console.log("Performing", method, args)
         let tx = await deployment.contract[method](...args)
         await tx.wait(1)

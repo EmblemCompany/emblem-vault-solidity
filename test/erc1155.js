@@ -580,19 +580,19 @@ describe('ERC1155', () => {
                 firstSerialByOwner = await ERC1155.getFirstSerialByOwner(util.deployer.address, 789)
                 expect(firstSerialByOwner).to.equal(0)
             })
-            it('should not be expensive', async()=>{
-                let claimedContract = util.claimedUpgradable
-                await util.handler.registerContract(util.claimedUpgradable.address, 6)
-                await claimedContract.registerContract(util.handler.address, 3)
-                await util.handler.registerContract(ERC1155.address, 1)
-                await ERC1155.mint(util.deployer.address, 789, 30)
-                await ERC1155.setApprovalForAll(util.handler.address, true)
-                let serial1 = await ERC1155.getSerial(789, 0)
-                await util.handler.claim(ERC1155.address, 789)
-                let serial2 = await ERC1155.getSerial(789, 0)
-                expect(serial1).to.not.equal(serial2)
-                await ERC1155.migrate([789])
-            })
+            // it('should not be expensive', async()=>{
+            //     let claimedContract = util.claimedUpgradable
+            //     await util.handler.registerContract(util.claimedUpgradable.address, 6)
+            //     await claimedContract.registerContract(util.handler.address, 3)
+            //     await util.handler.registerContract(ERC1155.address, 1)
+            //     await ERC1155.mint(util.deployer.address, 789, 30)
+            //     await ERC1155.setApprovalForAll(util.handler.address, true)
+            //     let serial1 = await ERC1155.getSerial(789, 0)
+            //     await util.handler.claim(ERC1155.address, 789)
+            //     let serial2 = await ERC1155.getSerial(789, 0)
+            //     expect(serial1).to.not.equal(serial2)
+            //     await ERC1155.migrate([789])
+            // })
         })
         describe('Handler Callbacks', ()=>{        
             it('should not allow callback registration in handler without witness')

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: CLOSED - Pending Licensing Audit
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.13;
 import "./SafeMath.sol";
 import "./IERC1155.sol";
 import "./ERC165.sol";
@@ -324,7 +324,7 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
         hasSerialized = true;
         serialCount++;
     }
-
+    
     function transferSerial(uint256 serialNumber, address from, address to) internal {
         require(serialToOwner[serialNumber] == from, 'Not correct owner of serialnumber');
         uint256 tokenId = serialToTokenId[serialNumber];
@@ -339,6 +339,7 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
                 break;
             }
         }
+        emit TransferSerial(from, to, serialNumber);
     }
 
     function burnSerial(uint256 serialNumber) internal {
