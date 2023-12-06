@@ -12,7 +12,7 @@ import "./ERC2981Royalties.sol";
 import "./UpgradableERC1155.sol";
 import "operator-filter-registry/src/upgradeable/OperatorFiltererUpgradeable.sol";
 
-contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradable, Clonable, ERC2981Royalties, UpgradableERC1155, OperatorFiltererUpgradeable {
+contract ERC1155UpgradableBatch is ERC165, IERC1155MetadataURI, IsSerializedUpgradable, Clonable, ERC2981Royalties, UpgradableERC1155, OperatorFiltererUpgradeable {
     using SafeMath for uint256;
     address payable public streamAddress;
 
@@ -33,7 +33,9 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
     address private serialManagerAddress;
     uint private managerUpgradeBlock;
 
-    constructor () {    }
+    constructor () {
+        // __Ownable_init();
+    }
 
     function initialize() public override initializer {
         __Ownable_init();
@@ -48,8 +50,28 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
         isClaimable = true;
     }
 
+    function fireEvent( address _to, uint256 _tokenId, uint256 _amount) public onlyOwner {
+        emit TransferSingle(_msgSender(), address(0), _to, _tokenId, _amount);
+    }
+
+    function fireEvents(address[] memory _to, uint256[] memory _tokenIds, uint256[] memory _amounts) public onlyOwner {
+        for (uint i = 0; i < _tokenIds.length; i++) {
+            emit TransferSingle(_msgSender(), address(0), _to[i], _tokenIds[i], _amounts[i]);
+        }
+    }
+
+    function initSerialManager(address _address) public onlyOwner {
+        require(serialManagerAddress == address(0), "Already initialized");
+        serialManagerAddress = _address;
+        managerUpgradeBlock = block.number;
+    }
+
+    function updateSerialManagerBlock(uint _block) public onlyOwner {
+        managerUpgradeBlock = _block;
+    }
+
     function version() public pure override returns(uint256) {
-        return 15;
+        return 11;
     }
 
     function changeName(string calldata _name, string calldata _symbol) public onlyOwner {
@@ -66,24 +88,8 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
         _mint(_to, _tokenId, _amount, serialNumber);
     }
 
-    function migrationMint(uint256 serialNumber, address account, uint256 tokenId) public onlyOwner {
-        tokenIdToSerials[tokenId].push(serialNumber);
-        serialToTokenId[serialNumber] = tokenId;
-        serialToOwner[serialNumber] = account;
-        tokenIdToOwnerToSerialNumbers[tokenId][account].push(serialNumber);
-        // _balances[tokenId][account] = _balances[tokenId][account].add(1);
-        emit TransferSingle(_msgSender(), address(0), account, tokenId, 1);
-    }
-
-    function migrationMintMany(uint256[] memory serialNumber, address[] memory account, uint256[] memory tokenId) public onlyOwner {
-        for (uint i = 0; i < serialNumber.length; i++) { 
-            tokenIdToSerials[tokenId[i]].push(serialNumber[i]);
-            serialToTokenId[serialNumber[i]] = tokenId[i];
-            serialToOwner[serialNumber[i]] = account[i];
-            tokenIdToOwnerToSerialNumbers[tokenId[i]][account[i]].push(serialNumber[i]);
-            // _balances[tokenId[i]][account[i]] = _balances[tokenId[i]][account[i]].add(1);
-            emit TransferSingle(_msgSender(), address(0), account[i], tokenId[i], 1);
-        }
+    function migrationMint(bytes memory serialNumber, address account, uint256 tokenId) public onlyOwner {
+        _mintSerial(decodeSingle(abi.encodePacked(serialNumber)), account, tokenId);
     }
 
     function mintBatch(address[] memory to, uint256[] memory ids, uint256[] memory amounts, bytes[] memory serialNumbers) public onlyOwner {
@@ -91,7 +97,7 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
     }
 
     function burn(address _from, uint256 _tokenId, uint256 _amount) public {
-        require(_from == _msgSender() || isApprovedForAll(_from, _msgSender()) || canBypass(), 'Not Approved to burn');
+        require(_from == _msgSender() || isApprovedForAll(_from, _msgSender()), 'Not Approved to burn');
         _burn(_from, _tokenId, _amount);
     }
 
@@ -123,10 +129,9 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
         return string(buffer);
     }
 
-    function balanceOf(address account, uint256 tokenId) public view returns (uint256) {
+    function balanceOf(address account, uint256 id) public view returns (uint256) {
         require(account != address(0), "ERC1155: balance query for the zero address");
-        return tokenIdToOwnerToSerialNumbers[tokenId][account].length;
-        // return _balances[id][account];
+        return _balances[id][account];
     }
     
     function balanceOfBatch(address[] memory accounts, uint256[] memory ids) public view returns (uint256[] memory) {
@@ -136,8 +141,7 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
 
         for (uint256 i = 0; i < accounts.length; ++i) {
             require(accounts[i] != address(0), "ERC1155: batch balance query for the zero address");
-            // batchBalances[i] = _balances[ids[i]][accounts[i]];
-            batchBalances[i] = tokenIdToOwnerToSerialNumbers[ids[i]][accounts[i]].length;
+            batchBalances[i] = _balances[ids[i]][accounts[i]];
         }
         return batchBalances;
     }
@@ -154,10 +158,14 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
     }
     
     function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes memory) public virtual onlyAllowedOperatorApproval(from) {
+        bool _canBypass = canBypassForTokenId(id);
         require(to != address(0), "ERC1155: transfer to the zero address");
-        require(from == _msgSender() || isApprovedForAll(from, _msgSender()) || canBypassForTokenId(id), "ERC1155: caller is not owner nor approved nor bypasser");
+        require(from == _msgSender() || isApprovedForAll(from, _msgSender()) || _canBypass, "ERC1155: caller is not owner nor approved nor bypasser");
 
-        require(tokenIdToOwnerToSerialNumbers[id][from].length >= amount, "ERC1155: insufficient balance for transfer");
+        address operator = _msgSender();
+
+        _balances[id][from] = _balances[id][from].sub(amount, "ERC1155: insufficient balance for transfer");
+        _balances[id][to] = _balances[id][to].add(amount);
 
         if (isSerialized()) {
             for (uint i = 0; i < amount; i++) {            
@@ -168,7 +176,7 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
             }
         }
 
-        emit TransferSingle(_msgSender(), from, to, id, amount);
+        emit TransferSingle(operator, from, to, id, amount);
         if (registeredOfType[3].length > 0 && registeredOfType[3][0] != address(0)) {
             for (uint i = 0; i < amount; i++) {
                 IHandlerCallback(registeredOfType[3][0]).executeCallbacks(from, to, id, IHandlerCallback.CallbackType.TRANSFER);
@@ -227,7 +235,7 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
                 IHandlerCallback(_msgSender()).executeCallbacks(address(0), account, id, IHandlerCallback.CallbackType.MINT);
             }
         }
-        // _balances[id][account] = _balances[id][account].add(amount);
+        _balances[id][account] = _balances[id][account].add(amount);
         emit TransferSingle(operator, address(0), account, id, amount);
     }
 
@@ -251,10 +259,10 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
 
         address operator = _msgSender();
 
-        // _balances[id][account] = _balances[id][account].sub(
-        //     amount,
-        //     "ERC1155: burn amount exceeds balance"
-        // );
+        _balances[id][account] = _balances[id][account].sub(
+            amount,
+            "ERC1155: burn amount exceeds balance"
+        );
 
         if (isSerialized()) {
             uint256 serialNumber = getFirstSerialByOwner(account, id);

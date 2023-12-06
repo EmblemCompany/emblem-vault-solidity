@@ -71,6 +71,66 @@ class Util {
       return s.address
     })
   }
+  async deployERC721AFees(deployType = null) {
+    const [_deployer, u1, u2] = await ethers.getSigners();
+    this.alice = u1;
+    this.bob = u2;
+    this.deployer = _deployer;
+    let EmblemVault721AUpgradeableFees = await ethers.getContractFactory('EmblemVault721AUpgradeableFees');
+    if (deployType && deployType == "upgradable") {
+      this.EmblemVault721AUpgradeableFees = await upgrades.deployProxy(EmblemVault721AUpgradeableFees)
+    } else {
+      this.EmblemVault721AUpgradeableFees = await EmblemVault721AUpgradeableFees.deploy()
+      await this.EmblemVault721AUpgradeableFees.initialize("TestA","test")
+    }
+    await this.EmblemVault721AUpgradeableFees.deployed();
+    await fs.promises.mkdir(path.resolve(__dirname, "../artifacts"), { recursive: true }).catch((e) => {})
+    await fs.promises.writeFile(path.resolve(__dirname, "../artifacts/Deployed.json"), JSON.stringify({ address: this.EmblemVault721AUpgradeableFees.address }))
+    let signers = await ethers.getSigners();
+    this.signers = signers
+    this.addresses = signers.map((s) => {
+      return s.address
+    })
+  }
+  async deploySimpleNFTBuyer(deployType = null) {
+    const [_deployer, u1, u2] = await ethers.getSigners();
+    this.deployer = _deployer;
+    let SimpleNFTBuyer = await ethers.getContractFactory('SimpleNFTBuyer');
+    if (deployType && deployType == "upgradable") {
+      this.simpleNFTBuyer = await upgrades.deployProxy(SimpleNFTBuyer)
+    } else {
+      this.simpleNFTBuyer = await SimpleNFTBuyer.deploy()
+    }
+    await this.simpleNFTBuyer.deployed();
+    await fs.promises.mkdir(path.resolve(__dirname, "../artifacts"), { recursive: true }).catch((e) => {})
+    await fs.promises.writeFile(path.resolve(__dirname, "../artifacts/Deployed.json"), JSON.stringify({ address: this.simpleNFTBuyer.address }))
+    let signers = await ethers.getSigners();
+    this.signers = signers
+    this.addresses = signers.map((s) => {
+      return s.address
+    })
+  }
+  async deployERC1155Batch(deployType = null) {
+    const [_deployer, u1, u2] = await ethers.getSigners();
+    this.deployer = _deployer;
+    this.alice = u1;
+    this.bob = u2;
+    let ERC1155UpgradableBatch = await ethers.getContractFactory('ERC1155UpgradableBatch');
+    if (deployType && deployType == "upgradable") {
+      this.erc1155Batch = await upgrades.deployProxy(ERC1155UpgradableBatch)
+    } else {
+      this.erc1155Batch = await ERC1155UpgradableBatch.deploy()
+      await this.erc1155Batch.deployed()
+      await this.erc1155Batch.initialize()
+    }    
+    await fs.promises.mkdir(path.resolve(__dirname, "../artifacts"), { recursive: true }).catch((e) => {})
+    await fs.promises.writeFile(path.resolve(__dirname, "../artifacts/Deployed.json"), JSON.stringify({ address: this.erc1155Batch.address }))
+    let signers = await ethers.getSigners();
+    this.signers = signers
+    this.addresses = signers.map((s) => {
+      return s.address
+    })
+  }
   async deployBulkMinter(deployType = null) {
     const [_deployer, u1, u2] = await ethers.getSigners();
     this.deployer = _deployer;

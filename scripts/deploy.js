@@ -1,13 +1,15 @@
 const { ethers, upgrades} = require("hardhat");
 const spawn = require('await-spawn')
 const utils = require("./utils")
+var request = require('request')
 const fs = require('fs')
 let deploymentsFilename = "./deployed"+("-"+process.env.NETWORK || "-unknown-network")+".json"
 let Deployments = fs.existsSync(deploymentsFilename) ? require("."+deploymentsFilename) : {}
 
 let VERIFY = process.env.NETWORK == "polygon" || process.env.NETWORK == "mainnet" || process.env.NETWORK == "goerli" ? true: false
 let results = {time: Date.now()}
-
+let EXTRA = false
+let TARGET = 'ERC1155'
 
 async function main() {
   const [_deployer] = await hre.ethers.getSigners();
@@ -26,12 +28,15 @@ async function main() {
   const ConfigurableERC20Upgradable = await ethers.getContractFactory("ConfigurableERC20Upgradable");
   const Bytes2Uint = await ethers.getContractFactory("Bytes2Uint");
   const ERC1155Upgradable = await ethers.getContractFactory("ERC1155Upgradable");
+  const ERC1155UpgradableBatch = await ethers.getContractFactory("ERC1155UpgradableBatch");
   const ContractNFTFactory = await ethers.getContractFactory("ContractNFTFactory");
   const UpgradableTest = await hre.ethers.getContractFactory("UpgradableTest");
   const UpgradableTestV2 = await hre.ethers.getContractFactory("UpgradableTestV2");
   const MintVaultQuote = await hre.ethers.getContractFactory("MintVaultQuote");
   const MintScribe = await hre.ethers.getContractFactory("MintScribe");
   const EmblemVault721AUpgradeable = await hre.ethers.getContractFactory("EmblemVault721AUpgradeable");
+  const EmblemVault721AUpgradeableFees = await hre.ethers.getContractFactory("EmblemVault721AUpgradeableFees");
+  const ERC1155SerialManager = await hre.ethers.getContractFactory("ERC1155SerialManager");
 
   results = Deployments
 
@@ -166,21 +171,22 @@ async function main() {
   // save()
 
   // Upgrade _RP
-  results.upgradableERC1155_SOG = await verifyContract(await utils.upgradeProxy(results.upgradableERC1155_SOG, "ERC1155Upgradable", ERC1155Upgradable))
-  save()
+  // results.upgradableERC1155_Unassigned = await verifyContract(await utils.upgradeProxy(results.upgradableERC1155_Unassigned, "ERC1155Upgradable", ERC1155Upgradable))
+  // save()
   // /* HANDLER UPGRADEABLE */
-  //  results.handler_upgradable = await verifyContract(await getOrDeployProxy(results.handler_upgradable, "VaultHandlerV8Upgradable", VaultHandlerV8Upgradable))
+   results.handler_upgradable = await verifyContract(await getOrDeployProxy(results.handler_upgradable, "VaultHandlerV8Upgradable", VaultHandlerV8Upgradable))
   //  results.upgradableClaim = await verifyContract(await getOrDeployProxy(results.upgradableClaim, "ClaimedUpgradable", ClaimedUpgradable))
   //  results.upgradableERC1155 = await verifyContract(await getOrDeployProxy(results.upgradableERC1155, "ERC1155Upgradable", ERC1155Upgradable))
   //  results.upgradableERC1155_RP = await verifyContract(await getOrDeployProxy(results.upgradableERC1155_RP, "ERC1155Upgradable", ERC1155Upgradable))
   //  results.upgradableERC1155_SOG = await verifyContract(await getOrDeployProxy(results.upgradableERC1155_SOG, "ERC1155Upgradable", ERC1155Upgradable))
-  //  results.upgradableERC721_Cursed = await verifyContract(await getOrDeployProxy(results.upgradableERC721_Cursed, "EmblemVault", EmblemVault))
+  //  results.upgradableERC721_Rinkeby = await verifyContract(await getOrDeployProxy(results.upgradableERC721_Rinkeby, "EmblemVault721AUpgradeable", EmblemVault721AUpgradeable))
   //  save()
   //  results.handler_upgradable.action != "get"? await utils.perform(results.handler_upgradable, "initialize") : null
   /* Upgrade */
   // results.handler_upgradable = await verifyContract(await utils.upgradeProxy(results.handler_upgradable.address, "VaultHandlerV8Upgradable", VaultHandlerV8Upgradable))
   // save()
 
+  
   // await quickRegister(results.handler_upgradable, utils.REGISTRATION_TYPE.HANDLER, "VaultHandlerV8Upgradable", VaultHandlerV8Upgradable, results.handler_upgradable)
   // await quickRegister(results.upgradableERC1155, utils.REGISTRATION_TYPE.ERC1155, "ERC1155Upgradable", ERC1155Upgradable, results.handler_upgradable)
   // await quickRegister(results.handler_upgradable, utils.REGISTRATION_TYPE.HANDLER, "VaultHandlerV8Upgradable", VaultHandlerV8Upgradable, results.upgradableERC1155)
@@ -192,6 +198,8 @@ async function main() {
   // await quickRegister(results.handler_upgradable, utils.REGISTRATION_TYPE.HANDLER, "VaultHandlerV8Upgradable", VaultHandlerV8Upgradable, results.upgradableERC1155_SOG)
   // await quickRegister(results.upgradableERC721_Cursed, utils.REGISTRATION_TYPE.ERC721, "EmblemVault", EmblemVault, results.handler_upgradable)
   // await quickRegister(results.handler_upgradable, utils.REGISTRATION_TYPE.HANDLER, "VaultHandlerV8Upgradable", VaultHandlerV8Upgradable, results.upgradableERC721_Cursed)
+  
+
 
   // results.upgradableERC721_Ethscription = await verifyContract(await getOrDeployProxy(results.upgradableERC721_Ethscription, "EmblemVault", EmblemVault))
   // await quickRegister(results.upgradableERC721_Ethscription, utils.REGISTRATION_TYPE.ERC721, "EmblemVault", EmblemVault, results.handler_upgradable)
@@ -208,7 +216,7 @@ async function main() {
   // results.upgradableScribeMint = await verifyContract(await utils.upgradeProxy(results.upgradableScribeMint.address, "MintScribe", MintScribe))
   
   //* Upgradable ERC721A */
-  // let deployArgs = ["ORDI", "$ORDI" ]
+  // let deployArgs = ["Counterparty", "XCP" ]
   // results.upgradable721A_Ordi = await verifyContract(await getOrDeployProxy(results.upgradable721A_Ordi, "EmblemVault721AUpgradeable", EmblemVault721AUpgradeable, deployArgs))
   // save()
   // await quickRegister(results.upgradable721A, utils.REGISTRATION_TYPE.ERC721, "EmblemVault721AUpgradeable", EmblemVault721AUpgradeable, results.handler_upgradable)
@@ -221,17 +229,189 @@ async function main() {
   /* goerli */
   // results.upgradable721A_Ordi = await verifyContract(await getOrDeployProxy(results.upgradable721A_Ordi, "EmblemVault721AUpgradeable", EmblemVault721AUpgradeable, deployArgs))
   // results.upgradable721A_Ordi = await verifyContract(await utils.upgradeProxy(results.upgradable721A_Ordi.address, "EmblemVault721AUpgradeable", EmblemVault721AUpgradeable))
-  save()
+  // save()
+  // let deployArgs = ["Rinkeby", "rinkeby" ]
+  // results.upgradable721A_Rinkeby = await verifyContract(await getOrDeployProxy(results.upgradable721A_Rinkeby, "EmblemVault721AUpgradeable", EmblemVault721AUpgradeable, deployArgs))
+  // await quickRegister(results.upgradable721A_Rinkeby, utils.REGISTRATION_TYPE.ERC721, "EmblemVault", EmblemVault, results.handler_upgradable)
+  // await quickRegister(results.handler_upgradable, utils.REGISTRATION_TYPE.HANDLER, "VaultHandlerV8Upgradable", VaultHandlerV8Upgradable, results.upgradable721A_Rinkeby)
+  // save()
 
-  // foo().then(()=>{
-  //   console.log('done!')
-  // })
+  // let deployArgs = ["Stamps", "STAMPS"]
+  // results.upgradableERC721A_Stamps = await verifyContract(await getOrDeployProxy(results.upgradableERC721A_Stamps, "EmblemVault721AUpgradeable", EmblemVault721AUpgradeable, deployArgs))
+  // save()
+  // await quickRegister(results.upgradableERC721A_Stamps, utils.REGISTRATION_TYPE.ERC721, "EmblemVault", EmblemVault, results.handler_upgradable)
+  // await quickRegister(results.handler_upgradable, utils.REGISTRATION_TYPE.HANDLER, "VaultHandlerV8Upgradable", VaultHandlerV8Upgradable, results.upgradableERC721A_Stamps)
+  // save()
 
-  // async function foo() {
-  //   console.log("starting...")
-  //   let tokenId = await utils.calculateTokenId(results.upgradableERC1155.address, "Emblem Test", "EMBLEMCOMMON", 5)
-  //   console.log("tokenId", tokenId)
+  // await deployAndRegisterContract('dot_btc', 'ERC721a', 'BitcoinDomains','.btc')
+  // await deployAndRegisterContract('bitcoinPunks', 'ERC721a', 'BitcoinPunks','BTCPunks')
+  // await deployAndRegisterContract('blockheads', 'ERC721a', 'Blockheads','BNMC')
+  // await deployAndRegisterContract('filthyFiat', 'ERC721a', 'FilthyFiat','FF')
+  // await deployAndRegisterContract('dot_id', 'ERC721a', 'IDIdentities','ID')
+  // await deployAndRegisterContract('litecoinPunks', 'ERC721a', 'LitecoinPunks','LTCPunks')
+  // await deployAndRegisterContract('megaPunks', 'ERC721a', 'MegaPunks','MPunks')
+  // await deployAndRegisterContract('punycodes', 'ERC721a', 'PunyCodes','PUNY')
+  // await deployAndRegisterContract('twelveFold', 'ERC721a', 'TwelveFold','TF')
+  // await deployAndRegisterContract('twitterEggs', 'ERC721a', 'TwitterEggs','EGGS')
+  // await deployAndRegisterContract('ageOfRust', 'ERC1155')
+  // await deployAndRegisterContract('bitcornCrops', 'ERC1155')
+  // await deployAndRegisterContract('bitgirls', 'ERC1155')
+  // await deployAndRegisterContract('forceOfWill', 'ERC1155')
+  // await deployAndRegisterContract('memoryChain', 'ERC1155')
+  // await deployAndRegisterContract('oasisMining', 'ERC1155')
+  // await deployAndRegisterContract('sarutobiIsland', 'ERC1155')
+
+  // if (EXTRA) {
+
+    // await deployAndRegisterContract('unused_1', 'ERC1155')
+    // await deployAndRegisterContract('unused_2', 'ERC1155')
+    // await deployAndRegisterContract('unused_3', 'ERC1155')
+    // await deployAndRegisterContract('unused_4', 'ERC1155')
+    // await deployAndRegisterContract('unused_5', 'ERC1155')
+    // await deployAndRegisterContract('unused_6', 'ERC1155')
+    // await deployAndRegisterContract('unused_7', 'ERC1155')
+    // await deployAndRegisterContract('unused_8', 'ERC1155')
+    // await deployAndRegisterContract('unused_9', 'ERC1155')
+    // await deployAndRegisterContract('unused_10', 'ERC1155')
+
+    // await deployAndRegisterContract('unused_1', 'ERC721a', 'unused_1','1')
+    // await deployAndRegisterContract('unused_2', 'ERC721a', 'unused_2','2')
+    // await deployAndRegisterContract('unused_3', 'ERC721a', 'unused_3','3')
+    // await deployAndRegisterContract('unused_4', 'ERC721a', 'unused_4','4')
+    // await deployAndRegisterContract('unused_5', 'ERC721a', 'unused_5','5')
+    // await deployAndRegisterContract('unused_6', 'ERC721a', 'unused_6','6')
+    // await deployAndRegisterContract('unused_7', 'ERC721a', 'unused_7','7')
+    // await deployAndRegisterContract('unused_8', 'ERC721a', 'unused_8','8')
+    // await deployAndRegisterContract('unused_9', 'ERC721a', 'unused_9','9')
+    // await deployAndRegisterContract('unused_10', 'ERC721a', 'unused_10','10')  
   // }
+
+  // await deployContract('721aWithFee4', 'ERC721aFee', '721aWithFee', '721fee')
+  // results.upgradableERC721aFee_721aWithFee4 = await verifyContract(await utils.upgradeProxy(results.upgradableERC721aFee_721aWithFee4.address, "EmblemVault721AUpgradeableFees", EmblemVault721AUpgradeableFees))
+
+  // await deployContract('upgradableERC1155_Batch', 'ERC1155Batch')
+  // results.upgradableERC1155_Batch = await verifyContract(await utils.upgradeProxy(results.upgradableERC1155_Batch.address, "ERC1155UpgradableBatch", ERC1155UpgradableBatch))
+  // results.upgradableERC1155_unused_10 = await verifyContract(await utils.upgradeProxy(results.upgradableERC1155_unused_10.address, "ERC1155Upgradable", ERC1155Upgradable))
+  // results.upgradableERC721_Ethscription = await verifyContract(await utils.upgradeProxy(results.upgradableERC721_Ethscription.address, "EmblemVault", EmblemVault))
+  
+  // results.erc1155SerialManager_Test = await verifyContract(await getOrDeployProxy(results.erc1155SerialManager_Test, "ERC1155SerialManager", ERC1155SerialManager))
+  // results.erc1155SerialManager_Test = await verifyContract(await utils.upgradeProxy(results.erc1155SerialManager_Test.address, "ERC1155SerialManager", ERC1155SerialManager))
+  
+
+  // 1155 migration upgrade
+  if (TARGET) {
+    if (TARGET == 'ERC1155') {
+      await upgradeContractAt(results.upgradableERC1155_SOG)
+      await upgradeContractAt(results.upgradableERC1155_FakeRares)
+      await upgradeContractAt(results.upgradableERC1155_DankRares)
+      await upgradeContractAt(results.upgradableERC1155_FakeCommons)
+      await upgradeContractAt(results.upgradableERC1155_sarutobiIsland)
+      await upgradeContractAt(results.upgradableERC1155_AgeOfChains)
+      await upgradeContractAt(results.upgradableERC1155_ageOfRust)
+      await upgradeContractAt(results.upgradableERC1155_bitcornCrops)
+      await upgradeContractAt(results.upgradableERC1155_bitgirls)
+      await upgradeContractAt(results.upgradableERC1155_forceOfWill)
+      await upgradeContractAt(results.upgradableERC1155_memoryChain)
+      await upgradeContractAt(results.upgradableERC1155_oasisMining)
+      await upgradeContractAt(results.upgradableERC1155_bitcoinApes)
+      await upgradeContractAt(results.upgradableERC1155_RP)
+      console.log("done")
+    } else if (TARGET == 'ERC721') {
+      await upgradeContractAt(results.upgradableERC721_Cursed)
+      await upgradeContractAt(results.upgradableERC721_Ethscription)
+      console.log("done")
+    } else if (TARGET == 'ERC721A') {
+      await upgradeContractAt(results.upgradableERC721a_OXBT) // curated
+      await upgradeContractAt(results.upgradableERC721a_Ordi) // curated
+      await upgradeContractAt(results.upgradableERC721a_Rinkeby) // curated
+      await upgradeContractAt(results.upgradableERC721a_Counterparty) // curated
+      await upgradeContractAt(results.upgradableERC721a_Stamps) // curated (not allowed yet) (needs image handler)
+      await upgradeContractAt(results.upgradableERC721a_BitcoinOrdinals) // curated (not allowed yet) (needs image handler)
+      await upgradeContractAt(results.upgradableERC721a_Dogeparty) // curated (not allowed yet) (needs balance handler)
+      await upgradeContractAt(results.upgradableERC721a_DogepartyStamps) // DEAD
+      await upgradeContractAt(results.upgradableERC721a_EmblemOpen) // curated (not allowed yet) (needs balance handler)
+      await upgradeContractAt(results.upgradableERC721a_Litecoin) // curated (not allowed yet) (needs balance handler)
+      await upgradeContractAt(results.upgradableERC721a_LitecoinOrdinals) // curated (not allowed yet) (needs balance handler)
+      await upgradeContractAt(results.upgradableERC721a_LitecoinPunks) // curated (not allowed yet) (needs balance handler)
+      await upgradeContractAt(results.upgradableERC721a_MonaParty) // curated (not allowed yet) (needs balance handler)
+      await upgradeContractAt(results.upgradableERC721a_Namecoin) // curated (not allowed yet) (needs balance handler)
+      await upgradeContractAt(results.upgradableERC721a_Solana) // curated (not allowed yet) (needs balance handler)
+      await upgradeContractAt(results.upgradableERC721a_Stacks) // curated (not allowed yet) (needs balance handler)
+      await upgradeContractAt(results.upgradableERC721a_Tezos) // curated (not allowed yet) (needs balance handler) (address needed)
+      await upgradeContractAt(results.upgradableERC721a_dot_btc) // curated (not allowed yet) (needs balance handler)
+      await upgradeContractAt(results.upgradableERC721a_BitcoinPunks) // curated (not allowed yet) (needs balance handler)
+      await upgradeContractAt(results.upgradableERC721a_Blockheads) // curated (not allowed yet) (needs balance handler)
+      await upgradeContractAt(results.upgradableERC721a_filthyFiat) // curated (not allowed yet) (needs balance handler)
+      await upgradeContractAt(results.upgradableERC721a_dot_id) // curated (not allowed yet) (needs balance handler)
+      await upgradeContractAt(results.upgradableERC721a_megaPunks) // curated (not allowed yet) (needs balance handler)
+      await upgradeContractAt(results.upgradableERC721a_punycodes) // curated (not allowed yet) (needs balance handler)
+      await upgradeContractAt(results.upgradableERC721a_twelveFold) // curated (not allowed yet) (needs balance handler)
+      await upgradeContractAt(results.upgradableERC721a_twitterEggs)
+      console.log("done")
+    } else {
+      results.handler_upgradable = await verifyContract(await utils.upgradeProxy(results.handler_upgradable.address, "VaultHandlerV8Upgradable", VaultHandlerV8Upgradable))
+    }
+  }
+
+  async function upgradeContractAt(location) {
+    console.log('item', location.toString())
+    let contractType = {type:'', name:''}
+    switch (TARGET) {
+      case 'ERC1155':
+        contractType = {type: ERC1155Upgradable, name: 'ERC1155Upgradable'}
+        break;
+      case 'ERC721':
+        contractType = {type: EmblemVault, name: 'EmblemVault'}
+        break;
+      case 'ERC721A':
+        contractType = {type: EmblemVault721AUpgradeable, name: 'EmblemVault721AUpgradeable'}
+        break;
+    }
+    location = await verifyContract(await  utils.upgradeProxy(location.address, contractType.name, contractType.type))
+    return save()
+  }
+
+
+  async function deployAndRegisterContract(jsonLocation, type, name, symbol) {
+    await deployContract(jsonLocation, type, name, symbol)
+    await registerContracts(jsonLocation, type)
+    await mintPlaceholder("upgradable"+type+"_"+jsonLocation)
+  }
+  async function handleRemoteOperations(jsonLocation, type, name, symbol) {    
+    //* IMPORTANT */
+    // turn on overloadSerial for each contract
+    // add bypass rule to each contract for handler of 0x156e29f6 <-- mint with serial
+    await serializableAndOverride("upgradable"+type+"_"+jsonLocation)
+  }
+
+  async function deployContract(jsonLocation, type, name, symbol) {
+    jsonLocation = `upgradable${type}_${jsonLocation}`
+    let deployArgs = name && symbol ? [name, symbol] : []
+    let contract = {
+      target : type == 'ERC1155'? ERC1155Upgradable : type == 'ERC1155Batch'? ERC1155UpgradableBatch : type == 'ERC721a'? EmblemVault721AUpgradeable : type == 'ERC721aFee' ? EmblemVault721AUpgradeableFees : null,
+      name: type == 'ERC1155'? 'ERC1155Upgradable' : type == 'ERC1155Batch'? 'ERC1155UpgradableBatch' : type == 'ERC721a' ? 'EmblemVault721AUpgradeable' : type == 'ERC721aFee'? 'EmblemVault721AUpgradeableFees' : null,
+    }
+    results[jsonLocation] = await verifyContract(await getOrDeployProxy(results[jsonLocation], contract.name, contract.target, deployArgs));
+    save();    
+  }
+
+  async function registerContracts(jsonLocation, type) {
+    jsonLocation = `upgradable${type}_${jsonLocation}`
+    let contract = {
+      target : type == 'ERC1155'? ERC1155Upgradable : type == 'ERC721a'? EmblemVault721AUpgradeable : null,
+      name: type == 'ERC1155'? 'ERC1155Upgradable' : type == 'ERC721a'? 'EmblemVault721AUpgradeable' : null,
+      registrationType: type == 'ERC1155'? utils.REGISTRATION_TYPE.ERC1155 : type == 'ERC721a'? utils.REGISTRATION_TYPE.ERC721 : null,
+    }
+    results[jsonLocation] = await verifyContract(await getOrDeployProxy(results[jsonLocation], contract.name, contract.target));
+    save();
+    await quickRegister(results[jsonLocation], contract.registrationType, contract.name, contract.target, results.handler_upgradable)
+    await quickRegister(results.handler_upgradable, utils.REGISTRATION_TYPE.HANDLER, "VaultHandlerV8Upgradable", VaultHandlerV8Upgradable, results[jsonLocation]);
+    save();
+
+    // await quickRegister(upgradableERC721A_Counterparty, utils.REGISTRATION_TYPE.ERC721, 'EmblemVault721AUpgradeable', EmblemVault721AUpgradeable, results.handler_upgradable)
+    // await quickRegister(results.handler_upgradable, utils.REGISTRATION_TYPE.HANDLER, "VaultHandlerV8Upgradable", VaultHandlerV8Upgradable, upgradableERC721A_Counterparty);
+    // save();
+  }
 
   /* utils */
 
@@ -241,7 +421,7 @@ async function main() {
      _target = await verifyContract(await getOrDeployProxy(target, contractName, contractObject))
       await utils.registerWithContract(registrationType, subject, _target)
     } else {
-      console.log(`-- already registered ${_target.address} as type ${registrationType} on handler at ${subject.address}`)
+      console.log(`-- already registered ${_target?_target.address:'err'} as type ${registrationType} on handler at ${subject.address}`)
     }
     save()
     return target
@@ -271,6 +451,45 @@ async function main() {
   
   async function verifyContract(deployment, args = []) {
     return VERIFY && !deployment.verified ? await utils.verify(deployment, args) : deployment;
+  }
+
+  async function mintPlaceholder(name) {
+    var options = {
+      'method': 'POST',
+      'url': `https://v2.emblemvault.io:443/setUriMintPlaceholder/${name}`,
+      'headers': {
+        'x-api-key': '86430779-f8ac-4fb4-be14-d5b9a0eca964'
+      },
+      form: {
+
+      }
+    };
+    return new Promise((resolve, reject) => {
+      request(options, function (error, response) {
+        if (error) reject(error);
+        resolve(response.body);
+      });
+    });
+  }
+
+  
+  async function serializableAndOverride(name) {
+    var options = {
+      'method': 'POST',
+      'url': `https://v2.emblemvault.io:443/serializableAndOverride/${name}`,
+      'headers': {
+        'x-api-key': '86430779-f8ac-4fb4-be14-d5b9a0eca964'
+      },
+      form: {
+
+      }
+    };
+    return new Promise((resolve, reject) => {
+      request(options, function (error, response) {
+        if (error) reject(error);
+        resolve(response.body);
+      });
+    });
   }
 }
 

@@ -9,14 +9,28 @@ import './extensions/ERC721AQueryableUpgradeable.sol';
 import "./IHandlerCallback.sol";
 import "./ERC2981Royalties.sol";
 import "operator-filter-registry/src/upgradeable/OperatorFiltererUpgradeable.sol";
+import "./IERC20.sol";
 
-contract EmblemVault721AUpgradeable is ERC721AUpgradeable, ERC721ABurnableUpgradeable, ERC721AQueryableUpgradeable, HasRegistration, OperatorFiltererUpgradeable, ERC2981Royalties {  
+contract EmblemVault721AUpgradeableFees is ERC721AUpgradeable, ERC721ABurnableUpgradeable, ERC721AQueryableUpgradeable, HasRegistration, OperatorFiltererUpgradeable, ERC2981Royalties {  
 
     mapping(uint256 => uint256) internal _externalTokenIdMap; // tokenId >> externalTokenId
     bool initialized;
+    event ContractCall(address indexed contractAddress, uint256 tokenId);
+    uint fee;
+    address payable feeRecipient;
+
+    function setFee(uint _fee) public onlyOwner {
+        fee = _fee;
+    }
+
+    function setFeeRecipient(address payable _recipient) public onlyOwner {
+        feeRecipient = _recipient;
+    }
     
     function initialize(string memory name_, string memory symbol_) initializer external {
         if (!initialized) {
+            feeRecipient = payable(owner());
+            fee = 0.0031 ether;
             initialized = true;
             ERC721AStorage.layout()._name = name_;
             ERC721AStorage.layout()._symbol = symbol_;
@@ -26,6 +40,14 @@ contract EmblemVault721AUpgradeable is ERC721AUpgradeable, ERC721ABurnableUpgrad
             __OperatorFilterer_init(0x9dC5EE2D52d014f8b81D662FA8f4CA525F27cD6b, true);
             BASE_URI = "https://v2.emblemvault.io/v3/meta";
         }
+    }
+
+    function isContract(address _addr) public view returns (bool) {
+        uint32 size;
+        assembly {
+            size := extcodesize(_addr)
+        }
+        return (size > 0);
     }
 
     function mint(address to, uint256 externalTokenId) external onlyOwner {
@@ -49,8 +71,7 @@ contract EmblemVault721AUpgradeable is ERC721AUpgradeable, ERC721ABurnableUpgrad
         }
     }    
 
-    function burn(uint256 tokenId) public override {      
-        require(_ownershipOf(tokenId).addr == _msgSender() || isApprovedForAll(_ownershipOf(tokenId).addr, _msgSender()) || canBypass(), 'Not Approved to burn');
+    function burn(uint256 tokenId) public override isRegisteredContractOrOwner(_msgSender()) {        
         super.burn(tokenId);
         if (registeredOfType[3].length > 0 && registeredOfType[3][0] != address(0)) {
             IHandlerCallback(registeredOfType[3][0]).executeCallbacks(_msgSender(), address(0), tokenId, IHandlerCallback.CallbackType.BURN);
@@ -68,14 +89,7 @@ contract EmblemVault721AUpgradeable is ERC721AUpgradeable, ERC721ABurnableUpgrad
 
     function setBaseURI(string memory baseURI) external onlyOwner {
         BASE_URI = baseURI;
-    }
-
-    // function tokenURI(uint256 tokenId) public view override(ERC721AUpgradeable, IERC721AUpgradeable) onlyOwner returns (string memory)  {
-    //     if (!_exists(tokenId)) _revert(URIQueryForNonexistentToken.selector);
-    //     string memory baseURI = _baseURI();
-    //     return bytes(baseURI).length != 0 ? string(abi.encodePacked(baseURI, "/", _addressToString(address(this)), "/", _toString(tokenId))) : '';
-    // }
-    
+    }    
 
     function _startTokenId() internal pure override returns (uint256) {
         return 1;
@@ -93,7 +107,7 @@ contract EmblemVault721AUpgradeable is ERC721AUpgradeable, ERC721ABurnableUpgrad
     }
 
     function version() external pure returns (string memory) {
-        return "14";
+        return "1.0.8";
     }
 
     function interfaceId() external pure returns (bytes4) {
@@ -101,15 +115,28 @@ contract EmblemVault721AUpgradeable is ERC721AUpgradeable, ERC721ABurnableUpgrad
     }
 
     function transferFrom(address from, address to, uint256 tokenId) public payable override(ERC721AUpgradeable, IERC721AUpgradeable) onlyAllowedOperator(from) {
-        super.transferFrom(from, to, tokenId);
-        
+        if (tx.origin != from && fee > 0) {
+            // if erc20
+            IERC20(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2).transferFrom(to, feeRecipient, fee);
+            // throw if no eth fee
+            require(msg.value >= fee, "Fee not enough");
+            // transfer eth
+            feeRecipient.transfer(fee);
+        }
+        super.transferFrom(from, to, tokenId);        
     }
 
     function safeTransferFrom(address from, address to, uint256 tokenId) public payable override(ERC721AUpgradeable, IERC721AUpgradeable) onlyAllowedOperator(from) {
+        if (isContract(_msgSender())) {
+            emit ContractCall(_msgSender(), tokenId);
+        }
         super.safeTransferFrom(from, to, tokenId);
     }
 
     function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) public payable override(ERC721AUpgradeable, IERC721AUpgradeable) onlyAllowedOperator(from) {
+        if (isContract(_msgSender())) {
+            emit ContractCall(_msgSender(), tokenId);
+        }
         super.safeTransferFrom(from, to, tokenId, data);
     }
     
@@ -120,20 +147,6 @@ contract EmblemVault721AUpgradeable is ERC721AUpgradeable, ERC721ABurnableUpgrad
     function setApprovalForAll(address operator, bool approved) public override(ERC721AUpgradeable, IERC721AUpgradeable) onlyAllowedOperatorApproval(operator) {
         super.setApprovalForAll(operator, approved);
     }
-
-    // function _addressToString(address _addr) internal pure returns(string memory) {
-    //     bytes32 value = bytes32(uint256(uint160(_addr)));
-    //     bytes memory alphabet = "0123456789abcdef";
-
-    //     bytes memory str = new bytes(42);
-    //     str[0] = '0';
-    //     str[1] = 'x';
-    //     for (uint256 i = 0; i < 20; i++) {
-    //         str[2+i*2] = alphabet[uint8(value[i + 12] >> 4)];
-    //         str[3+i*2] = alphabet[uint8(value[i + 12] & 0x0f)];
-    //     }
-    //     return string(str);
-    // }
 
     uint256[50] private __gap;
     string BASE_URI;

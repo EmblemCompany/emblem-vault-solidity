@@ -65,5 +65,19 @@
         "verified": true,
         "registrations": [],
         "contractType": 7
+    },
+    "upgradableERC1155_Batch": {
+        "address": "0x4fB841dc5c1477D571de0E6339b1aE0436C3F7B7",
+        "delegation": "0x819bd620ae64ea311aa850c7d83622dd133b2f24",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "erc1155SerialManager_Test": {
+        "address": "0x6d2621D6f30A818F6930995f7786547cA115FA1D",
+        "delegation": "0x36206934a0623d081bd5576911d73a61d237a368",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
     }
 }

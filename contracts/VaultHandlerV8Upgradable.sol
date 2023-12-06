@@ -92,14 +92,15 @@ contract VaultHandlerV8Upgradable is ReentrancyGuardUpgradable, HasCallbacksUpgr
             require(!claimer.isClaimed(_nftAddress, serialNumber, proof), "Already Claimed");
             IERC1155(_nftAddress).burn(_msgSender(), tokenId, 1);
             claimer.claim(_nftAddress, serialNumber, _msgSender());
-        } else {
-            require(!claimer.isClaimed(_nftAddress, tokenId, proof), "Already Claimed");
+        } else {            
             if (IERC165(_nftAddress).supportsInterface(_INTERFACE_ID_ERC721A)){
                 IERC721A token = IERC721A(_nftAddress);
                 uint256 internalTokenId = token.getInternalTokenId(tokenId);
+                require(!claimer.isClaimed(_nftAddress, internalTokenId, proof), "Already Claimed");
                 require(token.ownerOf(internalTokenId) == _msgSender(), "Not Token Owner");
                 token.burn(internalTokenId);
             } else {
+                require(!claimer.isClaimed(_nftAddress, tokenId, proof), "Already Claimed");
                 IERC721 token = IERC721(_nftAddress);
                 require(token.ownerOf(tokenId) == _msgSender(), "Not Token Owner");
                 token.burn(tokenId);                
