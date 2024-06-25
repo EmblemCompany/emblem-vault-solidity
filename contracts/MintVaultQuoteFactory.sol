@@ -8,7 +8,7 @@ import "./OwnableUpgradeable.sol";
 import "./IUniswapV2Pair.sol";
 
 
-contract MintVaultQuote is Initializable, OwnableUpgradeable {
+abstract contract MintVaultQuoteFactory is Initializable, OwnableUpgradeable {
     IUniswapV2Pair public pair;
     uint256 public usdPrice;
     
@@ -27,7 +27,7 @@ contract MintVaultQuote is Initializable, OwnableUpgradeable {
     DiscountToken[] public discountTokens;
     MintPass[] public mintPasses;
 
-    function initialize() public initializer {
+    function initialize() public virtual initializer {
         __Ownable_init();
         pair = IUniswapV2Pair(0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc);
     }
@@ -82,10 +82,7 @@ contract MintVaultQuote is Initializable, OwnableUpgradeable {
         (reserve0, reserve1,) = pair.getReserves();        
     }
 
-    function quoteExternalPrice(address buyer, uint256 _usdPrice) external view returns (uint256) {
-        if (block.chainid == 5) {
-            return 0;
-        }
+    function quoteExternalPrice(address buyer, uint256 _usdPrice) internal view returns (uint256) {
         uint256 price = getUsdPriceInEth(_usdPrice);
         return getQuoteFromPrice(buyer, price);
     }

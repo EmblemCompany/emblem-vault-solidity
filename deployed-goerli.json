@@ -79,5 +79,12 @@
         "verified": true,
         "registrations": [],
         "contractType": 7
+    },
+    "quote": {
+        "address": "0x35A6BD061cF2d3BA63c2a6B5ca515B9167e50502",
+        "delegation": "0x892ba760f4bc23f949023cf512450034cf3263bf",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
     }
 }
