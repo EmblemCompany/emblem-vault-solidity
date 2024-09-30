@@ -134,17 +134,23 @@ contract VaultHandlerV8Upgradable is ReentrancyGuardUpgradable, HasCallbacksUpgr
         return true;
     }
 
-    // function buyWithSignedPrice(address _nftAddress, address _payment, uint _price, address _to, uint256 _tokenId, uint256 _nonce, bytes calldata _signature, bytes calldata serialNumber, uint256 _amount) public nonReentrant {
-    //     IERC20Token paymentToken = IERC20Token(_payment);
-    //     if (shouldBurn) {
-    //         require(paymentToken.transferFrom(msg.sender, address(this), _price), 'Transfer ERROR'); // Payment sent to recipient
-    //         BasicERC20(_payment).burn(_price);
-    //     } else {
-    //         require(paymentToken.transferFrom(msg.sender, address(recipientAddress), _price), 'Transfer ERROR'); // Payment sent to recipient
-    //     }
-    //     address signer = getAddressFromSignature(_nftAddress, _payment, _price, _to, _tokenId, _nonce, _amount, _signature);
-    //     mintRouter(_nftAddress, _to, _tokenId, _nonce, _amount, signer, serialNumber);
-    // }
+    function buyWithSignedPrice(address _nftAddress, address _payment, uint _price, address _to, uint256 _tokenId, uint256 _nonce, bytes calldata _signature, bytes calldata serialNumber, uint256 _amount) public payable nonReentrant {
+        if (_price == 0) {            
+        } else if (_payment == address(0)) {
+            require(msg.value == _price, "Incorrect ETH amount sent");
+            payable(recipientAddress).transfer(_price);            
+        } else {
+            IERC20Token paymentToken = IERC20Token(_payment);
+            if (shouldBurn) {
+                require(paymentToken.transferFrom(msg.sender, address(this), _price), 'Transfer ERROR'); // Payment sent to contract
+                BasicERC20(_payment).burn(_price);
+            } else {
+                require(paymentToken.transferFrom(msg.sender, address(recipientAddress), _price), 'Transfer ERROR'); // Payment sent to recipient
+            }
+        }
+        address signer = getAddressFromSignature(_nftAddress, _payment, _price, _to, _tokenId, _nonce, _amount, _signature);
+        mintRouter(_nftAddress, _to, _tokenId, _nonce, _amount, signer, serialNumber);
+    }
 
     function buyWithQuote(address _nftAddress, uint _price, address _to, uint256 _tokenId, uint256 _nonce, bytes calldata _signature, bytes calldata serialNumber, uint256 _amount) public payable nonReentrant {
         uint256 quote = IMintVaultQuote(quoteContract).quoteExternalPrice(_msgSender(), _price);
@@ -203,18 +209,15 @@ contract VaultHandlerV8Upgradable is ReentrancyGuardUpgradable, HasCallbacksUpgr
         usedNonces[_nonce] = true;        
         if (IERC165(_nftAddress).supportsInterface(_INTERFACE_ID_ERC1155)) {
             if (IIsSerialized(_nftAddress).isOverloadSerial()) {
-                // IERC1155(_nftAddress).mintWithSerial(_to, _tokenId, _amount, serialNumber);
+                IERC1155(_nftAddress).mintBatch(_to, _tokenId, _amount, serialNumber);
             } else {
-                // IERC1155(_nftAddress).mint(_to, _tokenId, _amount);
+                revert("Non-serialized bulk minting is not allowed");
             }
         } else {
             if (IERC165(_nftAddress).supportsInterface(_INTERFACE_ID_ERC721A)) {
-                // IERC721A(_nftAddress).mint(_to, _tokenId);
                 IERC721A(_nftAddress).mintMany(_to, tokenIds);
             } else {
-                // string memory _uri = concat(metadataBaseUri, uintToStr(_tokenId));
-                // IERC721(_nftAddress).mint(_to, _tokenId, _uri, '');
-                
+                revert("Non-1155/721A bulk minting is not allowed");
             }
         }
         return true;
