@@ -9,7 +9,7 @@ let Deployments = fs.existsSync(deploymentsFilename) ? require("."+deploymentsFi
 let VERIFY = process.env.NETWORK == "polygon" || process.env.NETWORK == "mainnet" || process.env.NETWORK == "goerli" ? true: false
 let results = {time: Date.now()}
 let EXTRA = false
-let TARGET = 'ERC1155'
+let TARGET = false // 'ERC1155'
 
 async function main() {
   const [_deployer] = await hre.ethers.getSigners();
@@ -317,7 +317,7 @@ async function main() {
       // await upgradeContractAt(results.upgradableERC1155_bitcoinApes)
       // await upgradeContractAt(results.upgradableERC1155_RP)
       // await upgradeContractAt(results.upgradableERC1155_Bells)
-      await upgradeContractAt(results.upgradableERC1155_unused_10)
+      // await upgradeContractAt(results.upgradableERC1155_unused_10)
       // await deployAndRegisterContract('unused_11', 'ERC1155')
       // await deployAndRegisterContract('unused_12', 'ERC1155')
       // await deployAndRegisterContract('unused_13', 'ERC1155')
@@ -391,7 +391,8 @@ async function main() {
       // await deployAndRegisterContract('upgradableERC721a_bitcoinDeGods', 'ERC721a', 'Bitcoin DeGods', 'DeGods')
       console.log("done")
     } else {
-      // results.handler_upgradable = await verifyContract(await utils.upgradeProxy(results.handler_upgradable.address, "VaultHandlerV8Upgradable", VaultHandlerV8Upgradable))
+      results.handler_upgradable = await verifyContract(await utils.upgradeProxy(results.handler_upgradable.address, "VaultHandlerV8Upgradable", VaultHandlerV8Upgradable))
+      save()
     }
   }
 

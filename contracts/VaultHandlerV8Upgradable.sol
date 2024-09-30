@@ -58,6 +58,7 @@ contract VaultHandlerV8Upgradable is ReentrancyGuardUpgradable, HasCallbacksUpgr
     address private quoteContract;
 
     // bytes4 private _INTERFACE_ID_ERC721A;
+    mapping(address => mapping(uint256 => bool)) private lockedVaults;
     
     function initialize() public initializer {
         __Ownable_init();
@@ -74,13 +75,58 @@ contract VaultHandlerV8Upgradable is ReentrancyGuardUpgradable, HasCallbacksUpgr
         initialized = true;
     }
 
+    // Lock vault
+    function lockVault(address _nftAddress, uint256 tokenId) public onlyOwner nonReentrant isRegisteredContract(_nftAddress) {
+        lockedVaults[_nftAddress][tokenId] = true;
+    }
+
+    // function unlockVault(address _nftAddress, uint256 tokenId) public onlyOwner nonReentrant isRegisteredContract(_nftAddress) {
+    //     lockedVaults[_nftAddress][tokenId] = false;
+    // }
+
+    function isVaultLocked(address _nftAddress, uint256 tokenId) public view returns (bool) {
+        return lockedVaults[_nftAddress][tokenId];
+    }
+
     function updateQuoteContract(address _address) public onlyOwner() {
         quoteContract = _address;
     }
 
-    function claim(address _nftAddress, uint256 tokenId) public nonReentrant isRegisteredContract(_nftAddress) {
+    function claim(address _nftAddress, uint256 tokenId) public nonReentrant isRegisteredContract(_nftAddress) {    
+        require(!lockedVaults[_nftAddress][tokenId], "Vault is locked");
         require(burnRouter(_nftAddress, tokenId, true), "Burn failed");
         executeCallbacksInternal(_nftAddress, _msgSender(), address(0), tokenId, IHandlerCallback.CallbackType.CLAIM);
+    }
+
+    function claimWithSignedPrice(address _nftAddress, uint256 _tokenId, uint256 _nonce, address _payment, uint _price, bytes calldata _signature) public payable nonReentrant isRegisteredContract(_nftAddress) {
+        address signer;
+
+        // if locked and server didn't add lock acknowledgement
+        // Expected: Failure - getAddressFromSignature will be called instead of getAddressFromSignatureLocked, resulting in an invalid signature
+        // if locked and server packs true in the correct place
+        // Expected: Success - getAddressFromSignatureLocked will be called with the correct signature
+        // if locked and server packs false in the correct place
+        // Expected: Failure - getAddressFromSignatureLocked will be called, but the signature won't match due to the false value
+        // if not locked, getAddressFromSignature will be called
+        // Expected: Success - getAddressFromSignature will be called with the correct signature
+        if (isVaultLocked(_nftAddress, _tokenId)) {
+            signer = getAddressFromSignatureLocked(_nftAddress, _payment, _price, _msgSender(), _tokenId, _nonce, 1, _signature);
+        } else {
+            signer = getAddressFromSignature(_nftAddress, _payment, _price, _msgSender(), _tokenId, _nonce, 1, _signature);
+        }
+        require(witnesses[signer], "Invalid signature");
+        if (_payment == address(0)) {
+            require(msg.value == _price, "Incorrect ETH amount sent");
+            payable(recipientAddress).transfer(_price);            
+        } else {
+            IERC20Token paymentToken = IERC20Token(_payment);            
+            require(paymentToken.transferFrom(_msgSender(), address(recipientAddress), _price), 'Transfer ERROR'); // Payment sent to recipient
+        }
+        // unlock vault because server signed it
+        lockedVaults[_nftAddress][_tokenId] = false;
+        require(burnRouter(_nftAddress, _tokenId, true), "Burn failed");        
+        usedNonces[_nonce] = true;        
+        executeCallbacksInternal(_nftAddress, _msgSender(), address(0), _tokenId, IHandlerCallback.CallbackType.CLAIM);
     }
 
     function burnRouter(address _nftAddress, uint256 tokenId, bool shouldClaim) internal isRegisteredContract(_nftAddress) returns (bool) {
@@ -117,8 +163,7 @@ contract VaultHandlerV8Upgradable is ReentrancyGuardUpgradable, HasCallbacksUpgr
     }
 
     function buyWithSignedPrice(address _nftAddress, address _payment, uint _price, address _to, uint256 _tokenId, uint256 _nonce, bytes calldata _signature, bytes calldata serialNumber, uint256 _amount) public payable nonReentrant {
-        if (_price == 0) {            
-        } else if (_payment == address(0)) {
+        if (_payment == address(0)) {
             require(msg.value == _price, "Incorrect ETH amount sent");
             payable(recipientAddress).transfer(_price);            
         } else {
@@ -129,18 +174,18 @@ contract VaultHandlerV8Upgradable is ReentrancyGuardUpgradable, HasCallbacksUpgr
         mintRouter(_nftAddress, _to, _tokenId, _nonce, _amount, signer, serialNumber);
     }
 
-    function buyWithSignedPriceBulk(address _nftAddress, address _payment, uint _price, address[] memory to, uint256[] memory tokenIds, uint256 _nonce, bytes calldata _signature, bytes calldata serialNumber, uint256 _amount) public payable nonReentrant {
-        if (_price == 0) {
-        } else if (_payment == address(0)) {
-            require(msg.value == _price, "Incorrect ETH amount sent");
-            payable(recipientAddress).transfer(_price);            
-        } else {
-            IERC20Token paymentToken = IERC20Token(_payment);           
-            require(paymentToken.transferFrom(_msgSender(), address(recipientAddress), _price), 'Transfer ERROR'); // Payment sent to recipient
-        }
-        address signer = getAddressFromSignatureBulk(_nftAddress, _payment, _price, to, tokenIds, _nonce, _amount, _signature);
-        mintRouterBulk(_nftAddress, to, tokenIds, _nonce, _amount, signer, serialNumber);        
-    }
+    // function buyWithSignedPriceBulk(address _nftAddress, address _payment, uint _price, address[] memory to, uint256[] memory tokenIds, uint256 _nonce, bytes calldata _signature, bytes[] calldata serialNumbers, uint256[] memory amounts) public payable nonReentrant {
+    //     if (_price == 0) {
+    //     } else if (_payment == address(0)) {
+    //         require(msg.value == _price, "Incorrect ETH amount sent");
+    //         payable(recipientAddress).transfer(_price);
+    //     } else {
+    //         IERC20Token paymentToken = IERC20Token(_payment);           
+    //         require(paymentToken.transferFrom(_msgSender(), address(recipientAddress), _price), 'Transfer ERROR'); // Payment sent to recipient
+    //     }
+    //     address signer = getAddressFromSignatureBulk(_nftAddress, _payment, _price, to, tokenIds, _nonce, amounts[0], _signature);
+    //     mintRouterBulk(_nftAddress, to, tokenIds, _nonce, amounts, signer, serialNumbers);        
+    // }
 
     function buyWithQuote(address _nftAddress, uint _price, address _to, uint256 _tokenId, uint256 _nonce, bytes calldata _signature, bytes calldata serialNumber, uint256 _amount) public payable nonReentrant {
         uint256 quote = IMintVaultQuote(quoteContract).quoteExternalPrice(_msgSender(), _price);
@@ -157,20 +202,20 @@ contract VaultHandlerV8Upgradable is ReentrancyGuardUpgradable, HasCallbacksUpgr
         mintRouter(_nftAddress, _to, _tokenId, _nonce, _amount, signer, serialNumber);        
     }
 
-     function buyWithQuoteBulk(address _nftAddress, uint _price, address[] memory to, uint256[] memory tokenIds, uint256 _nonce, bytes calldata _signature, bytes calldata serialNumber, uint256 _amount) public payable nonReentrant {
-        uint256 quote = IMintVaultQuote(quoteContract).quoteExternalPrice(_msgSender(), _price);
-        uint256 totalPrice = quote * _amount;
-        // Calculate the acceptable range for the msg.value
-        uint256 acceptableRange = totalPrice.mul(2).div(100); // 2% of totalPrice
+    // function buyWithQuoteBulk(address _nftAddress, uint _price, address[] memory to, uint256[] memory tokenIds, uint256 _nonce, bytes calldata _signature, bytes[] calldata serialNumbers, uint256[] memory amounts) public payable nonReentrant {
+    //     uint256 quote = IMintVaultQuote(quoteContract).quoteExternalPrice(_msgSender(), _price);
+    //     uint256 totalPrice = quote * amounts[0];
+    //     // Calculate the acceptable range for the msg.value
+    //     uint256 acceptableRange = totalPrice.mul(2).div(100); // 2% of totalPrice
 
-        require(
-            msg.value >= totalPrice.sub(acceptableRange) && msg.value <= totalPrice.add(acceptableRange),
-            "The sent amount is outside the acceptable range"
-        );
-        payable(recipientAddress).transfer(msg.value);
-        address signer = getAddressFromSignatureBulkQuote(_nftAddress, _price, to[0], tokenIds, _nonce, _amount, _signature);
-        mintRouterBulk(_nftAddress, to, tokenIds, _nonce, _amount, signer, serialNumber);        
-    }
+    //     require(
+    //         msg.value >= totalPrice.sub(acceptableRange) && msg.value <= totalPrice.add(acceptableRange),
+    //         "The sent amount is outside the acceptable range"
+    //     );
+    //     payable(recipientAddress).transfer(msg.value);
+    //     address signer = getAddressFromSignatureBulkQuote(_nftAddress, _price, to[0], tokenIds, _nonce, amounts[0], _signature);
+    //     mintRouterBulk(_nftAddress, to, tokenIds, _nonce, amounts, signer, serialNumbers);        
+    // }
 
     function mintRouter(address _nftAddress, address _to, uint256 _tokenId, uint256 _nonce, uint256 _amount, address signer, bytes calldata serialNumber) internal returns (bool){
         require(witnesses[signer], 'Not Witnessed');
@@ -193,25 +238,25 @@ contract VaultHandlerV8Upgradable is ReentrancyGuardUpgradable, HasCallbacksUpgr
         return true;
     }
 
-    function mintRouterBulk(address _nftAddress, address[] memory _to, uint256[] memory tokenIds, uint256 _nonce, uint256 _amount, address signer, bytes calldata serialNumber) internal returns (bool){
-        require(witnesses[signer], 'Not Witnessed');
-        require(!usedNonces[_nonce], 'Nonce already used');
-        usedNonces[_nonce] = true;        
-        if (IERC165(_nftAddress).supportsInterface(_INTERFACE_ID_ERC1155)) {
-            if (IIsSerialized(_nftAddress).isOverloadSerial()) {
-                IERC1155(_nftAddress).mintBatch(_to, _tokenId, _amount, serialNumber);
-            } else {
-                revert("Non-serialized bulk minting is not allowed");
-            }
-        } else {
-            if (IERC165(_nftAddress).supportsInterface(_INTERFACE_ID_ERC721A)) {
-                IERC721A(_nftAddress).mintMany(_to, tokenIds);
-            } else {
-                revert("Non-1155/721A bulk minting is not allowed");
-            }
-        }
-        return true;
-    }
+    // function mintRouterBulk(address _nftAddress, address[] memory to, uint256[] memory tokenIds, uint256 _nonce, uint256[] memory amounts, address signer, bytes[] calldata serialNumbers) internal returns (bool){
+    //     require(witnesses[signer], 'Not Witnessed');
+    //     require(!usedNonces[_nonce], 'Nonce already used');
+    //     usedNonces[_nonce] = true;        
+    //     if (IERC165(_nftAddress).supportsInterface(_INTERFACE_ID_ERC1155)) {
+    //         if (IIsSerialized(_nftAddress).isOverloadSerial()) {
+    //             IERC1155(_nftAddress).mintBatch(to[0], tokenIds, amounts, serialNumbers);
+    //         } else {
+    //             revert("Non-serialized bulk minting is not allowed");
+    //         }
+    //     } else {
+    //         if (IERC165(_nftAddress).supportsInterface(_INTERFACE_ID_ERC721A)) {                
+    //             IERC721A(_nftAddress).mintMany(to, tokenIds);
+    //         } else {
+    //             revert("Non-1155/721A bulk minting is not allowed");
+    //         }
+    //     }
+    //     return true;
+    // }
 
     // ADMIN ONLY DO NOT USE
     function mint(address _nftAddress, address _to, uint256 _tokenId, string calldata _uri, string calldata _payload, uint256 amount) external onlyOwner {
@@ -226,37 +271,37 @@ contract VaultHandlerV8Upgradable is ReentrancyGuardUpgradable, HasCallbacksUpgr
         }        
     }
 
-    // Like Claim, but only burn and mints since its not claimed anywhere.
-    function moveVault(address _from, address _to, uint256 tokenId, uint256 newTokenId, uint256 nonce, bytes calldata signature, bytes calldata serialNumber) external isRegisteredContract(_from) isRegisteredContract(_to)  {
-        address witness = getAddressFromSignatureMove(_from, _to, tokenId, newTokenId, nonce, serialNumber, signature);
-        require(_from != _to, 'Cannot move vault to same address');
-        require(witnesses[witness], 'Invalid Witness');
-        require(burnRouter(_from, tokenId),"Burn failed");
-        require(mintRouter(_to, _msgSender(), newTokenId, nonce, 1, witness, serialNumber),"Mint failed");
-        // if (IERC165(_from).supportsInterface(_INTERFACE_ID_ERC1155)) {
-        //     require(tokenId != newTokenId, 'from: TokenIds must be different for ERC1155');
-        //     require(IERC1155(_from).balanceOf(_msgSender(), tokenId) > 0, 'from: Not owner of vault');
-        //     IERC1155(_from).burn(_msgSender(), tokenId, 1);
-        // } else {
-        //     require(IERC721(_from).ownerOf(tokenId) == _msgSender(), 'from: Not owner of vault');
-        //     IERC721(_from).burn(tokenId);
-        // }
-        // if (IERC165(_to).supportsInterface(_INTERFACE_ID_ERC1155)) {
-        //     require(tokenId != newTokenId, 'to: TokenIds must be different for ERC1155');
-        //     if (IIsSerialized(_to).isOverloadSerial()) {
-        //         require(BytesLib.toUint256(serialNumber, 0) != 0, "Handler: must provide serial number");
-        //         IERC1155(_to).mintWithSerial(_msgSender(), newTokenId, 1, serialNumber);
-        //     } else {
-        //         IERC1155(_to).mint(_msgSender(), newTokenId, 1);
-        //     }
-        // } else {
-        //     if (supportsInterface(_INTERFACE_ID_ERC721A)) {
-        //         IERC721A(_to).mint(_msgSender(), newTokenId);
-        //     } else {
-        //         IERC721(_to).mint(_msgSender(), newTokenId, concat(metadataBaseUri, uintToStr(newTokenId)), "");
-        //     }
-        // }
-    }  
+    // Like Claim, but only burn and mint since its not claimed yet, just jumped.
+    // function moveVault(address _from, address _to, uint256 tokenId, uint256 newTokenId, uint256 nonce, bytes calldata signature, bytes calldata serialNumber) external isRegisteredContract(_from) isRegisteredContract(_to)  {
+    //     address witness = getAddressFromSignatureMove(_from, _to, tokenId, newTokenId, nonce, serialNumber, signature);
+    //     require(_from != _to, 'Cannot move vault to same address');
+    //     require(witnesses[witness], 'Invalid Witness');
+    //     require(burnRouter(_from, tokenId, false),"Burn failed");
+    //     require(mintRouter(_to, _msgSender(), newTokenId, nonce, 1, witness, serialNumber),"Mint failed");
+    //     // if (IERC165(_from).supportsInterface(_INTERFACE_ID_ERC1155)) {
+    //     //     require(tokenId != newTokenId, 'from: TokenIds must be different for ERC1155');
+    //     //     require(IERC1155(_from).balanceOf(_msgSender(), tokenId) > 0, 'from: Not owner of vault');
+    //     //     IERC1155(_from).burn(_msgSender(), tokenId, 1);
+    //     // } else {
+    //     //     require(IERC721(_from).ownerOf(tokenId) == _msgSender(), 'from: Not owner of vault');
+    //     //     IERC721(_from).burn(tokenId);
+    //     // }
+    //     // if (IERC165(_to).supportsInterface(_INTERFACE_ID_ERC1155)) {
+    //     //     require(tokenId != newTokenId, 'to: TokenIds must be different for ERC1155');
+    //     //     if (IIsSerialized(_to).isOverloadSerial()) {
+    //     //         require(BytesLib.toUint256(serialNumber, 0) != 0, "Handler: must provide serial number");
+    //     //         IERC1155(_to).mintWithSerial(_msgSender(), newTokenId, 1, serialNumber);
+    //     //     } else {
+    //     //         IERC1155(_to).mint(_msgSender(), newTokenId, 1);
+    //     //     }
+    //     // } else {
+    //     //     if (supportsInterface(_INTERFACE_ID_ERC721A)) {
+    //     //         IERC721A(_to).mint(_msgSender(), newTokenId);
+    //     //     } else {
+    //     //         IERC721(_to).mint(_msgSender(), newTokenId, concat(metadataBaseUri, uintToStr(newTokenId)), "");
+    //     //     }
+    //     // }
+    // }  
     
     // function toggleShouldBurn() public onlyOwner {
     //     shouldBurn = !shouldBurn;
@@ -275,13 +320,24 @@ contract VaultHandlerV8Upgradable is ReentrancyGuardUpgradable, HasCallbacksUpgr
         return addressFromSig;
     }
 
-    function getAddressFromSignatureBulkQuote( address contractAddress, uint256 price, address destinationAddress, uint256[] memory tokenIds, uint256 nonce, uint256 amount, bytes calldata signature) public pure returns (address) {
-        return getAddressFromSignatureHash(keccak256(abi.encodePacked(contractAddress, price, destinationAddress, tokenIds, nonce, amount)), signature);
-    }
+    // function getAddressFromSignatureBulkQuote( address contractAddress, uint256 price, address destinationAddress, uint256[] memory tokenIds, uint256 nonce, uint256 amount, bytes calldata signature) public pure returns (address) {
+    //     return getAddressFromSignatureHash(keccak256(abi.encodePacked(contractAddress, price, destinationAddress, tokenIds, nonce, amount)), signature);
+    // }
 
     function getAddressFromSignature(address _nftAddress, address _payment, uint _price, address _to, uint256 _tokenId, uint256 _nonce, uint256 _amount, bytes calldata signature) internal view returns (address) {
         require(!usedNonces[_nonce], 'Nonce already used');
         return getAddressFromSignatureHash(keccak256(abi.encodePacked(_nftAddress, _payment, _price, _to, _tokenId, _nonce, _amount)), signature);
+    }
+
+
+    function getAddressFromSignatureBulk(address _nftAddress, address _payment, uint _price, address[] memory _to, uint256[] memory _tokenIds, uint256 _nonce, uint256 _amount, bytes calldata signature) internal view returns (address) {
+        require(!usedNonces[_nonce], 'Nonce already used');
+        return getAddressFromSignatureHash(keccak256(abi.encodePacked(_nftAddress, _payment, _price, _to, _tokenIds, _nonce, _amount)), signature);
+    }
+
+    function getAddressFromSignatureLocked(address _nftAddress, address _payment, uint _price, address _to, uint256 _tokenId, uint256 _nonce, uint256 _amount, bytes calldata signature) internal view returns (address) {
+        require(!usedNonces[_nonce], 'Nonce already used');
+        return getAddressFromSignatureHash(keccak256(abi.encodePacked(_nftAddress, _payment, _price, _to, _tokenId, _nonce, _amount, true)), signature); // check to see if we not only signed but said, yes we see its locked
     }
 
     function getAddressFromSignatureQuote(address _nftAddress, uint _price, address _to, uint256 _tokenId, uint256 _nonce, uint256 _amount, bytes calldata signature) internal view returns (address) {
@@ -296,7 +352,6 @@ contract VaultHandlerV8Upgradable is ReentrancyGuardUpgradable, HasCallbacksUpgr
 
     function getAddressFromSignatureMove(address _from, address _to, uint256 tokenId, uint256 newTokenId, uint256 _nonce, bytes memory serialNumber, bytes calldata signature) internal pure returns (address) {
         return getAddressFromSignatureHash(keccak256(abi.encodePacked(_from, _to, tokenId, newTokenId, serialNumber, _nonce)), signature);
-
     }
     
     function changeMetadataBaseUri(string calldata _uri) public onlyOwner {
