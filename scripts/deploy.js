@@ -9,7 +9,7 @@ let Deployments = fs.existsSync(deploymentsFilename) ? require("."+deploymentsFi
 let VERIFY = process.env.NETWORK == "polygon" || process.env.NETWORK == "mainnet" || process.env.NETWORK == "goerli" ? true: false
 let results = {time: Date.now()}
 let EXTRA = false
-let TARGET = false // 'ERC1155'
+let TARGET = 'ERC721A'
 
 async function main() {
   const [_deployer] = await hre.ethers.getSigners();
@@ -218,10 +218,10 @@ async function main() {
   
   //* Upgradable ERC721A */
   // let deployArgs = ["Counterparty", "XCP" ]
-  // results.upgradable721A_Ordi = await verifyContract(await getOrDeployProxy(results.upgradable721A_Ordi, "EmblemVault721AUpgradeable", EmblemVault721AUpgradeable, deployArgs))
+  // results.upgradable721A_Belinals = await verifyContract(await getOrDeployProxy(results.upgradable721A_Belinals, "EmblemVault721AUpgradeable", EmblemVault721AUpgradeable, deployArgs))
   // save()
-  // await quickRegister(results.upgradable721A, utils.REGISTRATION_TYPE.ERC721, "EmblemVault721AUpgradeable", EmblemVault721AUpgradeable, results.handler_upgradable)
-  // await quickRegister(results.handler_upgradable, utils.REGISTRATION_TYPE.HANDLER, "VaultHandlerV8Upgradable", VaultHandlerV8Upgradable, results.upgradable721A)
+  // await quickRegister(results.upgradable721A_Belinals, utils.REGISTRATION_TYPE.ERC721, "EmblemVault721AUpgradeable", EmblemVault721AUpgradeable, results.handler_upgradable)
+  // await quickRegister(results.handler_upgradable, utils.REGISTRATION_TYPE.HANDLER, "VaultHandlerV8Upgradable", VaultHandlerV8Upgradable, results.upgradable721A_Belinals)
   /* Upgrade */
   // results.upgradable721A_OXBT = await verifyContract(await utils.upgradeProxy(results.upgradable721A_OXBT.address, "EmblemVault721AUpgradeable", EmblemVault721AUpgradeable))
   // save()
@@ -328,13 +328,15 @@ async function main() {
       // await deployAndRegisterContract('unused_18', 'ERC1155')
       // await deployAndRegisterContract('unused_19', 'ERC1155')
       // await deployAndRegisterContract('unused_20', 'ERC1155')
+      save()
       console.log("done")
     } else if (TARGET == 'ERC721') {
       // await upgradeContractAt(results.upgradableERC721_Cursed)
       // await upgradeContractAt(results.upgradableERC721_Ethscription)
+      save()
       console.log("done")
     } else if (TARGET == 'ERC721A') {
-      // await upgradeContractAt(results.upgradableERC721a_OXBT) // curated
+      await upgradeContractAt(results.upgradableERC721a_HoneyBadgers) // curated
       // await upgradeContractAt(results.upgradableERC721a_Ordi) // curated
       // await upgradeContractAt(results.upgradableERC721a_Rinkeby) // curated
       // await upgradeContractAt(results.upgradableERC721a_Counterparty) // curated
@@ -387,7 +389,8 @@ async function main() {
       // await deployAndRegisterContract('unused_27', 'ERC721a', 'unused_27','27')
       // await deployAndRegisterContract('unused_28', 'ERC721a', 'unused_28','28')
       // await deployAndRegisterContract('unused_29', 'ERC721a', 'unused_29','29')
-      // await deployAndRegisterContract('unused_30', 'ERC721a', 'unused_30','30')
+      // await deployAndRegisterContract('Belinals', 'ERC721a', 'Belinals','Belinals')
+      save()
       // await deployAndRegisterContract('upgradableERC721a_bitcoinDeGods', 'ERC721a', 'Bitcoin DeGods', 'DeGods')
       console.log("done")
     } else {

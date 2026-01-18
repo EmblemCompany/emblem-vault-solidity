@@ -123,346 +123,9 @@
     },
     "handler_upgradable": {
         "address": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
-        "delegation": "0x408eea2625027c32a5acd4be641550dcecb94f33",
+        "delegation": "0xcd9be960bb452c880bc96724fcb3d53b2a93d943",
         "verified": true,
-        "registrations": [
-            {
-                "registered": "0xa7d679DaeF34A628c9971F5c6b1133e0FAb11207",
-                "asType": 2
-            },
-            {
-                "registered": "0x4C03BCAD293fb0562D26FAa7D90A0cb3Ea74c919",
-                "asType": 1
-            },
-            {
-                "registered": "0x99DA31CF682d1F2b61b57c826B954bB1783D50E5",
-                "asType": 1
-            },
-            {
-                "registered": "0xDE542530037Fd01D10AaBe0C5953feC17BdCCEd4",
-                "asType": 1
-            },
-            {
-                "registered": "0xEAD67175CDb9CBDeA5bDDC36015e52f4A954E3fD",
-                "asType": 2
-            },
-            {
-                "registered": "0xe5674733bDa3D2643839F8bC7837311A2734Ae8E",
-                "asType": 2
-            },
-            {
-                "registered": "0x269211987Ca6E99D3A02DE07Ea3478BE9E675734",
-                "asType": 1
-            },
-            {
-                "registered": "0xa57D1519F426D5F961B3B37E298f3020a8fae115",
-                "asType": 2
-            },
-            {
-                "registered": "0xbeB389142d04aC39A70517012F467A3A75e0384F",
-                "asType": 2
-            },
-            {
-                "registered": "0x184ddb67E2EF517f6754F055b56905f2A9b29b6A",
-                "asType": 2
-            },
-            {
-                "registered": "0xa82ABd255762114E5FF8808f4B4576A7E5375CF2",
-                "asType": 2
-            },
-            {
-                "registered": "0x6f159F7738957e97c2F39659D1e96350ECe3CaC7",
-                "asType": 2
-            },
-            {
-                "registered": "0x0cd04D29d5FC26bA2e56C96cdF957B1b132958df",
-                "asType": 2
-            },
-            {
-                "registered": "0xCdE13b6535f63B328A48EFf2ab049B96794b7dB7",
-                "asType": 2
-            },
-            {
-                "registered": "0xAC29AEB4fF322fa3AD08A7b1903B4e1E358c445a",
-                "asType": 2
-            },
-            {
-                "registered": "0x36e572cD2507c9a2849AB984e41B3c15abF19732",
-                "asType": 2
-            },
-            {
-                "registered": "0x6e3556Addb180D7eFF855fe902d1b123c5b28ca2",
-                "asType": 2
-            },
-            {
-                "registered": "0x2F5362EBd4D883bBf00A801949137cD1246117CA",
-                "asType": 2
-            },
-            {
-                "registered": "0xb03676314dda4f2887f0F6ff268693968245Dfa0",
-                "asType": 2
-            },
-            {
-                "registered": "0x173366C5DDb8BAe17aBE2F125F423198DBcE0d97",
-                "asType": 2
-            },
-            {
-                "registered": "0xD1a7f3Aa6d015ee0014384DADEFA14D768Cb2c14",
-                "asType": 2
-            },
-            {
-                "registered": "0xfD19d9E9e7dea8491E50baAB0A9cBAC3020473e8",
-                "asType": 2
-            },
-            {
-                "registered": "0x48e4bfb7e978C0Db171BBd9D244eD338527181C4",
-                "asType": 2
-            },
-            {
-                "registered": "0x6e68C984Ae3E4e1d5865C03afb95846b5596b5E1",
-                "asType": 2
-            },
-            {
-                "registered": "0x25A43Fef3813eaE59C21C8135b4C17643997e87f",
-                "asType": 2
-            },
-            {
-                "registered": "0x1000a71CB62987142708f8BbC8c5BfbD0316fEb0",
-                "asType": 2
-            },
-            {
-                "registered": "0x5830354bADC34ABe0064e80F96cA2c923bd6A2F1",
-                "asType": 2
-            },
-            {
-                "registered": "0xE95a169f585BfEc57FCBD5D77e4b2dF0b1cD59bc",
-                "asType": 1
-            },
-            {
-                "registered": "0xd47C82fc857638598507764c3178De8CAf3f7911",
-                "asType": 1
-            },
-            {
-                "registered": "0xF02413f2286ab99F2EcC5b59f608a19AdC1B7937",
-                "asType": 1
-            },
-            {
-                "registered": "0x691F9ecc830236eB8eb5d63A2F7e60b316160509",
-                "asType": 1
-            },
-            {
-                "registered": "0x56B346070c4Ba9D11C48AEeA9BeD635578125Cdc",
-                "asType": 1
-            },
-            {
-                "registered": "0xf1Ebe97F8949B8c59D4fb89F08aC5F10948d6d0B",
-                "asType": 1
-            },
-            {
-                "registered": "0xBe1F7965193673786C539484f27F3196d1C6A934",
-                "asType": 1
-            },
-            {
-                "registered": "0x2A8BA3293099F17Df936b06C04B6DBB3812dEaEd",
-                "asType": 1
-            },
-            {
-                "registered": "0x75d7CBE016f5bb40690Cb732bFBBD4fc1D7bFa1D",
-                "asType": 2
-            },
-            {
-                "registered": "0x19b094c17F29a16F80bE04cdc0C3e274474C7724",
-                "asType": 1
-            },
-            {
-                "registered": "0x15E1c0d178a9386DE9122c8dF53BE3f087B00C1F",
-                "asType": 1
-            },
-            {
-                "registered": "0x98131cc875cD3CD07e43C7313368c1a70B4a6dA5",
-                "asType": 1
-            },
-            {
-                "registered": "0x5B3E2596DF46e4ff9a88FeF50d5e2B703Db67b71",
-                "asType": 1
-            },
-            {
-                "registered": "0x9bc6922243d0d14Fdff13E27E3Ba2e8C1745aCba",
-                "asType": 1
-            },
-            {
-                "registered": "0xE319D6c8bC1Cb92CBAd9733e8b71297599Ee3243",
-                "asType": 1
-            },
-            {
-                "registered": "0xD36cd8cbbAbC10053Cb46dFa3754ec599d18B4Ac",
-                "asType": 1
-            },
-            {
-                "registered": "0xa8B5BF82f1059e61C1B89251439cEBDBFb0D6F13",
-                "asType": 1
-            },
-            {
-                "registered": "0xEB46c7707f61fF56319dD944A8A4b2d8469D0648",
-                "asType": 1
-            },
-            {
-                "registered": "0x345eF9d7E75aEEb979053AA41BB6330683353B7b",
-                "asType": 2
-            },
-            {
-                "registered": "0xD499A1c24d0D6289BAe7F202B0A5C06FfE33f1EC",
-                "asType": 2
-            },
-            {
-                "registered": "0x8e7263c680884beaD8116521170E2a460De7aa92",
-                "asType": 2
-            },
-            {
-                "registered": "0x25e6CfD042294a716FF60603ca01e92555cA9426",
-                "asType": 2
-            },
-            {
-                "registered": "0xF1906Cd2af95dDB4e701F51d936D58d0068C8474",
-                "asType": 2
-            },
-            {
-                "registered": "0x44C062aA4261dD3fB4692F11dAB94a7B52D85a23",
-                "asType": 2
-            },
-            {
-                "registered": "0x90401BdCa1C2D928bB4c5b374E1367aa1174E624",
-                "asType": 2
-            },
-            {
-                "registered": "0x47F1Bbc1b82A5E50beBAB6Ff30988A2F7298493D",
-                "asType": 2
-            },
-            {
-                "registered": "0xda689a3dDF90c76496c8D30de21742efcF03E0fe",
-                "asType": 2
-            },
-            {
-                "registered": "0xaF69fb7cf58Ca35f32AA356BC17060b41a66C17d",
-                "asType": 2
-            },
-            {
-                "registered": "0x8b925E589F13E3f8FcAdb7632Cb4631281eef65c",
-                "asType": 2
-            },
-            {
-                "registered": "0x9a0104871b250F70aB079c6d9F50e75Dc6b1A771",
-                "asType": 2
-            },
-            {
-                "registered": "0x2957bd210FB37f76d5979243202E7989A1339032",
-                "asType": 2
-            },
-            {
-                "registered": "0x69fb218350c8Ac8cf0Ea0A129f270e4FfC2Cd6c6",
-                "asType": 2
-            },
-            {
-                "registered": "0xfeC71933470644Fb3c8Ea441D9826482271Cc4F8",
-                "asType": 2
-            },
-            {
-                "registered": "0xFbAd6eE3Ef42eb2af11176cF09Ce56d1e9148311",
-                "asType": 2
-            },
-            {
-                "registered": "0xf951A726197FfE785A355F9e5Ba3bCed998cBab4",
-                "asType": 2
-            },
-            {
-                "registered": "0xDD0bb36698cf74Ba339fd2B7bd687867aFa2c1D2",
-                "asType": 2
-            },
-            {
-                "registered": "0xbd12e3D59B7d1fF4A8c66d1907A2c5C50525C2d8",
-                "asType": 2
-            },
-            {
-                "registered": "0x3FEE8B2b20faC6293B24F10E2fF95D403214125d",
-                "asType": 2
-            },
-            {
-                "registered": "0x0CbA47b68F247b5D7621838DC9B268D8dd4F435c",
-                "asType": 2
-            },
-            {
-                "registered": "0x4D23a347e6ECC015A6a41f17f527cF8824Fae116",
-                "asType": 2
-            },
-            {
-                "registered": "0x4298Cb0f7b942249a3E4868C5952A78ce3503273",
-                "asType": 2
-            },
-            {
-                "registered": "0x7b2Ab0455678d8F2ce184D5E1234FF93c951A540",
-                "asType": 2
-            },
-            {
-                "registered": "0xcCd6074549E73a7A0214B3E3fA429519e9315895",
-                "asType": 2
-            },
-            {
-                "registered": "0x85da2dD8140883e5B670465B19f2995Be3576FCe",
-                "asType": 2
-            },
-            {
-                "registered": "0xef9ECa17cb19020dFA1bcAF03Cf898FC23140cA6",
-                "asType": 2
-            },
-            {
-                "registered": "0xB0DF635978B2573c647857D376CDc79B4508BAC8",
-                "asType": 2
-            },
-            {
-                "registered": "0x3fd03A67C2d4DEdD7F8BeC42E1695543749C3543",
-                "asType": 2
-            },
-            {
-                "registered": "0x067260686A435e4b327ee73BF1462DCa2b3A6B55",
-                "asType": 1
-            },
-            {
-                "registered": "0xBF3bCAbFD67128CB4a7CCFEB0c306e392cC7b01e",
-                "asType": 1
-            },
-            {
-                "registered": "0xa0e9e599135E72880dE988D31882d4B2e087C2b5",
-                "asType": 1
-            },
-            {
-                "registered": "0x8266370DFd788Dc760f5C3E37Fa5bb5acE8d6b2d",
-                "asType": 1
-            },
-            {
-                "registered": "0x64BC4798E10C08Ae026E01852f365a41047A1156",
-                "asType": 1
-            },
-            {
-                "registered": "0x3ebC5aF95b213f6C50f0027629024E086f1A43F0",
-                "asType": 1
-            },
-            {
-                "registered": "0xF0fCb7F30597d9f341A16C6edE1573de2E32A583",
-                "asType": 1
-            },
-            {
-                "registered": "0x20aBd7D57E8a5b1595425c7Cd5b2c30ebAda368a",
-                "asType": 1
-            },
-            {
-                "registered": "0x940d0580C80D4076c0a48CdFB24686B10E59228B",
-                "asType": 1
-            },
-            {
-                "registered": "0xE33995B3CeB1F730CB47a8e9Ce8D1b885d6CA825",
-                "asType": 1
-            }
-        ],
+        "registrations": [],
         "contractType": 7
     },
     "upgradableERC721_Ethscription": {
@@ -1294,7 +957,7 @@
         ],
         "contractType": 7
     },
-    "upgradableERC721a_unused_29": {
+    "upgradableERC721a_HoneyBadgers": {
         "address": "0xB0DF635978B2573c647857D376CDc79B4508BAC8",
         "delegation": "0x178e803a852f8fbcea7b0d1bc3774f8760a7b943",
         "verified": true,
@@ -1306,7 +969,7 @@
         ],
         "contractType": 7
     },
-    "upgradableERC721a_unused_30": {
+    "upgradableERC721a_Founder": {
         "address": "0x3fd03A67C2d4DEdD7F8BeC42E1695543749C3543",
         "delegation": "0x178e803a852f8fbcea7b0d1bc3774f8760a7b943",
         "verified": true,
@@ -1429,6 +1092,18 @@
     "upgradableERC1155_unused_20": {
         "address": "0xE33995B3CeB1F730CB47a8e9Ce8D1b885d6CA825",
         "delegation": "0x7c03e2323af3212ceb9b7b8edd81d9fd007ecbfb",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_Belinals": {
+        "address": "0x82AA50a726b2B1A02d80aE04852845F73B6Ae895",
+        "delegation": "0x178e803a852f8fbcea7b0d1bc3774f8760a7b943",
         "verified": true,
         "registrations": [
             {

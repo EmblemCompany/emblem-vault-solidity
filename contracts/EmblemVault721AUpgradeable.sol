@@ -43,6 +43,7 @@ contract EmblemVault721AUpgradeable is ERC721AUpgradeable, ERC721ABurnableUpgrad
         require(_externalTokenIdMap[externalTokenId] == 0, "External ID already minted");
         uint256 _tokenId = ERC721AStorage.layout()._currentIndex;
         _externalTokenIdMap[externalTokenId] = _tokenId;
+        _internalTokenIdMap[_tokenId] = externalTokenId;
         _mint(to, 1);        
         if (registeredOfType[3].length > 0 && registeredOfType[3][0] == _msgSender()) { // Called by Handler
             IHandlerCallback(_msgSender()).executeCallbacks(address(0), to, _tokenId, IHandlerCallback.CallbackType.MINT);
@@ -75,6 +76,18 @@ contract EmblemVault721AUpgradeable is ERC721AUpgradeable, ERC721ABurnableUpgrad
     //     string memory baseURI = _baseURI();
     //     return bytes(baseURI).length != 0 ? string(abi.encodePacked(baseURI, "/", _addressToString(address(this)), "/", _toString(tokenId))) : '';
     // }
+
+    function tokenURI(uint256 tokenId) public view override(ERC721AUpgradeable, IERC721AUpgradeable) returns (string memory) {
+        if (!_exists(tokenId)) _revert(URIQueryForNonexistentToken.selector);
+
+        string memory baseURI = _baseURI();
+        // return bytes(baseURI).length != 0 & _internalTokenIdMap[tokenId] != 0 ? string(abi.encodePacked(baseURI, _toString(_internalTokenIdMap[tokenId]))) : bytes(baseURI).length != 0 ? string(abi.encodePacked(baseURI, _toString(tokenId));
+        if (_internalTokenIdMap[tokenId] == 0) {
+            return string(abi.encodePacked(baseURI,_toString(tokenId)));
+        } else {
+            return string(abi.encodePacked(baseURI,_toString(_internalTokenIdMap[tokenId])));
+        }
+    }
     
 
     function _startTokenId() internal pure override returns (uint256) {
@@ -137,4 +150,5 @@ contract EmblemVault721AUpgradeable is ERC721AUpgradeable, ERC721ABurnableUpgrad
 
     uint256[50] private __gap;
     string BASE_URI;
+    mapping(uint256 => uint256) internal _internalTokenIdMap; // tokenId >> externalTokenId
 }

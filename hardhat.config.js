@@ -6,7 +6,7 @@ require('@nomiclabs/hardhat-waffle')
 require('hardhat-abi-exporter');
 require("hardhat-gas-reporter");
 require('hardhat-contract-sizer');
-require("@nomiclabs/hardhat-etherscan");
+require("@nomicfoundation/hardhat-verify");
 require("@nomiclabs/hardhat-ethers");
 require("@openzeppelin/hardhat-upgrades");
 // require("@nomiclabs/hardhat-truffle5");
@@ -79,11 +79,12 @@ module.exports = {
     }
   },
   etherscan: {
+    enabled: true,
     // apiKey: process.env.AURORA_API_KEY
     apiKey: process.env.ETHERSCAN_API_KEY
     // apiKey: {
     //   aurora: process.env.AURORA_API_KEY,
-    //   mainnet: process.env.ETHERSCAN_API_KEY,
+      // mainnet: process.env.ETHERSCAN_API_KEY,
     // //   ropsten: "YOUR_ETHERSCAN_API_KEY",
     //   rinkeby: process.env.ETHERSCAN_API_KEY,
     //   goerli: "YOUR_ETHERSCAN_API_KEY",
@@ -123,5 +124,12 @@ module.exports = {
     //   aurora: "api-key",
     //   auroraTestnet: "api-key"
     // }
-  }
+  },
+  sourcify: {
+  enabled: false,
+  // Optional: specify a different Sourcify server
+  apiUrl: "https://sourcify.dev/server",
+  // Optional: specify a different Sourcify repository
+  browserUrl: "https://repo.sourcify.dev",
+}
 };
