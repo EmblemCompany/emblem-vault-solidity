@@ -6,8 +6,8 @@ import "./IsClaimable.sol";
 
 abstract contract IsBypassable is IsClaimable {
 
-    bool byPassable;
-    mapping(address => mapping(bytes4 => bool)) byPassableFunction;
+    bool public byPassable;
+    mapping(address => mapping(bytes4 => bool)) public byPassableFunction;
     mapping(address => mapping(uint256 => bool)) byPassableIds;
 
     modifier onlyOwner virtual override {

@@ -1,0 +1,33 @@
+[
+  {
+    "network": "hederaTestnet",
+    "chainId": 296,
+    "deployer": "0x2272ECf43A7481088FA2d4Ba9109804ED5A31901",
+    "proxy": "0x5cCa9D75DF2dFC117855adD4DD45727dee5287EC",
+    "implementation": "0x8b8407c6184f1f0Fd1082e83d6A3b8349cAcEd12",
+    "proxyAdmin": "0x1649AA23384296429798Bad9291FE5C3e5f697c4",
+    "tokenName": "Hustle",
+    "tokenSymbol": "HUSTLE",
+    "deployedAt": "2026-01-31T02:42:12.009Z",
+    "blockNumber": 30890151,
+    "verified": true,
+    "verificationStatus": "verified"
+  },
+  {
+    "network": "hederaTestnet",
+    "chainId": 296,
+    "deployer": "0x2272ECf43A7481088FA2d4Ba9109804ED5A31901",
+    "proxy": "0x5cCa9D75DF2dFC117855adD4DD45727dee5287EC",
+    "implementation": "0x9058d1A5Fdba852403D5b080abAF31D1379EF653",
+    "proxyAdmin": "0x1649AA23384296429798Bad9291FE5C3e5f697c4",
+    "tokenName": "Hustle",
+    "tokenSymbol": "HUSTLE",
+    "deployedAt": "2026-01-31T02:42:12.009Z",
+    "blockNumber": 30890151,
+    "verified": true,
+    "verificationStatus": "verified",
+    "upgradedFrom": "0x8b8407c6184f1f0Fd1082e83d6A3b8349cAcEd12",
+    "upgradedAt": "2026-01-31T03:28:29.891Z",
+    "upgradeBlockNumber": 30891540
+  }
+]

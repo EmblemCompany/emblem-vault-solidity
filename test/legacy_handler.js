@@ -27,10 +27,10 @@ describe('Legacy Vault Handler', () => {
   })
 
   it('signer should be witness', async()=>{
-    let isWitness = await util.legacy_handler.witnesses("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
+    let isWitness = await util.legacy_handler.witnesses(util.witness)
     expect(isWitness).to.be.false
-    await util.legacy_handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
-    isWitness = await util.legacy_handler.witnesses("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
+    await util.legacy_handler.addWitness(util.witness)
+    isWitness = await util.legacy_handler.witnesses(util.witness)
     expect(isWitness).to.be.true
   })
 
@@ -44,7 +44,7 @@ describe('Legacy Vault Handler', () => {
   })
 
   it('old buy with signature will allow minting of claimed tokens', async ()=>{
-    await util.legacy_handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
+    await util.legacy_handler.addWitness(util.witness)
     await util.legacy_handler.addClaimAddress(util.claimedUpgradable.address)
     await util.claimedUpgradable.registerContract(util.legacy_handler.address, 11)
     var provider = util.selectProvider("mainnet")
@@ -65,7 +65,7 @@ describe('Legacy Vault Handler', () => {
   })
 
   it('new buy with signature method does not allow minting previously claimed tokens', async()=>{
-    await util.legacy_handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
+    await util.legacy_handler.addWitness(util.witness)
     await util.legacy_handler.addClaimAddress(util.claimedUpgradable.address)
     await util.claimedUpgradable.registerContract(util.legacy_handler.address, 11)
     var provider = util.selectProvider("mainnet")
@@ -94,7 +94,7 @@ describe('Legacy Vault Handler', () => {
 
   it('mint outside blockWindow is not successful', async()=>{
     await util.legacy_handler.adjustBlockWindow(1)
-    await util.legacy_handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
+    await util.legacy_handler.addWitness(util.witness)
     await ERC721.transferOwnership(util.legacy_handler.address)
     var provider = util.selectProvider("mainnet")
     var web3 = new Web3(provider)
@@ -106,7 +106,7 @@ describe('Legacy Vault Handler', () => {
   })
 
   it('mint within blockWindow is successful', async()=>{
-    await util.legacy_handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
+    await util.legacy_handler.addWitness(util.witness)
     await util.legacy_handler.addClaimAddress(util.claimedUpgradable.address)
     await util.claimedUpgradable.registerContract(util.legacy_handler.address, 11)
     await ERC721.transferOwnership(util.legacy_handler.address)
@@ -135,7 +135,7 @@ describe('Legacy Vault Handler', () => {
   })
 
   it('mint after burn vs claim is not sucessful', async()=>{
-    await util.legacy_handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
+    await util.legacy_handler.addWitness(util.witness)
     await util.legacy_handler.addClaimAddress(util.claimedUpgradable.address)
     await util.claimedUpgradable.registerContract(util.legacy_handler.address, 11)
     await ERC721.transferOwnership(util.legacy_handler.address)
@@ -154,7 +154,7 @@ describe('Legacy Vault Handler', () => {
   })
 
   it('onchain claim is succcessful', async()=>{
-    await util.legacy_handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
+    await util.legacy_handler.addWitness(util.witness)
     await util.legacy_handler.addClaimAddress(util.claimedUpgradable.address)
     await util.claimedUpgradable.registerContract(util.legacy_handler.address, 11)
     var provider = util.selectProvider("mainnet")

@@ -29,24 +29,11 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
     mapping (address => mapping (uint => bool)) seenInBlock;
 
     mapping(uint256 => mapping(address => uint256[])) internal tokenIdToOwnerToSerialNumbers;
-    
 
-    constructor () {
-        // __Ownable_init();
-    }
+    address private serialManagerAddress;
+    uint private managerUpgradeBlock;
 
-    modifier oncePerBlock(address to) {
-        require(!seenInBlock[to][block.number], 'already seen this block');
-        _;
-    }
-
-    function upgradeFrom(address oldContract) public onlyOwner virtual override {
-       UpgradableERC1155.upgradeFrom(oldContract);
-    }
-
-    // function  makeEvents(address[] calldata operators, uint256[] calldata tokenIds, address[] calldata _from, address[] calldata _to, uint256[] calldata amounts) public onlyOwner override {
-    //     EventableERC1155.makeEvents(operators, tokenIds, _from, _to, amounts);
-    // }
+    constructor () {    }
 
     function initialize() public override initializer {
         __Ownable_init();
@@ -54,14 +41,15 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
         _registerInterface(0x0e89341c); //_INTERFACE_ID_ERC1155_METADATA_URI
         initializeERC165();
         _registerInterface(0x2a55205a); // ERC2981
+        __OperatorFilterer_init(0x9dC5EE2D52d014f8b81D662FA8f4CA525F27cD6b, true);
         _uri = "https://api.emblemvault.io/s:evmetadata/meta/"; 
         serialized = true;
-        overloadSerial = false;
+        overloadSerial = true;
         isClaimable = true;
     }
 
     function version() public pure override returns(uint256) {
-        return 10;
+        return 15;
     }
 
     function changeName(string calldata _name, string calldata _symbol) public onlyOwner {
@@ -69,22 +57,41 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
       symbol = _symbol;
     }
 
-    function mint(address _to, uint256 _tokenId, uint256 _amount) public onlyOwner oncePerBlock(_to) {
-        bytes memory empty = abi.encodePacked(uint256(0));
-        
+    function mint(address _to, uint256 _tokenId, uint256 _amount) public onlyOwner {
+        bytes memory empty = abi.encodePacked(uint256(0));        
         mintWithSerial(_to, _tokenId, _amount, empty);
     }
 
-    function mintWithSerial(address _to, uint256 _tokenId, uint256 _amount, bytes memory serialNumber) public onlyOwner oncePerBlock(_to) {
+    function mintWithSerial(address _to, uint256 _tokenId, uint256 _amount, bytes memory serialNumber) public onlyOwner {
         _mint(_to, _tokenId, _amount, serialNumber);
     }
 
-    function mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes[] memory serialNumbers) public onlyOwner oncePerBlock(to) {
+    function migrationMint(uint256 serialNumber, address account, uint256 tokenId) public onlyOwner {
+        tokenIdToSerials[tokenId].push(serialNumber);
+        serialToTokenId[serialNumber] = tokenId;
+        serialToOwner[serialNumber] = account;
+        tokenIdToOwnerToSerialNumbers[tokenId][account].push(serialNumber);
+        // _balances[tokenId][account] = _balances[tokenId][account].add(1);
+        emit TransferSingle(_msgSender(), address(0), account, tokenId, 1);
+    }
+
+    function migrationMintMany(uint256[] memory serialNumber, address[] memory account, uint256[] memory tokenId) public onlyOwner {
+        for (uint i = 0; i < serialNumber.length; i++) { 
+            tokenIdToSerials[tokenId[i]].push(serialNumber[i]);
+            serialToTokenId[serialNumber[i]] = tokenId[i];
+            serialToOwner[serialNumber[i]] = account[i];
+            tokenIdToOwnerToSerialNumbers[tokenId[i]][account[i]].push(serialNumber[i]);
+            // _balances[tokenId[i]][account[i]] = _balances[tokenId[i]][account[i]].add(1);
+            emit TransferSingle(_msgSender(), address(0), account[i], tokenId[i], 1);
+        }
+    }
+
+    function mintBatch(address[] memory to, uint256[] memory ids, uint256[] memory amounts, bytes[] memory serialNumbers) public onlyOwner {
         _mintBatch(to, ids, amounts, serialNumbers);
     }
 
     function burn(address _from, uint256 _tokenId, uint256 _amount) public {
-        require(_from == _msgSender() || isApprovedForAll(_from, _msgSender()), 'Not Approved to burn');
+        require(_from == _msgSender() || isApprovedForAll(_from, _msgSender()) || canBypass(), 'Not Approved to burn');
         _burn(_from, _tokenId, _amount);
     }
 
@@ -116,9 +123,10 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
         return string(buffer);
     }
 
-    function balanceOf(address account, uint256 id) public view returns (uint256) {
+    function balanceOf(address account, uint256 tokenId) public view returns (uint256) {
         require(account != address(0), "ERC1155: balance query for the zero address");
-        return UpgradableERC1155.balanceOfHook(account, id, _balances);
+        return tokenIdToOwnerToSerialNumbers[tokenId][account].length;
+        // return _balances[id][account];
     }
     
     function balanceOfBatch(address[] memory accounts, uint256[] memory ids) public view returns (uint256[] memory) {
@@ -128,7 +136,8 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
 
         for (uint256 i = 0; i < accounts.length; ++i) {
             require(accounts[i] != address(0), "ERC1155: batch balance query for the zero address");
-            batchBalances[i] = UpgradableERC1155.balanceOfHook(accounts[i], ids[i], _balances);
+            // batchBalances[i] = _balances[ids[i]][accounts[i]];
+            batchBalances[i] = tokenIdToOwnerToSerialNumbers[ids[i]][accounts[i]].length;
         }
         return batchBalances;
     }
@@ -145,19 +154,10 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
     }
     
     function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes memory) public virtual onlyAllowedOperatorApproval(from) {
-        bool _canBypass = canBypassForTokenId(id);
-        uint256 pastSenderBalance = 0;
-        uint256 pastRecipientBalance = 0;
         require(to != address(0), "ERC1155: transfer to the zero address");
-        require(from == _msgSender() || isApprovedForAll(from, _msgSender()) || _canBypass, "ERC1155: caller is not owner nor approved nor bypasser");
+        require(from == _msgSender() || isApprovedForAll(from, _msgSender()) || canBypassForTokenId(id), "ERC1155: caller is not owner nor approved nor bypasser");
 
-        address operator = _msgSender();
-
-        // _beforeTokenTransfer(operator, from, to, _asSingletonArray(id), _asSingletonArray(amount), data);
-        (pastSenderBalance, pastRecipientBalance) = UpgradableERC1155.transferHook(from, to, id, _balances);
-
-        _balances[id][from] = _balances[id][from].sub(amount, "ERC1155: insufficient balance for transfer");
-        _balances[id][to] = _balances[id][to].add(amount);
+        require(tokenIdToOwnerToSerialNumbers[id][from].length >= amount, "ERC1155: insufficient balance for transfer");
 
         if (isSerialized()) {
             for (uint i = 0; i < amount; i++) {            
@@ -168,10 +168,7 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
             }
         }
 
-        emit TransferSingle(operator, from, to, id, amount);
-        UpgradableERC1155.transferEventHook(operator, from, to, id, pastSenderBalance, pastRecipientBalance);
-
-        // _doSafeTransferAcceptanceCheck(operator, from, to, id, amount, data);
+        emit TransferSingle(_msgSender(), from, to, id, amount);
         if (registeredOfType[3].length > 0 && registeredOfType[3][0] != address(0)) {
             for (uint i = 0; i < amount; i++) {
                 IHandlerCallback(registeredOfType[3][0]).executeCallbacks(from, to, id, IHandlerCallback.CallbackType.TRANSFER);
@@ -202,8 +199,6 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
 
         address operator = _msgSender();
 
-        // _beforeTokenTransfer(operator, from, to, ids, amounts, data);
-
         for (uint256 i = 0; i < ids.length; ++i) {
             uint256 id = ids[i];
             uint256 amount = amounts[i];
@@ -212,13 +207,10 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
 
         emit TransferBatch(operator, from, to, ids, amounts);
 
-        // _doSafeBatchTransferAcceptanceCheck(operator, from, to, ids, amounts, data);
     }
 
     function _mint(address account, uint256 id, uint256 amount, bytes memory serialNumber) internal virtual {
-        require(account != address(0), "ERC1155: mint to the zero address");
         address operator = _msgSender();
-        amount = UpgradableERC1155.mintHook(account, id, amount);
         if (isSerialized()) {
             for (uint i = 0; i < amount; i++) {
                 if (overloadSerial){
@@ -235,23 +227,23 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
                 IHandlerCallback(_msgSender()).executeCallbacks(address(0), account, id, IHandlerCallback.CallbackType.MINT);
             }
         }
-        // usedTokenId[id] = true;
-        _balances[id][account] = _balances[id][account].add(amount);
+        // _balances[id][account] = _balances[id][account].add(amount);
         emit TransferSingle(operator, address(0), account, id, amount);
     }
 
-    function _mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes[] memory serialNumbers) internal virtual {
-        require(to != address(0), "ERC1155: mint to the zero address");
+    function _mintBatch(address[] memory to, uint256[] memory ids, uint256[] memory amounts, bytes[] memory serialNumbers) internal virtual {
+        
         require(ids.length == amounts.length, "ERC1155: ids and amounts length mismatch");
 
-        address operator = _msgSender();
-
         for (uint i = 0; i < ids.length; i++) {
+            // If a particular id entry has multiple amounts, pack the serial numbers into a byte array
+            // If there is only one amount, use the serial number as is
+            // Example using web3.js:
+            // let serialNumbers = [123, 456, 789];
+            // let packedSerialNumbers = web3.eth.abi.encodeParameter('uint256[]', serialNumbers);
             bytes memory _serialNumber = amounts[i] > 1? abi.encode(decodeUintArray(serialNumbers[i])) : serialNumbers[i];
-            _mint(to, ids[i], amounts[i], _serialNumber);
-        }
-
-        emit TransferBatch(operator, address(0), to, ids, amounts);
+            _mint(to[i], ids[i], amounts[i], _serialNumber);
+        }        
     }
 
     function _burn(address account, uint256 id, uint256 amount) internal virtual {
@@ -259,10 +251,10 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
 
         address operator = _msgSender();
 
-        _balances[id][account] = _balances[id][account].sub(
-            amount,
-            "ERC1155: burn amount exceeds balance"
-        );
+        // _balances[id][account] = _balances[id][account].sub(
+        //     amount,
+        //     "ERC1155: burn amount exceeds balance"
+        // );
 
         if (isSerialized()) {
             uint256 serialNumber = getFirstSerialByOwner(account, id);
@@ -290,18 +282,6 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
         serialized = !serialized;
     }
 
-    // function migrate(uint256[] calldata tokenIds) public onlyOwner {
-    //     for(uint _i=0; _i<tokenIds.length; _i++){
-    //         uint256 tokenId = tokenIds[_i];
-    //         uint256[] memory serialNumbers = tokenIdToSerials[tokenId];
-    //         for (uint i=0; i<serialNumbers.length; i++){
-    //             uint256 serialNumber = serialNumbers[i];
-    //             address owner = serialToOwner[serialNumber];
-    //             tokenIdToOwnerToSerialNumbers[tokenId][owner].push(serialNumber);
-    //         }
-    //     }
-    // }
-
     function toggleOverloadSerial() public onlyOwner {
         overloadSerial = !overloadSerial;
     }
@@ -321,7 +301,9 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
         serialToTokenId[serialNumber] = tokenId;
         serialToOwner[serialNumber] = _owner;
         tokenIdToOwnerToSerialNumbers[tokenId][_owner].push(serialNumber);
-        hasSerialized = true;
+        if (!hasSerialized) {
+            hasSerialized = true;
+        }
         serialCount++;
     }
     
@@ -339,7 +321,6 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
                 break;
             }
         }
-        emit TransferSerial(from, to, serialNumber);
     }
 
     function burnSerial(uint256 serialNumber) internal {
@@ -364,11 +345,7 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
 
 
     function getSerial(uint256 tokenId, uint256 index) public view returns (uint256) {
-        if(tokenIdToSerials[tokenId].length == 0) {
-            return 0;
-        } else {
-            return tokenIdToSerials[tokenId][index];
-        }
+        return tokenIdToSerials[tokenId][index];
     }
 
     function getFirstSerialByOwner(address _owner, uint256 tokenId) public view returns (uint256) {
@@ -391,8 +368,11 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
         ids = abi.decode(encoded, (uint256[]));
     }
 
+    // To pack the value using web3.js, you can use the following code:
+    // let value = 123;
+    // let packedValue = web3.eth.abi.encodeParameter('uint256', value);     
     function decodeSingle(bytes memory encoded) internal pure returns(uint256 id) {
-        id = abi.decode(encoded, (uint));
+        id = abi.decode(encoded, (uint256));
     }
 
     function isContract(address account) internal view returns (bool) {
@@ -420,8 +400,4 @@ contract ERC1155Upgradable is ERC165, IERC1155MetadataURI, IsSerializedUpgradabl
 
         return tempUint;
     }
-
-    // fallback (bytes calldata input) external returns (bytes memory) {
-    //     // should allow registration of fallback functions
-    // }
 }

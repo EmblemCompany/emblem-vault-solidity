@@ -21,7 +21,10 @@ async function verify(address, constructor = []) {
     });
   } catch (e) {
     console.log("error",e)
-    return console.log("Reason", e.toString().split("Reason: ")[1].split(" at ")[0])
+    // return console.log("Reason", e.toString().split("Reason: ")[1].split(" at ")[0])
+    const msg = (e && (e.shortMessage || e.message || e.toString())) || "";
+    const m = msg.match(/Reason:\\s*(.*?)(?:\\s+at\\s+|$)/);
+    console.log("Error reason:", m ? m[1] : msg);
   }
 }
 

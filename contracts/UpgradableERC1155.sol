@@ -13,16 +13,16 @@ abstract contract UpgradableERC1155 is IUpgradableERC1155, EventableERC1155  {
     using SafeMath for uint256;
 
     bool internal _isUpgrade;
-    address public upgradedFrom;
+    address internal upgradedFrom;
     uint256 internal _totalMoved;
     mapping(address => uint256) internal _supplyMoved;
-    mapping(address => bool) public seen;
+    mapping(address => bool) internal seen;
 
-    function isUpgrade() public view returns (bool) {
+    function isUpgrade() internal view returns (bool) {
         return _isUpgrade;
     }
 
-    function upgradeFrom(address oldContract) public virtual override {
+    function upgradeFrom(address oldContract) external virtual override {
         require(!_isUpgrade, "Contract already an upgrade");
         require(oldContract != address(0), "Invalid Upgrade");
         _isUpgrade = true;

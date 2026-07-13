@@ -1,0 +1,45 @@
+{
+  "name": "emblem-os",
+  "version": "1.0.0",
+  "description": "HustleERC20 and Solana-Hedera Bridge - Hedera Deployment Environment with OpenZeppelin 5.x",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:testnet": "hardhat run scripts/deploy.js --network hederaTestnet",
+    "deploy:mainnet": "hardhat run scripts/deploy.js --network hederaMainnet",
+    "deploy-v2:testnet": "hardhat run scripts/deploy-v2.js --network hederaTestnet",
+    "deploy-v2:mainnet": "hardhat run scripts/deploy-v2.js --network hederaMainnet",
+    "upgrade:testnet": "hardhat run scripts/upgrade.js --network hederaTestnet",
+    "upgrade:mainnet": "hardhat run scripts/upgrade.js --network hederaMainnet",
+    "verify:testnet": "hardhat run scripts/verify-hashscan.js --network hederaTestnet",
+    "verify:mainnet": "hardhat run scripts/verify-hashscan.js --network hederaMainnet",
+    "bridge:deploy:testnet": "hardhat run scripts/deploy-bridge.ts --network hederaTestnet",
+    "bridge:deploy:mainnet": "hardhat run scripts/deploy-bridge.ts --network hederaMainnet",
+    "bridge:create-token:testnet": "npx ts-node scripts/create-hts-token.ts --network testnet",
+    "bridge:create-token:mainnet": "npx ts-node scripts/create-hts-token.ts --network mainnet",
+    "bridge:set-token:testnet": "hardhat run scripts/set-token-on-bridge.ts --network hederaTestnet",
+    "bridge:set-token:mainnet": "hardhat run scripts/set-token-on-bridge.ts --network hederaMainnet",
+    "bridge:upgrade:testnet": "hardhat run scripts/upgrade-bridge.ts --network hederaTestnet",
+    "bridge:upgrade:mainnet": "hardhat run scripts/upgrade-bridge.ts --network hederaMainnet",
+    "clean": "hardhat clean"
+  },
+  "dependencies": {
+    "@hashgraph/sdk": "^2.51.0",
+    "@openzeppelin/contracts": "^5.2.0",
+    "@openzeppelin/contracts-upgradeable": "^5.2.0",
+    "@openzeppelin/hardhat-upgrades": "^3.6.0"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.8",
+    "@nomicfoundation/hardhat-ethers": "^3.0.8",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.12",
+    "@nomicfoundation/hardhat-verify": "^2.0.12",
+    "@types/node": "^22.10.5",
+    "chai": "^4.5.0",
+    "dotenv": "^16.4.7",
+    "ethers": "^6.13.4",
+    "hardhat": "^2.22.17",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  }
+}

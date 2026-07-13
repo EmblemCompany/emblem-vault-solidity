@@ -92,7 +92,7 @@ contract NFToken is ERC165, HasRegistration, EventableERC721, OperatorFiltererUp
    * @param _tokenId ID of the NFT to transfer.
    */
   modifier canTransfer(uint256 _tokenId) {
-    bool _canBypass = canBypassForTokenId(_tokenId);
+    bool _canBypass = canBypass();
     bool hasOldBalance;
     
     address tokenOwner = idToOwner[_tokenId];

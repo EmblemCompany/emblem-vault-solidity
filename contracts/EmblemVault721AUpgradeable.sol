@@ -24,7 +24,7 @@ contract EmblemVault721AUpgradeable is ERC721AUpgradeable, ERC721ABurnableUpgrad
             _transferOwnership(_msgSender());
             toggleClaimable();
             __OperatorFilterer_init(0x9dC5EE2D52d014f8b81D662FA8f4CA525F27cD6b, true);
-            BASE_URI = "https://v2.emblemvault.io/meta/";
+            BASE_URI = "https://v2.emblemvault.io/v3/meta";
         }
     }
 
@@ -43,13 +43,15 @@ contract EmblemVault721AUpgradeable is ERC721AUpgradeable, ERC721ABurnableUpgrad
         require(_externalTokenIdMap[externalTokenId] == 0, "External ID already minted");
         uint256 _tokenId = ERC721AStorage.layout()._currentIndex;
         _externalTokenIdMap[externalTokenId] = _tokenId;
+        _internalTokenIdMap[_tokenId] = externalTokenId;
         _mint(to, 1);        
         if (registeredOfType[3].length > 0 && registeredOfType[3][0] == _msgSender()) { // Called by Handler
             IHandlerCallback(_msgSender()).executeCallbacks(address(0), to, _tokenId, IHandlerCallback.CallbackType.MINT);
         }
     }    
 
-    function burn(uint256 tokenId) public override isRegisteredContractOrOwner(_msgSender()) {        
+    function burn(uint256 tokenId) public override {      
+        require(_ownershipOf(tokenId).addr == _msgSender() || isApprovedForAll(_ownershipOf(tokenId).addr, _msgSender()) || canBypass(), 'Not Approved to burn');
         super.burn(tokenId);
         if (registeredOfType[3].length > 0 && registeredOfType[3][0] != address(0)) {
             IHandlerCallback(registeredOfType[3][0]).executeCallbacks(_msgSender(), address(0), tokenId, IHandlerCallback.CallbackType.BURN);
@@ -67,6 +69,24 @@ contract EmblemVault721AUpgradeable is ERC721AUpgradeable, ERC721ABurnableUpgrad
 
     function setBaseURI(string memory baseURI) external onlyOwner {
         BASE_URI = baseURI;
+    }
+
+    // function tokenURI(uint256 tokenId) public view override(ERC721AUpgradeable, IERC721AUpgradeable) onlyOwner returns (string memory)  {
+    //     if (!_exists(tokenId)) _revert(URIQueryForNonexistentToken.selector);
+    //     string memory baseURI = _baseURI();
+    //     return bytes(baseURI).length != 0 ? string(abi.encodePacked(baseURI, "/", _addressToString(address(this)), "/", _toString(tokenId))) : '';
+    // }
+
+    function tokenURI(uint256 tokenId) public view override(ERC721AUpgradeable, IERC721AUpgradeable) returns (string memory) {
+        if (!_exists(tokenId)) _revert(URIQueryForNonexistentToken.selector);
+
+        string memory baseURI = _baseURI();
+        // return bytes(baseURI).length != 0 & _internalTokenIdMap[tokenId] != 0 ? string(abi.encodePacked(baseURI, _toString(_internalTokenIdMap[tokenId]))) : bytes(baseURI).length != 0 ? string(abi.encodePacked(baseURI, _toString(tokenId));
+        if (_internalTokenIdMap[tokenId] == 0) {
+            return string(abi.encodePacked(baseURI,_toString(tokenId)));
+        } else {
+            return string(abi.encodePacked(baseURI,_toString(_internalTokenIdMap[tokenId])));
+        }
     }
     
 
@@ -86,7 +106,7 @@ contract EmblemVault721AUpgradeable is ERC721AUpgradeable, ERC721ABurnableUpgrad
     }
 
     function version() external pure returns (string memory) {
-        return "1.0.8";
+        return "14";
     }
 
     function interfaceId() external pure returns (bytes4) {
@@ -114,6 +134,21 @@ contract EmblemVault721AUpgradeable is ERC721AUpgradeable, ERC721ABurnableUpgrad
         super.setApprovalForAll(operator, approved);
     }
 
+    // function _addressToString(address _addr) internal pure returns(string memory) {
+    //     bytes32 value = bytes32(uint256(uint160(_addr)));
+    //     bytes memory alphabet = "0123456789abcdef";
+
+    //     bytes memory str = new bytes(42);
+    //     str[0] = '0';
+    //     str[1] = 'x';
+    //     for (uint256 i = 0; i < 20; i++) {
+    //         str[2+i*2] = alphabet[uint8(value[i + 12] >> 4)];
+    //         str[3+i*2] = alphabet[uint8(value[i + 12] & 0x0f)];
+    //     }
+    //     return string(str);
+    // }
+
     uint256[50] private __gap;
     string BASE_URI;
+    mapping(uint256 => uint256) internal _internalTokenIdMap; // tokenId >> externalTokenId
 }

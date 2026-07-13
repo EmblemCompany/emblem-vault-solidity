@@ -1,6 +1,7 @@
 const { expect } = require('chai')
 const Util = require('./util.js')
 const util = new Util()
+const Web3 = require('web3');
 
 describe('ERC721a', () => {
   beforeEach(async ()=>{
@@ -12,6 +13,21 @@ describe('ERC721a', () => {
     let emblemAddress = util.emblemVault721AUpgradeable.address
     console.log(emblemAddress)
     expect(emblemAddress).to.exist
+  })
+
+  it('should have no uri on invalid token', async ()=>{
+    let tx = ERC721.tokenURI(1)
+    await expect(tx).to.be.revertedWith("URIQueryForNonexistentToken")
+  })
+
+
+  it('should have no default uri', async ()=>{
+    await ERC721.mint(util.deployer.address, 1)
+    let uri = await ERC721.tokenURI(1)
+    var provider = util.selectProvider("mainnet")
+    var web3 = new Web3(provider)
+    let checksum = web3.utils.toHex(ERC721.address)
+    expect(uri).to.to.equal(`https://v2.emblemvault.io/v3/meta/${checksum}/1`)
   })
   
   it('should prevent non owner mint', async ()=>{
@@ -49,7 +65,7 @@ describe('ERC721a', () => {
     balance = await ERC721.balanceOf(util.deployer.address)
     expect(balance).to.equal(1)
     // let covalAddress = util.erc20.address
-    // await util.handler_upgradable.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
+    // await util.handler_upgradable.addWitness(util.witness)
     // var provider = util.selectProvider("mainnet")
     // var web3 = new Web3(provider)
     // let hash = web3.utils.soliditySha3(ERC1155.address, covalAddress, 0, util.deployer.address, 123, 111, 1)

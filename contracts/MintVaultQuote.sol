@@ -83,6 +83,9 @@ contract MintVaultQuote is Initializable, OwnableUpgradeable {
     }
 
     function quoteExternalPrice(address buyer, uint256 _usdPrice) external view returns (uint256) {
+        if (block.chainid == 5) {
+            return 0;
+        }
         uint256 price = getUsdPriceInEth(_usdPrice);
         return getQuoteFromPrice(buyer, price);
     }

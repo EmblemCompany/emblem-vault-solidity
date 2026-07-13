@@ -1,0 +1,25 @@
+{
+  "network": "hederaTestnet",
+  "chainId": 296,
+  "deployer": "0x2272ECf43A7481088FA2d4Ba9109804ED5A31901",
+  "proxy": "0x55fd9Ea22bc3f1856017A407d9D811021d0571F4",
+  "implementation": "0xd15CeE1DEaFBad6C0B3Fd7489677Cc102B141464",
+  "version": "1.0.0",
+  "maxPerTx": "100000000000000",
+  "dailyLimit": "1000000000000000",
+  "deployedAt": "2026-02-04T11:34:44.440Z",
+  "blockNumber": 31078927,
+  "verified": true,
+  "upgradedAt": "2026-02-04T11:48:50.538Z",
+  "upgradeHistory": [
+    {
+      "from": "0xdB3379899011E997b1B82864F5Bd759beD27c38A",
+      "to": "0xd15CeE1DEaFBad6C0B3Fd7489677Cc102B141464",
+      "at": "2026-02-04T11:48:50.538Z",
+      "version": "1.0.0"
+    }
+  ],
+  "htsTokenAddress": "0x000000000000000000000000000000000077797c",
+  "tokenConfigured": true,
+  "tokenConfiguredAt": "2026-02-04T11:51:22.835Z"
+}

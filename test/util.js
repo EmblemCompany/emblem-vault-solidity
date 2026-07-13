@@ -7,8 +7,16 @@ const Web3 = require('web3');
 const { util } = require('chai');
 const HDWalletProvider = require("@truffle/hdwallet-provider")
 require('dotenv').config()
+
+// The key used by selectProvider()/sign() for witness signatures. The witness
+// address MUST be derived from this key — a hardcoded address silently drifts
+// from the actual signer and breaks every signed-price/mint test.
+const WITNESS_PRIVATE_KEY = process.env.ETHKEY || "a819fcd7afa2c39a7f9baf70273a128875b6c9f03001b218824559ccad6ef11c";
+const WITNESS_ADDRESS = new ethers.Wallet(WITNESS_PRIVATE_KEY).address;
+
 class Util {
   all = ethers.utils.formatBytes32String("")
+  witness = WITNESS_ADDRESS
   _cid = "0x" + this.toHexString(CID.parse('bafybeifpcgydc47j67wv7chqzbi56sbnee72kenmn5si66wpkqnghxsbx4').toJSON().hash).slice(4);
   toHexString (bytes) {
     return bytes.reduce((str, byte) => str + byte.toString(16).padStart(2, '0'), '');
@@ -65,6 +73,66 @@ class Util {
     await this.emblemVault721AUpgradeable.deployed();
     await fs.promises.mkdir(path.resolve(__dirname, "../artifacts"), { recursive: true }).catch((e) => {})
     await fs.promises.writeFile(path.resolve(__dirname, "../artifacts/Deployed.json"), JSON.stringify({ address: this.emblemVault721AUpgradeable.address }))
+    let signers = await ethers.getSigners();
+    this.signers = signers
+    this.addresses = signers.map((s) => {
+      return s.address
+    })
+  }
+  async deployERC721AFees(deployType = null) {
+    const [_deployer, u1, u2] = await ethers.getSigners();
+    this.alice = u1;
+    this.bob = u2;
+    this.deployer = _deployer;
+    let EmblemVault721AUpgradeableFees = await ethers.getContractFactory('EmblemVault721AUpgradeableFees');
+    if (deployType && deployType == "upgradable") {
+      this.EmblemVault721AUpgradeableFees = await upgrades.deployProxy(EmblemVault721AUpgradeableFees)
+    } else {
+      this.EmblemVault721AUpgradeableFees = await EmblemVault721AUpgradeableFees.deploy()
+      await this.EmblemVault721AUpgradeableFees.initialize("TestA","test")
+    }
+    await this.EmblemVault721AUpgradeableFees.deployed();
+    await fs.promises.mkdir(path.resolve(__dirname, "../artifacts"), { recursive: true }).catch((e) => {})
+    await fs.promises.writeFile(path.resolve(__dirname, "../artifacts/Deployed.json"), JSON.stringify({ address: this.EmblemVault721AUpgradeableFees.address }))
+    let signers = await ethers.getSigners();
+    this.signers = signers
+    this.addresses = signers.map((s) => {
+      return s.address
+    })
+  }
+  async deploySimpleNFTBuyer(deployType = null) {
+    const [_deployer, u1, u2] = await ethers.getSigners();
+    this.deployer = _deployer;
+    let SimpleNFTBuyer = await ethers.getContractFactory('SimpleNFTBuyer');
+    if (deployType && deployType == "upgradable") {
+      this.simpleNFTBuyer = await upgrades.deployProxy(SimpleNFTBuyer)
+    } else {
+      this.simpleNFTBuyer = await SimpleNFTBuyer.deploy()
+    }
+    await this.simpleNFTBuyer.deployed();
+    await fs.promises.mkdir(path.resolve(__dirname, "../artifacts"), { recursive: true }).catch((e) => {})
+    await fs.promises.writeFile(path.resolve(__dirname, "../artifacts/Deployed.json"), JSON.stringify({ address: this.simpleNFTBuyer.address }))
+    let signers = await ethers.getSigners();
+    this.signers = signers
+    this.addresses = signers.map((s) => {
+      return s.address
+    })
+  }
+  async deployERC1155Batch(deployType = null) {
+    const [_deployer, u1, u2] = await ethers.getSigners();
+    this.deployer = _deployer;
+    this.alice = u1;
+    this.bob = u2;
+    let ERC1155UpgradableBatch = await ethers.getContractFactory('ERC1155UpgradableBatch');
+    if (deployType && deployType == "upgradable") {
+      this.erc1155Batch = await upgrades.deployProxy(ERC1155UpgradableBatch)
+    } else {
+      this.erc1155Batch = await ERC1155UpgradableBatch.deploy()
+      await this.erc1155Batch.deployed()
+      await this.erc1155Batch.initialize()
+    }    
+    await fs.promises.mkdir(path.resolve(__dirname, "../artifacts"), { recursive: true }).catch((e) => {})
+    await fs.promises.writeFile(path.resolve(__dirname, "../artifacts/Deployed.json"), JSON.stringify({ address: this.erc1155Batch.address }))
     let signers = await ethers.getSigners();
     this.signers = signers
     this.addresses = signers.map((s) => {
@@ -762,7 +830,7 @@ class Util {
     return selected
   }
   selectProvider(network) {
-    return new HDWalletProvider(process.env.ETHKEY || "a819fcd7afa2c39a7f9baf70273a128875b6c9f03001b218824559ccad6ef11c", this.selectProviderEndpoint(network), 0, 1)
+    return new HDWalletProvider(WITNESS_PRIVATE_KEY, this.selectProviderEndpoint(network), 0, 1)
   }
   selectProviderEndpoint(network) {
     return this.infuraEndpoints.filter(item => { return item.network == network })[0].address

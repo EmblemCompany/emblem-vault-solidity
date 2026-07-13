@@ -6,7 +6,7 @@ require('@nomiclabs/hardhat-waffle')
 require('hardhat-abi-exporter');
 require("hardhat-gas-reporter");
 require('hardhat-contract-sizer');
-require("@nomiclabs/hardhat-etherscan");
+require("@nomicfoundation/hardhat-verify");
 require("@nomiclabs/hardhat-ethers");
 require("@openzeppelin/hardhat-upgrades");
 // require("@nomiclabs/hardhat-truffle5");
@@ -40,6 +40,15 @@ module.exports = {
       blockGasLimit: 0x1fffffffffffff,
       allowUnlimitedContractSize: true,
       //timeout: 1800000
+      // Opt-in mainnet fork for upgrade simulation only (HARDHAT_FORK=1).
+      // Off by default so normal tests keep using a clean in-memory chain.
+      ...(process.env.HARDHAT_FORK ? {
+        forking: {
+          url: process.env.MAINNET || "https://mainnet.infura.io/v3/03104519b3554dabaf3259dfbfd0635a",
+          ...(process.env.FORK_BLOCK ? { blockNumber: parseInt(process.env.FORK_BLOCK) } : {}),
+        },
+        chainId: 1,
+      } : {}),
     },
     rinkeby: {
       // gasPrice: 32000000000,
@@ -79,11 +88,12 @@ module.exports = {
     }
   },
   etherscan: {
+    enabled: true,
     // apiKey: process.env.AURORA_API_KEY
     apiKey: process.env.ETHERSCAN_API_KEY
     // apiKey: {
     //   aurora: process.env.AURORA_API_KEY,
-    //   mainnet: process.env.ETHERSCAN_API_KEY,
+      // mainnet: process.env.ETHERSCAN_API_KEY,
     // //   ropsten: "YOUR_ETHERSCAN_API_KEY",
     //   rinkeby: process.env.ETHERSCAN_API_KEY,
     //   goerli: "YOUR_ETHERSCAN_API_KEY",
@@ -123,5 +133,12 @@ module.exports = {
     //   aurora: "api-key",
     //   auroraTestnet: "api-key"
     // }
-  }
+  },
+  sourcify: {
+  enabled: false,
+  // Optional: specify a different Sourcify server
+  apiUrl: "https://sourcify.dev/server",
+  // Optional: specify a different Sourcify repository
+  browserUrl: "https://repo.sourcify.dev",
+}
 };

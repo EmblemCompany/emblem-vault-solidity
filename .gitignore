@@ -16,3 +16,5 @@ artifacts
 cache
 store
 .vscode
+scripts/database
+*/.env

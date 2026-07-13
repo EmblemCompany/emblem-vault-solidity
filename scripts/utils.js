@@ -1,8 +1,9 @@
 const { ethers, upgrades} = require("hardhat");
 const REGISTRATION_TYPE = {"EMPTY": 0, "ERC1155": 1, "ERC721":2, "HANDLER":3, "ERC20":4, "BALANCE":5, "CLAIM":6, "UNKNOWN":7, "FACTORY":8, "STAKING":9}
-// import { utils, BigNumber } from "ethers"
-const utils = require("ethers").utils
-const BigNumber = require("ethers").BigNumber
+// Support both ethers v5 (CommonJS) and v6 (ESM) without requiring 'ethers' directly
+const EthersUtils = ethers.utils || ethers;
+const utils = EthersUtils;
+const BigNumber = ethers.BigNumber || { from: (v) => BigInt(v) };
 
 async function deploy(name, ContractClass, constructorArgs = []) {
     console.log("Deploying", name)
@@ -47,11 +48,12 @@ async function verifyAddress(address, constructor = []) {
         })
         return { address: address, verified: true }
     } catch (e) {
-        let reason
-        try {
-            reason = e.toString().split("Reason: ")[1].split(" at ")[0]
-        } catch(err) {
-            reason = "Unknown " + e + " " +err
+        // Make error parsing resilient to different plugin formats (Etherscan V2, etc.)
+        const raw = (e && (e.shortMessage || e.message || e.toString())) || "";
+        let reason = raw;
+        const m = raw.match(/Reason:\s*(.*?)(?:\s+at\s+|$)/);
+        if (m && m[1]) {
+            reason = m[1];
         }
         if (reason.includes("does not have bytecode") || reason.includes("has no bytecode") || reason.includes("but its bytecode doesn't")) {
             console.log("Trying again : etherscan is slow")

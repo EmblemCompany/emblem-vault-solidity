@@ -1,0 +1,966 @@
+{
+    "EmblemVaultLegacy_ERC721Legacy": {
+        "address": "0x82c7a8f707110f5fbb16184a5933e9f78a34c6ab",
+        "delegation": null,
+        "verified": true,
+        "registrations": [],
+        "contractType": 99
+    },
+    "bytes2uint": {
+        "address": "0x119aCf8289941cB32D339E7D5B51ECa6d5C379ca",
+        "delegation": "0xbed1642696698f3f6330419cfa7d47d758f39240",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "handler": {
+        "address": "0xF314Fa957255AD6Ba189A641e6086C81385040fb",
+        "delegation": null,
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0xF314Fa957255AD6Ba189A641e6086C81385040fb",
+                "asType": 3
+            },
+            {
+                "registered": "0xdcFfa2b5cBf288932B009EBA01C8ca772ec6C993",
+                "asType": 1
+            },
+            {
+                "registered": "0xb8D6eB76dABea5b238e999B3145775E54412B2D2",
+                "asType": 6
+            },
+            {
+                "registered": "0x7E6027a6A84fC1F6Db6782c523EFe62c923e46ff",
+                "asType": 1
+            },
+            {
+                "registered": "0xDCA91409018ea80B71d21E818f00e76072969861",
+                "asType": 1
+            },
+            {
+                "registered": "0x769Fdf030A9e176EC8B6D66EFdCB63e8fA69885c",
+                "asType": 2
+            }
+        ],
+        "contractType": 3
+    },
+    "upgradableERC1155": {
+        "address": "0xdcFfa2b5cBf288932B009EBA01C8ca772ec6C993",
+        "delegation": "0x7ae672da2f6fb28b428c1dff133c7286bc99c2e7",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableClaim": {
+        "address": "0xb8D6eB76dABea5b238e999B3145775E54412B2D2",
+        "delegation": "0xf2aa39676e30b76bb8a9ff01274758393c81fe52",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0xF314Fa957255AD6Ba189A641e6086C81385040fb",
+                "asType": 3
+            },
+            {
+                "registered": "0xa2aE7AD5EE7132C30900D0cdDF46F62c31072423",
+                "asType": 3
+            },
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 6
+    },
+    "upgradableERC1155_RP": {
+        "address": "0x7E6027a6A84fC1F6Db6782c523EFe62c923e46ff",
+        "delegation": "0x6e5a5644e2473091612e58506c0248402364ff94",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableERC1155_SOG": {
+        "address": "0xDCA91409018ea80B71d21E818f00e76072969861",
+        "delegation": "0x54804e28450d59f17b9d23e98a10b068fc37ece7",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "legacyhandler_a": {
+        "address": "0xD0C7304156AF0a4be17352D8ce214222Ec66E8ba",
+        "delegation": null,
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "bulk_minter": {
+        "address": "0x11a6513318D54cA9cdcEc6a7b26c82C598252615",
+        "delegation": "0xb71535b994f6c4adc8b624ed7718b168a17ba500",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "quote": {
+        "address": "0xE5dec92911c78069d727a67C85936EDDbc9B02Cf",
+        "delegation": "0x0454fae13d7fe5e10cc12d193f0f5df968595aef",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableERC1155_MintPasses": {
+        "address": "0xd3a3CBc7983792172C13dcc4adf02CAf481d257f",
+        "delegation": "0x7ae672da2f6fb28b428c1dff133c7286bc99c2e7",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableERC721_Cursed": {
+        "address": "0x769Fdf030A9e176EC8B6D66EFdCB63e8fA69885c",
+        "delegation": "0x20db8237e76b160c3aa2030c07c8e6ca0d3f07e5",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "handler_upgradable": {
+        "address": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+        "delegation": "0x408eea2625027c32a5acd4be641550dcecb94f33",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0xa7d679DaeF34A628c9971F5c6b1133e0FAb11207",
+                "asType": 2
+            },
+            {
+                "registered": "0x4C03BCAD293fb0562D26FAa7D90A0cb3Ea74c919",
+                "asType": 1
+            },
+            {
+                "registered": "0x99DA31CF682d1F2b61b57c826B954bB1783D50E5",
+                "asType": 1
+            },
+            {
+                "registered": "0xDE542530037Fd01D10AaBe0C5953feC17BdCCEd4",
+                "asType": 1
+            },
+            {
+                "registered": "0xEAD67175CDb9CBDeA5bDDC36015e52f4A954E3fD",
+                "asType": 2
+            },
+            {
+                "registered": "0xe5674733bDa3D2643839F8bC7837311A2734Ae8E",
+                "asType": 2
+            },
+            {
+                "registered": "0x269211987Ca6E99D3A02DE07Ea3478BE9E675734",
+                "asType": 1
+            },
+            {
+                "registered": "0xa57D1519F426D5F961B3B37E298f3020a8fae115",
+                "asType": 2
+            },
+            {
+                "registered": "0xbeB389142d04aC39A70517012F467A3A75e0384F",
+                "asType": 2
+            },
+            {
+                "registered": "0x184ddb67E2EF517f6754F055b56905f2A9b29b6A",
+                "asType": 2
+            },
+            {
+                "registered": "0xa82ABd255762114E5FF8808f4B4576A7E5375CF2",
+                "asType": 2
+            },
+            {
+                "registered": "0x6f159F7738957e97c2F39659D1e96350ECe3CaC7",
+                "asType": 2
+            },
+            {
+                "registered": "0x0cd04D29d5FC26bA2e56C96cdF957B1b132958df",
+                "asType": 2
+            },
+            {
+                "registered": "0xCdE13b6535f63B328A48EFf2ab049B96794b7dB7",
+                "asType": 2
+            },
+            {
+                "registered": "0xAC29AEB4fF322fa3AD08A7b1903B4e1E358c445a",
+                "asType": 2
+            },
+            {
+                "registered": "0x36e572cD2507c9a2849AB984e41B3c15abF19732",
+                "asType": 2
+            },
+            {
+                "registered": "0x6e3556Addb180D7eFF855fe902d1b123c5b28ca2",
+                "asType": 2
+            },
+            {
+                "registered": "0x2F5362EBd4D883bBf00A801949137cD1246117CA",
+                "asType": 2
+            },
+            {
+                "registered": "0xb03676314dda4f2887f0F6ff268693968245Dfa0",
+                "asType": 2
+            },
+            {
+                "registered": "0x173366C5DDb8BAe17aBE2F125F423198DBcE0d97",
+                "asType": 2
+            },
+            {
+                "registered": "0xD1a7f3Aa6d015ee0014384DADEFA14D768Cb2c14",
+                "asType": 2
+            },
+            {
+                "registered": "0xfD19d9E9e7dea8491E50baAB0A9cBAC3020473e8",
+                "asType": 2
+            },
+            {
+                "registered": "0x48e4bfb7e978C0Db171BBd9D244eD338527181C4",
+                "asType": 2
+            },
+            {
+                "registered": "0x6e68C984Ae3E4e1d5865C03afb95846b5596b5E1",
+                "asType": 2
+            },
+            {
+                "registered": "0x25A43Fef3813eaE59C21C8135b4C17643997e87f",
+                "asType": 2
+            },
+            {
+                "registered": "0x1000a71CB62987142708f8BbC8c5BfbD0316fEb0",
+                "asType": 2
+            },
+            {
+                "registered": "0x5830354bADC34ABe0064e80F96cA2c923bd6A2F1",
+                "asType": 2
+            },
+            {
+                "registered": "0xE95a169f585BfEc57FCBD5D77e4b2dF0b1cD59bc",
+                "asType": 1
+            },
+            {
+                "registered": "0xd47C82fc857638598507764c3178De8CAf3f7911",
+                "asType": 1
+            },
+            {
+                "registered": "0xF02413f2286ab99F2EcC5b59f608a19AdC1B7937",
+                "asType": 1
+            },
+            {
+                "registered": "0x691F9ecc830236eB8eb5d63A2F7e60b316160509",
+                "asType": 1
+            },
+            {
+                "registered": "0x56B346070c4Ba9D11C48AEeA9BeD635578125Cdc",
+                "asType": 1
+            },
+            {
+                "registered": "0xf1Ebe97F8949B8c59D4fb89F08aC5F10948d6d0B",
+                "asType": 1
+            },
+            {
+                "registered": "0xBe1F7965193673786C539484f27F3196d1C6A934",
+                "asType": 1
+            },
+            {
+                "registered": "0x2A8BA3293099F17Df936b06C04B6DBB3812dEaEd",
+                "asType": 1
+            },
+            {
+                "registered": "0x75d7CBE016f5bb40690Cb732bFBBD4fc1D7bFa1D",
+                "asType": 2
+            },
+            {
+                "registered": "0x19b094c17F29a16F80bE04cdc0C3e274474C7724",
+                "asType": 1
+            },
+            {
+                "registered": "0x15E1c0d178a9386DE9122c8dF53BE3f087B00C1F",
+                "asType": 1
+            },
+            {
+                "registered": "0x98131cc875cD3CD07e43C7313368c1a70B4a6dA5",
+                "asType": 1
+            },
+            {
+                "registered": "0x5B3E2596DF46e4ff9a88FeF50d5e2B703Db67b71",
+                "asType": 1
+            },
+            {
+                "registered": "0x9bc6922243d0d14Fdff13E27E3Ba2e8C1745aCba",
+                "asType": 1
+            },
+            {
+                "registered": "0xE319D6c8bC1Cb92CBAd9733e8b71297599Ee3243",
+                "asType": 1
+            },
+            {
+                "registered": "0xD36cd8cbbAbC10053Cb46dFa3754ec599d18B4Ac",
+                "asType": 1
+            },
+            {
+                "registered": "0xa8B5BF82f1059e61C1B89251439cEBDBFb0D6F13",
+                "asType": 1
+            },
+            {
+                "registered": "0xEB46c7707f61fF56319dD944A8A4b2d8469D0648",
+                "asType": 1
+            },
+            {
+                "registered": "0x345eF9d7E75aEEb979053AA41BB6330683353B7b",
+                "asType": 2
+            },
+            {
+                "registered": "0xD499A1c24d0D6289BAe7F202B0A5C06FfE33f1EC",
+                "asType": 2
+            },
+            {
+                "registered": "0x8e7263c680884beaD8116521170E2a460De7aa92",
+                "asType": 2
+            },
+            {
+                "registered": "0x25e6CfD042294a716FF60603ca01e92555cA9426",
+                "asType": 2
+            },
+            {
+                "registered": "0xF1906Cd2af95dDB4e701F51d936D58d0068C8474",
+                "asType": 2
+            },
+            {
+                "registered": "0x44C062aA4261dD3fB4692F11dAB94a7B52D85a23",
+                "asType": 2
+            },
+            {
+                "registered": "0x90401BdCa1C2D928bB4c5b374E1367aa1174E624",
+                "asType": 2
+            },
+            {
+                "registered": "0x47F1Bbc1b82A5E50beBAB6Ff30988A2F7298493D",
+                "asType": 2
+            },
+            {
+                "registered": "0xda689a3dDF90c76496c8D30de21742efcF03E0fe",
+                "asType": 2
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721_Ethscription": {
+        "address": "0x8C3c0274c33f263F0A55d129cFC8eaa3667A9E8b",
+        "delegation": "0xb8c90615d9739a2d9921db0bf56a9cf2c8865bf4",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableERC721a_OXBT": {
+        "address": "0x363D0C12eDCAF2C5962110401f651491f58C760a",
+        "delegation": "0x472e6a8f0011f5cffe06f5c1e49ebf31357c09e2",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableERC721a_Ordi": {
+        "address": "0x49aCD1b04702a30fb2cE8522298c299527E31913",
+        "delegation": "0x472e6a8f0011f5cffe06f5c1e49ebf31357c09e2",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableERC721_Unassigned": {
+        "address": "0x8233fe4B00bb23f6842cF9a3120Fb3F9291e4Bb1",
+        "delegation": "0x34787812867a2a7eca10c8b0b12eb22b4eeca20e",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableERC721a_Rinkeby": {
+        "address": "0x9885d3F9b3B71A1Ff69D6a8B4AC87426A60F993d",
+        "delegation": "0x472e6a8f0011f5cffe06f5c1e49ebf31357c09e2",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableERC721a_Counterparty": {
+        "address": "0xa57D1519F426D5F961B3B37E298f3020a8fae115",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_Stamps": {
+        "address": "0xa7d679DaeF34A628c9971F5c6b1133e0FAb11207",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC1155_FakeRares": {
+        "address": "0x4C03BCAD293fb0562D26FAa7D90A0cb3Ea74c919",
+        "delegation": "0x54804e28450d59f17b9d23e98a10b068fc37ece7",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableERC1155_DankRares": {
+        "address": "0x99DA31CF682d1F2b61b57c826B954bB1783D50E5",
+        "delegation": "0x54804e28450d59f17b9d23e98a10b068fc37ece7",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableERC1155_FakeCommons": {
+        "address": "0xDE542530037Fd01D10AaBe0C5953feC17BdCCEd4",
+        "delegation": "0x54804e28450d59f17b9d23e98a10b068fc37ece7",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableERC721a_BitcoinOrdinals": {
+        "address": "0xEAD67175CDb9CBDeA5bDDC36015e52f4A954E3fD",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_Dogeparty": {
+        "address": "0xe5674733bDa3D2643839F8bC7837311A2734Ae8E",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC1155_AgeOfChains": {
+        "address": "0x269211987Ca6E99D3A02DE07Ea3478BE9E675734",
+        "delegation": "0x54804e28450d59f17b9d23e98a10b068fc37ece7",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableERC721a_DogepartyStamps": {
+        "address": "0xbeB389142d04aC39A70517012F467A3A75e0384F",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_EmblemOpen": {
+        "address": "0x184ddb67E2EF517f6754F055b56905f2A9b29b6A",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_Litecoin": {
+        "address": "0xa82ABd255762114E5FF8808f4B4576A7E5375CF2",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_LitecoinOrdinals": {
+        "address": "0x6f159F7738957e97c2F39659D1e96350ECe3CaC7",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_MonaParty": {
+        "address": "0x0cd04D29d5FC26bA2e56C96cdF957B1b132958df",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_Namecoin": {
+        "address": "0xCdE13b6535f63B328A48EFf2ab049B96794b7dB7",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_Solana": {
+        "address": "0xAC29AEB4fF322fa3AD08A7b1903B4e1E358c445a",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_Stacks": {
+        "address": "0x36e572cD2507c9a2849AB984e41B3c15abF19732",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_Tezos": {
+        "address": "0x6e3556Addb180D7eFF855fe902d1b123c5b28ca2",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_dot_btc": {
+        "address": "0x2F5362EBd4D883bBf00A801949137cD1246117CA",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_BitcoinPunks": {
+        "address": "0xb03676314dda4f2887f0F6ff268693968245Dfa0",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_Blockheads": {
+        "address": "0x173366C5DDb8BAe17aBE2F125F423198DBcE0d97",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_filthyFiat": {
+        "address": "0xD1a7f3Aa6d015ee0014384DADEFA14D768Cb2c14",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_dot_id": {
+        "address": "0xfD19d9E9e7dea8491E50baAB0A9cBAC3020473e8",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_LitecoinPunks": {
+        "address": "0x48e4bfb7e978C0Db171BBd9D244eD338527181C4",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_megaPunks": {
+        "address": "0x6e68C984Ae3E4e1d5865C03afb95846b5596b5E1",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_punycodes": {
+        "address": "0x25A43Fef3813eaE59C21C8135b4C17643997e87f",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_twelveFold": {
+        "address": "0x1000a71CB62987142708f8BbC8c5BfbD0316fEb0",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_twitterEggs": {
+        "address": "0x5830354bADC34ABe0064e80F96cA2c923bd6A2F1",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC1155_ageOfRust": {
+        "address": "0xE95a169f585BfEc57FCBD5D77e4b2dF0b1cD59bc",
+        "delegation": "0x54804e28450d59f17b9d23e98a10b068fc37ece7",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableERC1155_bitcornCrops": {
+        "address": "0xd47C82fc857638598507764c3178De8CAf3f7911",
+        "delegation": "0x54804e28450d59f17b9d23e98a10b068fc37ece7",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableERC1155_bitgirls": {
+        "address": "0xF02413f2286ab99F2EcC5b59f608a19AdC1B7937",
+        "delegation": "0x54804e28450d59f17b9d23e98a10b068fc37ece7",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableERC1155_forceOfWill": {
+        "address": "0x691F9ecc830236eB8eb5d63A2F7e60b316160509",
+        "delegation": "0x54804e28450d59f17b9d23e98a10b068fc37ece7",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableERC1155_memoryChain": {
+        "address": "0x56B346070c4Ba9D11C48AEeA9BeD635578125Cdc",
+        "delegation": "0x54804e28450d59f17b9d23e98a10b068fc37ece7",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableERC1155_oasisMining": {
+        "address": "0xf1Ebe97F8949B8c59D4fb89F08aC5F10948d6d0B",
+        "delegation": "0x54804e28450d59f17b9d23e98a10b068fc37ece7",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableERC1155_sarutobiIsland": {
+        "address": "0xBe1F7965193673786C539484f27F3196d1C6A934",
+        "delegation": "0x54804e28450d59f17b9d23e98a10b068fc37ece7",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableERC1155_bitcoinApes": {
+        "address": "0x2A8BA3293099F17Df936b06C04B6DBB3812dEaEd",
+        "delegation": "0x54804e28450d59f17b9d23e98a10b068fc37ece7",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableERC721a_unused_1": {
+        "address": "0x75d7CBE016f5bb40690Cb732bFBBD4fc1D7bFa1D",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC1155_Bells": {
+        "address": "0x19b094c17F29a16F80bE04cdc0C3e274474C7724",
+        "delegation": "0x7ae672da2f6fb28b428c1dff133c7286bc99c2e7",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_bitcoinDeGods": {
+        "address": "0x345eF9d7E75aEEb979053AA41BB6330683353B7b",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC1155_unused_3": {
+        "address": "0x15E1c0d178a9386DE9122c8dF53BE3f087B00C1F",
+        "delegation": "0x7ae672da2f6fb28b428c1dff133c7286bc99c2e7",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC1155_unused_4": {
+        "address": "0x98131cc875cD3CD07e43C7313368c1a70B4a6dA5",
+        "delegation": "0x7ae672da2f6fb28b428c1dff133c7286bc99c2e7",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC1155_unused_5": {
+        "address": "0x5B3E2596DF46e4ff9a88FeF50d5e2B703Db67b71",
+        "delegation": "0x7ae672da2f6fb28b428c1dff133c7286bc99c2e7",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC1155_unused_6": {
+        "address": "0x9bc6922243d0d14Fdff13E27E3Ba2e8C1745aCba",
+        "delegation": "0x7ae672da2f6fb28b428c1dff133c7286bc99c2e7",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC1155_unused_7": {
+        "address": "0xE319D6c8bC1Cb92CBAd9733e8b71297599Ee3243",
+        "delegation": "0x7ae672da2f6fb28b428c1dff133c7286bc99c2e7",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC1155_unused_8": {
+        "address": "0xD36cd8cbbAbC10053Cb46dFa3754ec599d18B4Ac",
+        "delegation": "0x7ae672da2f6fb28b428c1dff133c7286bc99c2e7",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC1155_unused_9": {
+        "address": "0xa8B5BF82f1059e61C1B89251439cEBDBFb0D6F13",
+        "delegation": "0x7ae672da2f6fb28b428c1dff133c7286bc99c2e7",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC1155_unused_10": {
+        "address": "0xEB46c7707f61fF56319dD944A8A4b2d8469D0648",
+        "delegation": "0xc79214504fa03733fed59ef79f2561d650cfa1cf",
+        "verified": true,
+        "registrations": [],
+        "contractType": 7
+    },
+    "upgradableERC721a_bitcoinRocks": {
+        "address": "0xD499A1c24d0D6289BAe7F202B0A5C06FfE33f1EC",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_onChainMonkey": {
+        "address": "0x8e7263c680884beaD8116521170E2a460De7aa92",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_unused_5": {
+        "address": "0x25e6CfD042294a716FF60603ca01e92555cA9426",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_BitcoinFrogs": {
+        "address": "0xF1906Cd2af95dDB4e701F51d936D58d0068C8474",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_ordinalMaxiBiz": {
+        "address": "0x44C062aA4261dD3fB4692F11dAB94a7B52D85a23",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_nodeMonkes": {
+        "address": "0x90401BdCa1C2D928bB4c5b374E1367aa1174E624",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_bitmap": {
+        "address": "0x47F1Bbc1b82A5E50beBAB6Ff30988A2F7298493D",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    },
+    "upgradableERC721a_ordinalPunks": {
+        "address": "0xda689a3dDF90c76496c8D30de21742efcF03E0fe",
+        "delegation": "0xaead18a6f788fb7460ada9fdff4c4cd6ba72ddbe",
+        "verified": true,
+        "registrations": [
+            {
+                "registered": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
+                "asType": 3
+            }
+        ],
+        "contractType": 7
+    }
+}
