@@ -65,7 +65,7 @@ describe('ERC721a', () => {
     balance = await ERC721.balanceOf(util.deployer.address)
     expect(balance).to.equal(1)
     // let covalAddress = util.erc20.address
-    // await util.handler_upgradable.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
+    // await util.handler_upgradable.addWitness(util.witness)
     // var provider = util.selectProvider("mainnet")
     // var web3 = new Web3(provider)
     // let hash = web3.utils.soliditySha3(ERC1155.address, covalAddress, 0, util.deployer.address, 123, 111, 1)

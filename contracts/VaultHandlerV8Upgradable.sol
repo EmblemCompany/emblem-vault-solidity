@@ -83,34 +83,72 @@ contract VaultHandlerV8Upgradable is ReentrancyGuardUpgradable, HasCallbacksUpgr
         quoteContract = _address;
     }
 
-    function claim(address _nftAddress, uint256 tokenId) public nonReentrant isRegisteredContract(_nftAddress) {
+    // The old free claim(address,uint256) is retired. Its selector is kept alive
+    // so legacy callers get a clear revert instead of an unrecognized selector.
+    // All claims now go through the witness-gated, priced path below (a free claim
+    // is a server-signed price of 0 — the same pattern minting uses).
+    function claim(address, uint256) public pure {
+        revert("Use claimWithSignedPrice");
+    }
+
+    function claimWithSignedPrice(address _nftAddress, uint256 tokenId, address _payment, uint _price, uint256 _nonce, bytes calldata _signature) public payable nonReentrant {
+        address signer = getAddressFromClaimSignature(_nftAddress, _payment, _price, tokenId, _nonce, _signature);
+        require(witnesses[signer], 'Not Witnessed');
+        require(!usedNonces[_nonce], 'Nonce already used');
+        usedNonces[_nonce] = true;
+        _takePayment(_payment, _price);
+        _claim(_nftAddress, tokenId, _msgSender());
+    }
+
+    function batchClaimWithSignedPrice(address[] calldata nftAddresses, uint256[] calldata tokenIds, address _payment, uint _price, uint256 _nonce, bytes calldata _signature) external payable nonReentrant {
+        require(nftAddresses.length == tokenIds.length, "LEN");
+        address signer = getAddressFromBatchClaimSignature(nftAddresses, tokenIds, _payment, _price, _nonce, _signature);
+        require(witnesses[signer], 'Not Witnessed');
+        require(!usedNonces[_nonce], 'Nonce already used');
+        usedNonces[_nonce] = true;
+        _takePayment(_payment, _price);
+        address sender = _msgSender();
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            _claim(nftAddresses[i], tokenIds[i], sender);
+        }
+    }
+
+    function _takePayment(address _payment, uint _price) internal {
+        if (_payment == address(0) && _price > 0) { // ETH
+            require(msg.value >= _price, "Incorrect ETH amount sent");
+            payable(recipientAddress).transfer(msg.value);
+        } else if (_price > 0) { // ERC20
+            require(IERC20Token(_payment).transferFrom(msg.sender, address(recipientAddress), _price), 'Transfer ERROR');
+        } // otherwise, no payment taken via contract
+    }
+
+    function _claim(address _nftAddress, uint256 tokenId, address sender) internal isRegisteredContract(_nftAddress) {
         IClaimed claimer = IClaimed(registeredOfType[6][0]);
         bytes32[] memory proof;
-        
+
         if (IERC165(_nftAddress).supportsInterface(_INTERFACE_ID_ERC1155)) {
             IIsSerialized serialized = IIsSerialized(_nftAddress);
-            uint256 serialNumber = serialized.getFirstSerialByOwner(_msgSender(), tokenId);
+            uint256 serialNumber = serialized.getFirstSerialByOwner(sender, tokenId);
             require(serialized.getTokenIdForSerialNumber(serialNumber) == tokenId, "Invalid tokenId serialnumber combination");
-            require(serialized.getOwnerOfSerial(serialNumber) == _msgSender(), "Not owner of serial number");
+            require(serialized.getOwnerOfSerial(serialNumber) == sender, "Not owner of serial number");
             require(!claimer.isClaimed(_nftAddress, serialNumber, proof), "Already Claimed");
-            IERC1155(_nftAddress).burn(_msgSender(), tokenId, 1);
-            claimer.claim(_nftAddress, serialNumber, _msgSender());
-        } else {            
+            IERC1155(_nftAddress).burn(sender, tokenId, 1);
+            claimer.claim(_nftAddress, serialNumber, sender);
+        } else {
             if (IERC165(_nftAddress).supportsInterface(_INTERFACE_ID_ERC721A)){
                 IERC721A token = IERC721A(_nftAddress);
                 uint256 internalTokenId = token.getInternalTokenId(tokenId);
                 require(!claimer.isClaimed(_nftAddress, internalTokenId, proof), "Already Claimed");
-                require(token.ownerOf(internalTokenId) == _msgSender(), "Not Token Owner");
+                require(token.ownerOf(internalTokenId) == sender, "Not Token Owner");
                 token.burn(internalTokenId);
             } else {
                 require(!claimer.isClaimed(_nftAddress, tokenId, proof), "Already Claimed");
                 IERC721 token = IERC721(_nftAddress);
-                require(token.ownerOf(tokenId) == _msgSender(), "Not Token Owner");
-                token.burn(tokenId);                
+                require(token.ownerOf(tokenId) == sender, "Not Token Owner");
+                token.burn(tokenId);
             }
-            claimer.claim(_nftAddress, tokenId, _msgSender());
+            claimer.claim(_nftAddress, tokenId, sender);
         }
-        executeCallbacksInternal(_nftAddress, _msgSender(), address(0), tokenId, IHandlerCallback.CallbackType.CLAIM);
     }
 
     function burnRouter(address _nftAddress, uint256 tokenId) internal isRegisteredContract(_nftAddress) returns (bool) {
@@ -324,6 +362,16 @@ contract VaultHandlerV8Upgradable is ReentrancyGuardUpgradable, HasCallbacksUpgr
     function getAddressFromSignatureQuote(address _nftAddress, uint _price, address _to, uint256 _tokenId, uint256 _nonce, uint256 _amount, bytes calldata signature) internal view returns (address) {
         require(!usedNonces[_nonce], 'Nonce already used');
         return getAddressFromSignatureHash(keccak256(abi.encodePacked(_nftAddress, _price, _to, _tokenId, _nonce, _amount)), signature);
+    }
+
+    function getAddressFromClaimSignature(address _nftAddress, address _payment, uint _price, uint256 _tokenId, uint256 _nonce, bytes calldata signature) internal view returns (address) {
+        require(!usedNonces[_nonce], 'Nonce already used');
+        return getAddressFromSignatureHash(keccak256(abi.encodePacked(_nftAddress, _payment, _price, _msgSender(), _tokenId, _nonce)), signature);
+    }
+
+    function getAddressFromBatchClaimSignature(address[] calldata nftAddresses, uint256[] calldata tokenIds, address _payment, uint _price, uint256 _nonce, bytes calldata signature) internal view returns (address) {
+        require(!usedNonces[_nonce], 'Nonce already used');
+        return getAddressFromSignatureHash(keccak256(abi.encodePacked(nftAddresses, tokenIds, _payment, _price, _msgSender(), _nonce)), signature);
     }
 
     function getAddressFromSignatureMint(address _nftAddress, address _to, uint256 _tokenId, uint256 _nonce, string calldata payload, bytes calldata signature) internal view returns (address) {

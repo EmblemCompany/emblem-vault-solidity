@@ -123,7 +123,7 @@
     },
     "handler_upgradable": {
         "address": "0x23859b51117dbFBcdEf5b757028B18d7759a4460",
-        "delegation": "0xcd9be960bb452c880bc96724fcb3d53b2a93d943",
+        "delegation": "0x10980d8f4542ebee4ef972fd909eee3d472294e9",
         "verified": true,
         "registrations": [],
         "contractType": 7

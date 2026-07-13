@@ -9,7 +9,7 @@ let Deployments = fs.existsSync(deploymentsFilename) ? require("."+deploymentsFi
 let VERIFY = process.env.NETWORK == "polygon" || process.env.NETWORK == "mainnet" || process.env.NETWORK == "goerli" ? true: false
 let results = {time: Date.now()}
 let EXTRA = false
-let TARGET = 'ERC721A'
+let TARGET = false // was 'ERC721A' — false so only the handler upgrade below runs
 
 async function main() {
   const [_deployer] = await hre.ethers.getSigners();
@@ -209,8 +209,8 @@ async function main() {
   // results.upgradableERC721_Cursed = await verifyContract(await utils.upgradeProxy(results.upgradableERC721_Cursed.address, "EmblemVault", EmblemVault))
   // save()
   /* Handler Upgrade */
-  // results.handler_upgradable = await verifyContract(await utils.upgradeProxy(results.handler_upgradable.address, "VaultHandlerV8Upgradable", VaultHandlerV8Upgradable))
-  // save()
+  results.handler_upgradable = await verifyContract(await utils.upgradeProxy(results.handler_upgradable.address, "VaultHandlerV8Upgradable", VaultHandlerV8Upgradable))
+  save()
 
   // results.upgradableScribeMint = await getOrDeployProxy(results.upgradableScribeMint, "MintScribe", MintScribe)
   // results.upgradableScribeMint = await verifyContract(await getOrDeployProxy(results.upgradableScribeMint, "MintScribe", MintScribe))
@@ -336,7 +336,7 @@ async function main() {
       save()
       console.log("done")
     } else if (TARGET == 'ERC721A') {
-      await upgradeContractAt(results.upgradableERC721a_HoneyBadgers) // curated
+      // await upgradeContractAt(results.upgradableERC721a_HoneyBadgers) // curated
       // await upgradeContractAt(results.upgradableERC721a_Ordi) // curated
       // await upgradeContractAt(results.upgradableERC721a_Rinkeby) // curated
       // await upgradeContractAt(results.upgradableERC721a_Counterparty) // curated

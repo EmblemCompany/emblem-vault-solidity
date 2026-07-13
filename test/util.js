@@ -7,8 +7,16 @@ const Web3 = require('web3');
 const { util } = require('chai');
 const HDWalletProvider = require("@truffle/hdwallet-provider")
 require('dotenv').config()
+
+// The key used by selectProvider()/sign() for witness signatures. The witness
+// address MUST be derived from this key — a hardcoded address silently drifts
+// from the actual signer and breaks every signed-price/mint test.
+const WITNESS_PRIVATE_KEY = process.env.ETHKEY || "a819fcd7afa2c39a7f9baf70273a128875b6c9f03001b218824559ccad6ef11c";
+const WITNESS_ADDRESS = new ethers.Wallet(WITNESS_PRIVATE_KEY).address;
+
 class Util {
   all = ethers.utils.formatBytes32String("")
+  witness = WITNESS_ADDRESS
   _cid = "0x" + this.toHexString(CID.parse('bafybeifpcgydc47j67wv7chqzbi56sbnee72kenmn5si66wpkqnghxsbx4').toJSON().hash).slice(4);
   toHexString (bytes) {
     return bytes.reduce((str, byte) => str + byte.toString(16).padStart(2, '0'), '');
@@ -822,7 +830,7 @@ class Util {
     return selected
   }
   selectProvider(network) {
-    return new HDWalletProvider(process.env.ETHKEY || "a819fcd7afa2c39a7f9baf70273a128875b6c9f03001b218824559ccad6ef11c", this.selectProviderEndpoint(network), 0, 1)
+    return new HDWalletProvider(WITNESS_PRIVATE_KEY, this.selectProviderEndpoint(network), 0, 1)
   }
   selectProviderEndpoint(network) {
     return this.infuraEndpoints.filter(item => { return item.network == network })[0].address

@@ -30014,6 +30014,381 @@
           }
         }
       }
+    },
+    "58c80df835045d6086c47b2115a1c6c5b4a7cd6d54c1f80789679f19b3826402": {
+      "address": "0x10980d8f4542EBEe4Ef972fd909eEe3d472294e9",
+      "txHash": "0xe5293b6b6d113df1c9ae4bc3d908672daee4a38e83af407d51849fec97e63e82",
+      "layout": {
+        "solcVersion": "0.8.13",
+        "storage": [
+          {
+            "label": "_NOT_ENTERED",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint256",
+            "contract": "ReentrancyGuardUpgradable",
+            "src": "contracts/ReentrancyGuardUpgradable.sol:31"
+          },
+          {
+            "label": "_ENTERED",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint256",
+            "contract": "ReentrancyGuardUpgradable",
+            "src": "contracts/ReentrancyGuardUpgradable.sol:32"
+          },
+          {
+            "label": "_status",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_uint256",
+            "contract": "ReentrancyGuardUpgradable",
+            "src": "contracts/ReentrancyGuardUpgradable.sol:34"
+          },
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "3",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "54",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "contracts/OwnableUpgradeable.sol:21"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "55",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "contracts/OwnableUpgradeable.sol:86"
+          },
+          {
+            "label": "isClaimable",
+            "offset": 0,
+            "slot": "104",
+            "type": "t_bool",
+            "contract": "IsClaimable",
+            "src": "contracts/IsClaimable.sol:6"
+          },
+          {
+            "label": "byPassable",
+            "offset": 1,
+            "slot": "104",
+            "type": "t_bool",
+            "contract": "IsBypassable",
+            "src": "contracts/IsBypassable.sol:9"
+          },
+          {
+            "label": "byPassableFunction",
+            "offset": 0,
+            "slot": "105",
+            "type": "t_mapping(t_address,t_mapping(t_bytes4,t_bool))",
+            "contract": "IsBypassable",
+            "src": "contracts/IsBypassable.sol:10"
+          },
+          {
+            "label": "byPassableIds",
+            "offset": 0,
+            "slot": "106",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_bool))",
+            "contract": "IsBypassable",
+            "src": "contracts/IsBypassable.sol:11"
+          },
+          {
+            "label": "registeredContracts",
+            "offset": 0,
+            "slot": "107",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "HasRegistration",
+            "src": "contracts/HasRegistration.sol:7"
+          },
+          {
+            "label": "registeredOfType",
+            "offset": 0,
+            "slot": "108",
+            "type": "t_mapping(t_uint256,t_array(t_address)dyn_storage)",
+            "contract": "HasRegistration",
+            "src": "contracts/HasRegistration.sol:8"
+          },
+          {
+            "label": "allowCallbacks",
+            "offset": 0,
+            "slot": "109",
+            "type": "t_bool",
+            "contract": "HasCallbacksUpgradable",
+            "src": "contracts/HasCallbacksUpgradable.sol:16"
+          },
+          {
+            "label": "registeredCallbacks",
+            "offset": 0,
+            "slot": "110",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_mapping(t_enum(CallbackType)20862,t_array(t_struct(Callback)20873_storage)dyn_storage)))",
+            "contract": "HasCallbacksUpgradable",
+            "src": "contracts/HasCallbacksUpgradable.sol:22"
+          },
+          {
+            "label": "registeredWildcardCallbacks",
+            "offset": 0,
+            "slot": "111",
+            "type": "t_mapping(t_address,t_mapping(t_enum(CallbackType)20862,t_array(t_struct(Callback)20873_storage)dyn_storage))",
+            "contract": "HasCallbacksUpgradable",
+            "src": "contracts/HasCallbacksUpgradable.sol:23"
+          },
+          {
+            "label": "supportedInterfaces",
+            "offset": 0,
+            "slot": "112",
+            "type": "t_mapping(t_bytes4,t_bool)",
+            "contract": "ERC165",
+            "src": "contracts/ERC165.sol:6"
+          },
+          {
+            "label": "metadataBaseUri",
+            "offset": 0,
+            "slot": "113",
+            "type": "t_string_storage",
+            "contract": "VaultHandlerV8Upgradable",
+            "src": "contracts/VaultHandlerV8Upgradable.sol:45"
+          },
+          {
+            "label": "initialized",
+            "offset": 0,
+            "slot": "114",
+            "type": "t_bool",
+            "contract": "VaultHandlerV8Upgradable",
+            "src": "contracts/VaultHandlerV8Upgradable.sol:46"
+          },
+          {
+            "label": "recipientAddress",
+            "offset": 1,
+            "slot": "114",
+            "type": "t_address",
+            "contract": "VaultHandlerV8Upgradable",
+            "src": "contracts/VaultHandlerV8Upgradable.sol:47"
+          },
+          {
+            "label": "_INTERFACE_ID_ERC1155",
+            "offset": 21,
+            "slot": "114",
+            "type": "t_bytes4",
+            "contract": "VaultHandlerV8Upgradable",
+            "src": "contracts/VaultHandlerV8Upgradable.sol:49"
+          },
+          {
+            "label": "_INTERFACE_ID_ERC20",
+            "offset": 25,
+            "slot": "114",
+            "type": "t_bytes4",
+            "contract": "VaultHandlerV8Upgradable",
+            "src": "contracts/VaultHandlerV8Upgradable.sol:50"
+          },
+          {
+            "label": "_INTERFACE_ID_ERC721",
+            "offset": 0,
+            "slot": "115",
+            "type": "t_bytes4",
+            "contract": "VaultHandlerV8Upgradable",
+            "src": "contracts/VaultHandlerV8Upgradable.sol:51"
+          },
+          {
+            "label": "shouldBurn",
+            "offset": 4,
+            "slot": "115",
+            "type": "t_bool",
+            "contract": "VaultHandlerV8Upgradable",
+            "src": "contracts/VaultHandlerV8Upgradable.sol:52"
+          },
+          {
+            "label": "witnesses",
+            "offset": 0,
+            "slot": "116",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "VaultHandlerV8Upgradable",
+            "src": "contracts/VaultHandlerV8Upgradable.sol:54"
+          },
+          {
+            "label": "usedNonces",
+            "offset": 0,
+            "slot": "117",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "contract": "VaultHandlerV8Upgradable",
+            "src": "contracts/VaultHandlerV8Upgradable.sol:55"
+          },
+          {
+            "label": "quoteContract",
+            "offset": 0,
+            "slot": "118",
+            "type": "t_address",
+            "contract": "VaultHandlerV8Upgradable",
+            "src": "contracts/VaultHandlerV8Upgradable.sol:57"
+          },
+          {
+            "label": "_INTERFACE_ID_ERC721A",
+            "offset": 20,
+            "slot": "118",
+            "type": "t_bytes4",
+            "contract": "VaultHandlerV8Upgradable",
+            "src": "contracts/VaultHandlerV8Upgradable.sol:59"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(Callback)20873_storage)dyn_storage": {
+            "label": "struct IHandlerCallback.Callback[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes4": {
+            "label": "bytes4",
+            "numberOfBytes": "4"
+          },
+          "t_enum(CallbackType)20862": {
+            "label": "enum IHandlerCallback.CallbackType",
+            "members": [
+              "MINT",
+              "TRANSFER",
+              "CLAIM",
+              "BURN",
+              "FALLBACK"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_bytes4,t_bool))": {
+            "label": "mapping(address => mapping(bytes4 => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_enum(CallbackType)20862,t_array(t_struct(Callback)20873_storage)dyn_storage))": {
+            "label": "mapping(address => mapping(enum IHandlerCallback.CallbackType => struct IHandlerCallback.Callback[]))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_bool))": {
+            "label": "mapping(address => mapping(uint256 => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_mapping(t_enum(CallbackType)20862,t_array(t_struct(Callback)20873_storage)dyn_storage)))": {
+            "label": "mapping(address => mapping(uint256 => mapping(enum IHandlerCallback.CallbackType => struct IHandlerCallback.Callback[])))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes4,t_bool)": {
+            "label": "mapping(bytes4 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_enum(CallbackType)20862,t_array(t_struct(Callback)20873_storage)dyn_storage)": {
+            "label": "mapping(enum IHandlerCallback.CallbackType => struct IHandlerCallback.Callback[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_array(t_address)dyn_storage)": {
+            "label": "mapping(uint256 => address[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_bool)": {
+            "label": "mapping(uint256 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_enum(CallbackType)20862,t_array(t_struct(Callback)20873_storage)dyn_storage))": {
+            "label": "mapping(uint256 => mapping(enum IHandlerCallback.CallbackType => struct IHandlerCallback.Callback[]))",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Callback)20873_storage": {
+            "label": "struct IHandlerCallback.Callback",
+            "members": [
+              {
+                "label": "vault",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "registrant",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "target",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "targetFunction",
+                "type": "t_bytes4",
+                "offset": 20,
+                "slot": "2"
+              },
+              {
+                "label": "canRevert",
+                "type": "t_bool",
+                "offset": 24,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
     }
   }
 }

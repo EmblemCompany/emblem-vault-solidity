@@ -479,7 +479,7 @@ describe('ERC1155', () => {
             //     await ERC1155.toggleSerialization()
             //     await ERC1155.transferOwnership(util.handler.address)
             //     let covalAddress = util.erc20.address
-            //     await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
+            //     await util.handler.addWitness(util.witness)
             //     var provider = util.selectProvider("mainnet")
             //     var web3 = new Web3(provider)
             //     let hash = web3.utils.soliditySha3(ERC1155.address, covalAddress, 0, util.deployer.address, 123, 111, 1)
@@ -494,7 +494,7 @@ describe('ERC1155', () => {
             //   it('should mint many via handler with signed price', async () => {
             //     await ERC1155.transferOwnership(util.handler.address)
             //     let covalAddress = util.erc20.address
-            //     await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
+            //     await util.handler.addWitness(util.witness)
             //     var provider = util.selectProvider("mainnet")
             //     var web3 = new Web3(provider)
             //     let hash = web3.utils.soliditySha3(ERC1155.address, covalAddress, 0, util.deployer.address, 123, 111, 3)
@@ -516,7 +516,7 @@ describe('ERC1155', () => {
               it('MINT sig: for testing purposes only', async () => {
                 var provider = util.selectProvider("mainnet")
                 var web3 = new Web3(provider)
-                let hash = web3.utils.soliditySha3("0x125355e3A87CB49ABD798bD96E7C5dA6F509cD09", "0x0b815bd8a298c2788c5b36e33d75a65cb29a5ab4", 100000000, "0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111", 123, 5555, "payload")
+                let hash = web3.utils.soliditySha3("0x125355e3A87CB49ABD798bD96E7C5dA6F509cD09", "0x0b815bd8a298c2788c5b36e33d75a65cb29a5ab4", 100000000, util.witness, 123, 5555, "payload")
                 console.log("hash", hash)
                 let sig = await sign(web3, hash)
                 console.log("sig", sig)
@@ -741,7 +741,7 @@ describe('ERC1155', () => {
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
-                await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
+                await util.handler.addWitness(util.witness)
     
                 await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig, util.serializeUintToBytes(123))
                 ticks = await util.handler.ticks();
@@ -849,7 +849,7 @@ describe('ERC1155', () => {
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
-                await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
+                await util.handler.addWitness(util.witness)
     
                 await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig, util.serializeUintToBytes(123))
                 ticks = await util.handler.ticks();
@@ -893,7 +893,7 @@ describe('ERC1155', () => {
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
-                await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
+                await util.handler.addWitness(util.witness)
     
                 await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig, util.serializeUintToBytes(123))
                 ticks = await util.handler.ticks();
@@ -917,7 +917,7 @@ describe('ERC1155', () => {
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 222)
                 let sig = await sign(web3, hash)
-                await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
+                await util.handler.addWitness(util.witness)
     
                 await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 222, sig, util.serializeUintToBytes(123))
                 ticks = await util.handler.ticks();
@@ -937,7 +937,7 @@ describe('ERC1155', () => {
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
-                await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
+                await util.handler.addWitness(util.witness)
     
                 await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig, util.serializeUintToBytes(123))
                 ticks = await util.handler.ticks()
@@ -958,7 +958,7 @@ describe('ERC1155', () => {
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
-                await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
+                await util.handler.addWitness(util.witness)
     
                 let tx = util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig, util.serializeUintToBytes(123))
                 await expect(tx).to.be.revertedWith("Callback Reverted")
@@ -974,7 +974,7 @@ describe('ERC1155', () => {
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
-                await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
+                await util.handler.addWitness(util.witness)
     
                 let tx = util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig, util.serializeUintToBytes(123))
                 await expect(tx).to.be.revertedWith("Callback Reverted")
@@ -990,7 +990,7 @@ describe('ERC1155', () => {
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
-                await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
+                await util.handler.addWitness(util.witness)
     
                 await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig, util.serializeUintToBytes(123))
                 let ticks = await util.handler.ticks()
@@ -1011,7 +1011,7 @@ describe('ERC1155', () => {
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
-                await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
+                await util.handler.addWitness(util.witness)
     
                 await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig, util.serializeUintToBytes(123))
                 let ticks = await util.handler.ticks()
@@ -1033,7 +1033,7 @@ describe('ERC1155', () => {
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
-                await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
+                await util.handler.addWitness(util.witness)
     
                 await util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig, util.serializeUintToBytes(123))
                 let ticks = await util.handler.ticks()
@@ -1055,7 +1055,7 @@ describe('ERC1155', () => {
                 var web3 = new Web3(provider)
                 let hash = web3.utils.soliditySha3(ERC721.address, ERC1155.address, 2, 1, util.serializeUintToBytes(123), 111)
                 let sig = await sign(web3, hash)
-                await util.handler.addWitness("0x2b8F310A5fE8D057d7Cf1d70E78Ded35cc291111")
+                await util.handler.addWitness(util.witness)
     
                 let tx = util.handler.moveVault(ERC721.address, ERC1155.address, 2, 1, 111, sig, util.serializeUintToBytes(123))
                 await expect(tx).to.be.revertedWith("Callback Reverted")
